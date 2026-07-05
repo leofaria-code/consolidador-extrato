@@ -4,7 +4,7 @@
 
 ## O que é
 
-Projeto final do módulo BE-JV-010 (Arquitetura de Software Ágil II — curso Java Especialista, turma Caixa). Tema: **Consolidador de Extrato / Open Finance** — ingestão por tópicos → agregação → cache de consulta. **Banca: 15/07/2026.** Avaliação por rubrica de 9 critérios (pesos: decomposição 15, assíncrono 15, idempotência 12, resiliência 12, testabilidade 13, ADRs 13, cache 10, IA 5, execução 5) — o `AVALIACAO.md` mapeia critério → evidência e é obrigatório.
+Projeto final do módulo BE-JV-010 (Arquitetura de Software Ágil II — curso Java Especialista, turma Caixa). Tema: **Consolidador de Extrato / Open Finance** — ingestão por tópicos → agregação → cache de consulta. **Banca: 13–14/07/2026 (antecipada; era 15/07 — entrega fechada até 12/07 à noite).** Avaliação por rubrica de 9 critérios (pesos: decomposição 15, assíncrono 15, idempotência 12, resiliência 12, testabilidade 13, ADRs 13, cache 10, IA 5, execução 5) — o `AVALIACAO.md` mapeia critério → evidência e é obrigatório.
 
 ## Grupo e papéis
 
@@ -43,10 +43,8 @@ O mount do Windows corrompe operações de lock/rename do git. **Não rodar `git
 - [x] Repo GitHub: `leofaria-code/consolidador-extrato` (privado)
 - [x] Bootstrap multi-módulo: 4 módulos, esqueleto REST+health+teste smoke
 - [x] ADR-001 (stack), ADR-002 (decomposição), arquitetura.md, AVALIACAO.md esqueleto
-- [ ] Incremento 1: tópico de ingestão + consumidor idempotente (Kafka)
-- [ ] Incremento 2: consolidação + base segregada + evento posicao-atualizada
-- [ ] Incremento 3: cache na consulta + invalidação + carimbo
-- [ ] Incremento 4: fila de reconsolidação (RabbitMQ) + retry/DLQ
-- [ ] Incremento 5: contract test PACT consulta↔consolidação
-- [ ] Incremento 6: observabilidade (logs JSON + correlation id) — opcional obrigatório
-- [ ] AVALIACAO.md preenchido + ensaio da banca
+Cronograma comprimido (banca antecipada):
+
+- [ ] 05–06/07 — Incremento 1: tópico de ingestão + consumidor idempotente (Kafka)
+- [ ] 07–08/07 — Incremento 2: consolidação + base segregada + evento posicao-atualizada · Incremento 3: cache na consulta + invalidação + carimbo
+- [ ] 09–10/07 — Incremento 4: fila de reconsolidação (RabbitMQ) + retry/DLQ · Incremento 6: observabilidade (logs JSON + corr
