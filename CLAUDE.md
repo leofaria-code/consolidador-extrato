@@ -43,8 +43,12 @@ O mount do Windows corrompe operações de lock/rename do git. **Não rodar `git
 - [x] Repo GitHub: `leofaria-code/consolidador-extrato` (privado)
 - [x] Bootstrap multi-módulo: 4 módulos, esqueleto REST+health+teste smoke
 - [x] ADR-001 (stack), ADR-002 (decomposição), arquitetura.md, AVALIACAO.md esqueleto
+- [x] Board de issues drafado em `docs/board-issues.md` (9 issues, milestone banca-2026-07). **GitHub MCP não autorizado** (autorizar conector engineering:github nas configurações) e sandbox sem rede para api.github.com — criar issues via MCP na próxima sessão ou via bloco `gh` do próprio arquivo.
 Cronograma comprimido (banca antecipada):
 
 - [ ] 05–06/07 — Incremento 1: tópico de ingestão + consumidor idempotente (Kafka)
 - [ ] 07–08/07 — Incremento 2: consolidação + base segregada + evento posicao-atualizada · Incremento 3: cache na consulta + invalidação + carimbo
-- [ ] 09–10/07 — Incremento 4: fila de reconsolidação (RabbitMQ) + retry/DLQ · Incremento 6: observabilidade (logs JSON + corr
+- [ ] 09–10/07 — Incremento 4: fila de reconsolidação (RabbitMQ) + retry/DLQ · Incremento 6: observabilidade (logs JSON + correlation id) — opcional obrigatório
+- [ ] 11/07 — Incremento 5: contract test PACT consulta↔consolidação
+- [ ] 12/07 — AVALIACAO.md preenchido + docker-compose/demo + ensaio da banca
+- [ ] 13–14/07 — banca (buffer no dia 13 de manhã se for dia 14)

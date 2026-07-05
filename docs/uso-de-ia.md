@@ -31,4 +31,16 @@ Ferramenta principal: Claude (Cowork/desktop), com delegação por complexidade 
 
 ---
 
-## 05/07 — Incremento 1: tópic
+## 05/07 — Incremento 1: tópico Kafka + consumidor idempotente
+
+- **Pedido:** ingestão publica no tópico `lancamentos-recebidos`; consolidação consome com guarda de idempotência; teste "reprocessa sem duplicar" (US-02) rodando sem Docker.
+- **IA entregou:** `LancamentoResource` (202 aceite / 400 com campos faltantes), `PublicadorLancamentos` (chave Kafka = instituição+agência+conta para ordem por conta), `GuardaIdempotencia` (interface + impl. provisória em memória via `Set#add` atômico), `ConsumidorLancamentos`, testes com connector in-memory do SmallRye.
+- **Autocorreção na revisão da própria IA (antes do build):** dependência Awaitility usada no teste da ingestão mas declarada só na consolidação. 
+- **Decisões conscientes registradas:** validação manual da ficha (não Bean Validation) para o 400 listar exatamente "o campo que faltou" (US-01); armazenamentos em memória são PROVISÓRIOS e nomeados como tal até a base segregada do Inc-2; logs só com identificadores opacos (US-12 desde já).
+- **Validação manual:** `mvn verify` na máquina do Leo (resultado registrado abaixo).
+
+## Backlog de registros (preencher a cada incremento)
+
+- [ ] Resultado do mvn verify do Inc-1 + surpresas.
+- [ ] Tradução `@RetryableTopic` → failure-strategy: funcionou como a ADR-001 previu?
+- [ ] PACT no Quarkus (Quarkiverse): documentar surpresas.

@@ -22,4 +22,14 @@ Projeto final em grupo do módulo **BE-JV-010 — Arquitetura de Software Ágil 
 
 ```bash
 mvn verify                 # perfil A (padrão) — Dev Services usa Docker quando necessário
-mvn verify -Pplano-b-jvm   # perfil B — pura-JVM, sem Docker (perfil 
+mvn verify -Pplano-b-jvm   # perfil B — pura-JVM, sem Docker (perfil dos testes/CI)
+mvn -pl extrato-consulta quarkus:dev   # um serviço em dev mode (portas: 8081/8082/8083)
+```
+
+## Stack (decisão do grupo — ver futuro ADR-001)
+
+Java 25 (LTS) · Quarkus 3.33 (LTS) · Maven multi-módulo · Docker Compose (perfil A) / pura-JVM (perfil B para testes).
+
+## Como começar
+
+Leia `docs/requisitos/README.md` — o pacote de requisitos é a entrada de todo o desenvolvimento. As user stories são a primeira fonte de verdade; em divergência, as transcrições prevalecem (a Sessão 6 corrige e precisa as anteriores).
