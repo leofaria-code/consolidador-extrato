@@ -16,7 +16,11 @@ Perfil de execução: A (docker) · Fallbacks usados: perfil B (pura-JVM) para t
    Evidência: _(tópico `lancamentos-recebidos` + fila `reconsolidacao`; garantia declarada em docs/arquitetura.md §Fluxos)_ — TODO código.
 
 3. **Idempotência e consistência** — _
-   Evidência: _(chave `IdentidadeLancamento`; teste "reprocessa sem duplicar" — US-02; ADR de idempotência)_ — TODO.
+   Evidência (parcial — mecanismo de idempotência entregue; consistência dos 3 efeitos aguarda Inc-2/ADR):
+   - Chave `IdentidadeLancamento` (instituicaoOrigem + idLancamentoOrigem, `shared-contracts`).
+   - `GuardaIdempotenciaEmMemoria` (`Set#add` atômico) — provisória até a base segregada assumir (Inc-2, ADR candidato #3 da Sessão 6).
+   - `ConsumidorIdempotenteTest.reprocessarAMesmaMensagemNaoDuplica` (US-02): 3 reenvios do mesmo lançamento + 1 distinto → exatamente 2 incorporados. Verde em `mvn verify -Pplano-b-jvm` (commit 88503a9, verificado 05/07).
+   - Pendente: ADR de idempotência (unicidade na base × janela de deduplicação) e ADR de consistência dos 3 efeitos.
 
 4. **Cache** — _
    Evidência: _(cache mês corrente; invalidação por evento + TTL; ADR da estratégia; carimbo US-07)_ — TODO.
@@ -25,7 +29,10 @@ Perfil de execução: A (docker) · Fallbacks usados: perfil B (pura-JVM) para t
    Evidência: _(retry 3× backoff exponencial + DLQ; teste falha transitória × permanente)_ — TODO.
 
 6. **Testabilidade** — _
-   Evidência: _(PACT consulta↔consolidação em disco; `mvn verify -Pplano-b-jvm` verde sem Docker)_ — TODO.
+   Evidência (parcial — PACT ainda não implementado):
+   - `mvn verify -Pplano-b-jvm` verde sem Docker: 5 módulos, 7 testes, 0 falhas (verificado em 05/07 — critério satisfeito por build real, não por leitura de código).
+   - Connector in-memory do SmallRye (`RecursosEmMemoria`) substitui Kafka nos testes de ingestão e consolidação.
+   - Pendente: contract test PACT consulta↔consolidação (Incremento 5, issue #6).
 
 7. **Decisões arquiteturais** — _
    Evidência: `docs/adr/` (ADR-001 stack com alternativas e custos; ADR-002 decomposição; pendentes mapeadas na Sessão 6 → ADRs futuras). Rastreabilidade decisão↔fala de stakeholder via `docs/requisitos/`.

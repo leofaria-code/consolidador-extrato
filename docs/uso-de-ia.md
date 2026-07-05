@@ -39,8 +39,16 @@ Ferramenta principal: Claude (Cowork/desktop), com delegação por complexidade 
 - **Decisões conscientes registradas:** validação manual da ficha (não Bean Validation) para o 400 listar exatamente "o campo que faltou" (US-01); armazenamentos em memória são PROVISÓRIOS e nomeados como tal até a base segregada do Inc-2; logs só com identificadores opacos (US-12 desde já).
 - **Validação manual:** `mvn verify` na máquina do Leo (resultado registrado abaixo).
 
+## 05/07 — Verificação geral do projeto
+
+- **Pedido:** varredura geral (não só Inc-1): coerência entre ADRs/arquitetura/user-stories/Sessão 6 e o código, revisão do código do Inc-1, e confirmação por build real.
+- **IA fez:** leu todo o pacote de docs e o código de `extrato-ingestao`/`extrato-consolidacao` linha a linha; rodou `mvn verify -Pplano-b-jvm` (não deu opinião sem rodar).
+- **Resultado:** BUILD SUCCESS — 5 módulos, 7 testes (3 ingestão + 3 consolidação + 1 consulta), 0 falhas, ~2min12s, sem Docker. Idempotência confirmada nos logs do teste (3 reenvios do mesmo lançamento geram só 1 log de incorporação).
+- **Achados:** nenhum bug de código. Docs desatualizados em relação ao que já foi entregue — `CLAUDE.md` (checklist do Inc-1) e `AVALIACAO.md` (critérios 3 e 6 ainda em TODO apesar de já terem evidência real) foram corrigidos nesta sessão.
+- **Validação manual:** o próprio `mvn verify` é a validação — regra do grupo (verificação sempre por build real, nunca por opinião do modelo).
+
 ## Backlog de registros (preencher a cada incremento)
 
-- [ ] Resultado do mvn verify do Inc-1 + surpresas.
+- [x] Resultado do mvn verify do Inc-1 + surpresas: `mvn verify -Pplano-b-jvm` — BUILD SUCCESS, 5 módulos, 7 testes, 0 falhas, ~2min12s, sem Docker. Sem surpresas nesta rodada (a pendência do plugin Quarkus/propriedades do tópico, deixada truncada numa sessão anterior, já tinha sido completada antes deste build).
 - [ ] Tradução `@RetryableTopic` → failure-strategy: funcionou como a ADR-001 previu?
 - [ ] PACT no Quarkus (Quarkiverse): documentar surpresas.
