@@ -31,4 +31,4 @@ Ferramenta principal: Claude (Cowork/desktop), com delegação por complexidade 
 
 ---
 
-## Backlog de registros (preenche
+## 05/07 — Incremento 1: tópic
