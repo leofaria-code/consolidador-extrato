@@ -50,15 +50,22 @@ AVALIACAO.md completo (critério → evidência), docker-compose de demo, roteir
 
 ## Pendência: atribuir Sandy/Marcos/Rodrigo
 
-Issues #1, #2, #3, #4, #6, #8 estão sem assignee (nome do responsável fica só no corpo da issue).
-Assim que os usernames do GitHub chegarem, rodar:
+Usernames confirmados — Sandy: `mycrosan` · Marcos: `marcospaim` · Rodrigo: `RBisso`.
+Convites de colaborador (`write`) já enviados em 05/07 pelo Leo, **ainda pendentes de aceite**
+(GitHub só permite `--add-assignee` depois que o convidado aceita — tentativa em 05/07 falhou
+com "not found" por isso, não por username errado).
+
+Assim que cada um aceitar, rodar:
 
 ```bash
 REPO=leofaria-code/consolidador-extrato
-gh issue edit 1 -R $REPO --add-assignee <username-sandy>    # já fechada, mas mantém rastreabilidade
-gh issue edit 2 -R $REPO --add-assignee <username-marcos>,<username-sandy>
-gh issue edit 3 -R $REPO --add-assignee <username-marcos>
-gh issue edit 4 -R $REPO --add-assignee <username-sandy>
-gh issue edit 6 -R $REPO --add-assignee <username-rodrigo>
-gh issue edit 8 -R $REPO --add-assignee <username-rodrigo>
+gh issue edit 1 -R $REPO --add-assignee mycrosan     # já fechada, mas mantém rastreabilidade
+gh issue edit 2 -R $REPO --add-assignee marcospaim,mycrosan
+gh issue edit 3 -R $REPO --add-assignee marcospaim
+gh issue edit 4 -R $REPO --add-assignee mycrosan
+gh issue edit 6 -R $REPO --add-assignee RBisso
+gh issue edit 8 -R $REPO --add-assignee RBisso
 ```
+
+Conferir aceite: `gh api repos/$REPO/invitations` (some da lista quando aceito) ou
+`gh api repos/$REPO/collaborators --jq '.[].login'` (aparece na lista quando aceito).
