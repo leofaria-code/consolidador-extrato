@@ -27,12 +27,8 @@ Ferramenta principal: Claude (Cowork/desktop), com delegação por complexidade 
 - **Pedido:** estrutura multi-módulo Quarkus 3.33.2 + Java 25, ADRs 001/002, esqueleto compilando.
 - **IA entregou:** 4 módulos, contratos iniciais em `shared-contracts`, smoke tests, perfis Maven A/B.
 - **Correção durante a revisão:** o contrato `LancamentoRecebido` inicialmente **não tinha `idCliente`** — a consolidação não saberia de quem é a conta. Detectado na revisão do próprio agente e corrigido antes do commit. Exemplo concreto de por que contrato gerado exige leitura humana.
-- **Validação manual:** `mvn verify` nos perfis A e B (registrado abaixo), revisão dos poms pelo grupo.
+- **Validação manual:** `mvn verify -Pplano-b-jvm` na máquina do Leo (Java 25, Windows): **BUILD SUCCESS**, 5 módulos, 3 testes verdes. O build revelou o que a IA não sabia: `quarkus-junit5` foi **relocado para `quarkus-junit`** na 3.31 (warning do Maven) — corrigido nos três poms. Reforça a regra do grupo: *conhecimento de versão da IA expira; o build é o árbitro*.
 
 ---
 
-## Backlog de registros (preencher a cada incremento)
-
-- [ ] Incremento Kafka/idempotência — o que a IA gerou × o que o teste de reprocessamento revelou.
-- [ ] Tradução `@RetryableTopic` → failure-strategy: funcionou como a ADR-001 previu?
-- [ ] PACT no Quarkus (Quarkiverse): documentar surpresas.
+## Backlog de registros (preenche
