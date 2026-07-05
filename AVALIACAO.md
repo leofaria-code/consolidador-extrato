@@ -32,10 +32,11 @@ Perfil de execução: A (docker) · Fallbacks usados: perfil B (pura-JVM) para t
    Evidência (parcial — PACT ainda não implementado):
    - `mvn verify -Pplano-b-jvm` verde sem Docker: 5 módulos, 7 testes, 0 falhas (verificado em 05/07 — critério satisfeito por build real, não por leitura de código).
    - Connector in-memory do SmallRye (`RecursosEmMemoria`) substitui Kafka nos testes de ingestão e consolidação.
+   - Estratégia dos dois perfis (A alta fidelidade × B Docker-free como gate) documentada em `docs/adr/ADR-003-perfis-de-teste.md`.
    - Pendente: contract test PACT consulta↔consolidação (Incremento 5, issue #6).
 
 7. **Decisões arquiteturais** — _
-   Evidência: `docs/adr/` (ADR-001 stack com alternativas e custos; ADR-002 decomposição; pendentes mapeadas na Sessão 6 → ADRs futuras). Rastreabilidade decisão↔fala de stakeholder via `docs/requisitos/`.
+   Evidência: `docs/adr/` (ADR-001 stack com alternativas e custos; ADR-002 decomposição; ADR-003 perfis de teste A/B; pendentes mapeadas na Sessão 6 → ADRs futuras). Rastreabilidade decisão↔fala de stakeholder via `docs/requisitos/`.
 
 8. **Uso crítico de IA** — _
    Como usamos IA e o que validamos manualmente: ver `docs/uso-de-ia.md` (log contínuo, honesto: inclui o que a IA errou e o que o grupo rejeitou/validou).
