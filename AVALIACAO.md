@@ -45,7 +45,7 @@ Perfil de execução: A (docker) · Fallbacks usados: perfil B (pura-JVM) para t
    - Pendente: contract test PACT consulta↔consolidação (Incremento 5, issue #6).
 
 7. **Decisões arquiteturais** — _
-   Evidência: `docs/adr/` — 7 ADRs, todas com alternativas rejeitadas e o porquê (ADR-001 stack; ADR-002 decomposição; ADR-003 perfis de teste A/B; ADR-004 idempotência na base; ADR-005 outbox transacional; ADR-006 cache miss; ADR-007 resiliência). **Os 5 candidatos da Sessão 6 estão fechados.** Rastreabilidade decisão↔fala de stakeholder via `docs/requisitos/`.
+   Evidência: `docs/adr/` — 7 ADRs, todas com alternativas rejeitadas e o porquê (ADR-001 stack; ADR-002 decomposição; ADR-003 perfis de teste A/B; ADR-004 idempotência na base; ADR-005 outbox transacional; ADR-006 cache miss; ADR-007 resiliência). **Os 5 candidatos da Sessão 6 estão fechados** (o candidato #1 já havia sido fechado como ADR-002 no bootstrap; os 4 pendentes da issue #7 — cache miss, idempotência, consistência, resiliência — fecharam como ADRs 004–007). Rastreabilidade decisão↔fala de stakeholder via `docs/requisitos/`.
 
 8. **Uso crítico de IA** — _
    Como usamos IA e o que validamos manualmente: ver `docs/uso-de-ia.md` (log contínuo, honesto: inclui o que a IA errou e o que o grupo rejeitou/validou).
