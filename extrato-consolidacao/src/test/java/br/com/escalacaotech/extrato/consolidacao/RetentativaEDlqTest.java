@@ -20,7 +20,7 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.ArgumentMatchers.any;
 
 /**
  * ADR-007 — o teste da banca (US-08, critério 5 da rubrica):
@@ -62,7 +62,7 @@ class RetentativaEDlqTest {
                 throw new RuntimeException("banco indisponível (falha transitória simulada)");
             }
             return invocacao.callRealMethod();
-        }).when(servico).incorporar(argThat(l -> l != null && "TX-500".equals(l.idLancamentoOrigem())));
+        }).when(servico).incorporar(argThat(l -> l != null && "TX-500".equals(l.idLancamentoOrigem())), any());
 
         connector.source("lancamentos-in").send(lancamento("TX-500"));
 
@@ -79,7 +79,7 @@ class RetentativaEDlqTest {
         doAnswer(invocacao -> {
             tentativasVeneno.incrementAndGet();
             throw new IllegalStateException("lançamento corrompido (falha permanente simulada)");
-        }).when(servico).incorporar(argThat(l -> l != null && "TX-VENENO".equals(l.idLancamentoOrigem())));
+        }).when(servico).incorporar(argThat(l -> l != null && "TX-VENENO".equals(l.idLancamentoOrigem())), any());
 
         var origem = connector.source("lancamentos-in");
         origem.send(lancamento("TX-VENENO"));

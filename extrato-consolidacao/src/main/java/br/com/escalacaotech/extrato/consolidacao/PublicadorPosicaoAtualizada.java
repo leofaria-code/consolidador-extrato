@@ -5,11 +5,13 @@ import io.quarkus.scheduler.Scheduled;
 import io.smallrye.reactive.messaging.kafka.api.OutgoingKafkaRecordMetadata;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
+import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.eclipse.microprofile.reactive.messaging.Message;
 import org.jboss.logging.Logger;
 
+import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -37,7 +39,9 @@ public class PublicadorPosicaoAtualizada {
     @Channel("posicao-atualizada-out")
     Emitter<PosicaoAtualizadaEvento> emitter;
 
-    @Scheduled(every = "{consolidacao.outbox.intervalo}",
+    // delayed: primeira varredura só após o wiring dos canais — evita ERROR
+    // transitório de injeção do Emitter quando o scheduler dispara no startup
+    @Scheduled(every = "{consolidacao.outbox.intervalo}", delayed = "2s",
             concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
     @Transactional
     void publicarPendentes() {
@@ -57,6 +61,13 @@ public class PublicadorPosicaoAtualizada {
         var confirmado = new CompletableFuture<Void>();
         var chave = pendente.instituicaoOrigem + ":" + pendente.agencia + ":" + pendente.conta;
 
+        // correlação preservada pela outbox volta ao fio como header (US-12)
+        var headers = new RecordHeaders();
+        if (pendente.correlacaoId != null) {
+            headers.add(Correlacao.HEADER_MENSAGEM,
+                    pendente.correlacaoId.getBytes(StandardCharsets.UTF_8));
+        }
+
         Message<PosicaoAtualizadaEvento> mensagem = Message.of(
                         pendente.comoEvento(),
                         () -> {
@@ -67,7 +78,11 @@ public class PublicadorPosicaoAtualizada {
                             confirmado.completeExceptionally(falha);
                             return CompletableFuture.<Void>completedFuture(null);
                         })
-                .addMetadata(OutgoingKafkaRecordMetadata.<String>builder().withKey(chave).build());
+                .addMetadata(OutgoingKafkaRecordMetadata.<String>builder()
+                        .withKey(chave).withHeaders(headers).build());
+        if (pendente.correlacaoId != null) {
+            mensagem = mensagem.addMetadata(new CorrelacaoMetadata(pendente.correlacaoId));
+        }
 
         emitter.send(mensagem);
         confirmado.orTimeout(ACK_TIMEOUT_SEGUNDOS, TimeUnit.SECONDS).join();
