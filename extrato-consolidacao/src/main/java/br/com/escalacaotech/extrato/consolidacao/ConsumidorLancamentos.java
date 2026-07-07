@@ -12,13 +12,16 @@ import org.jboss.logging.Logger;
  * <p>
  * Regras (Sessão 2): reenvio é comportamento normal das origens — repetido é
  * <b>ignorado silenciosamente</b> (log em nível debug, sem erro). A identidade é
- * (instituicaoOrigem, idLancamentoOrigem).
+ * (instituicaoOrigem, idLancamentoOrigem); a dedup vive na base (ADR-004).
  * <p>
- * Observabilidade (US-12): logs carregam apenas a identidade (identificadores opacos),
- * nunca valor/descrição/dados do cliente.
+ * O retorno deste método commita o offset ("marcar processado" — ato 2 da
+ * ADR-005): queda entre o commit da transação e o do offset causa reentrega,
+ * que a dedup reconhece — sem duplicação.
  * <p>
- * Próximos incrementos: consolidação em base segregada (Inc-2), retry/DLQ (Inc-4),
- * verificação de consentimento (US-04).
+ * Observabilidade (US-12): logs carregam apenas a identidade (identificadores
+ * opacos), nunca valor/descrição/dados do cliente.
+ * <p>
+ * Próximos incrementos: retry/DLQ (Inc-4), verificação de consentimento (US-04).
  */
 @ApplicationScoped
 public class ConsumidorLancamentos {
@@ -26,22 +29,17 @@ public class ConsumidorLancamentos {
     private static final Logger LOG = Logger.getLogger(ConsumidorLancamentos.class);
 
     @Inject
-    GuardaIdempotencia guardaIdempotencia;
-
-    @Inject
-    LancamentosProcessados lancamentosProcessados;
+    ServicoConsolidacao servico;
 
     @Incoming("lancamentos-in")
     @Blocking
     public void consumir(LancamentoRecebido lancamento) {
         var identidade = lancamento.identidade();
 
-        if (!guardaIdempotencia.primeiraVez(identidade)) {
-            LOG.debugf("Lançamento repetido ignorado (idempotência): %s", identidade);
-            return;
+        switch (servico.incorporar(lancamento)) {
+            case REPETIDO -> LOG.debugf(
+                    "Lançamento repetido ignorado (idempotência, ADR-004): %s", identidade);
+            case INCORPORADO -> LOG.infof("Lançamento incorporado: %s", identidade);
         }
-
-        lancamentosProcessados.incorporar(lancamento);
-        LOG.infof("Lançamento incorporado: %s", identidade);
     }
 }
