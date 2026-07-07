@@ -58,7 +58,7 @@ flowchart LR
 
 ## Decisões
 
-Ver `docs/adr/` — índice: ADR-001 (stack Quarkus), ADR-002 (decomposição), ADR-003 (perfis de teste A/B — Docker-free × alta fidelidade), ADR-004 (idempotência: unicidade na base), ADR-005 (consistência dos três efeitos: outbox transacional), ADR-006 (consulta em cache miss: chamada interna + Caffeine + TTL). Pendente (Sessão 6): parâmetros de resiliência.
+Ver `docs/adr/` — índice: ADR-001 (stack Quarkus), ADR-002 (decomposição), ADR-003 (perfis de teste A/B — Docker-free × alta fidelidade), ADR-004 (idempotência: unicidade na base), ADR-005 (consistência dos três efeitos: outbox transacional), ADR-006 (consulta em cache miss: chamada interna + Caffeine + TTL), ADR-007 (resiliência: 3× backoff exponencial + DLQ). **Todos os ADRs candidatos da Sessão 6 estão fechados.**
 
 ## Perfis de execução
 
