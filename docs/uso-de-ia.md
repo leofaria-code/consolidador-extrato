@@ -56,6 +56,14 @@ Ferramenta principal: Claude (Cowork/desktop), com delegação por complexidade 
 - **Mudança estrutural consciente:** a interface `GuardaIdempotencia` do Inc-1 foi **removida**, não reimplementada — a dedup precisa rodar dentro da transação dos três efeitos; mantê-la como componente separado não sustentaria a semântica (racional na ADR-004).
 - **Validação manual:** `mvn verify -Pplano-b-jvm` no reator completo — BUILD SUCCESS, 11 testes (3 ingestão + 7 consolidação + 1 consulta), 0 falhas, sem Docker.
 
+## 07/07 — Incremento 3: cache na consulta + ADR-006
+
+- **Pedido:** aproveitar o dia para adiantar o cronograma — ADR-006 (cache miss) + Inc-3 completo, em branch empilhada sobre a do Inc-2 (PR separado, main intocada).
+- **Argumento que fechou a ADR-006 (achado da análise, não estava na Sessão 6):** como o evento `posicao-atualizada` carrega só referência (minimização, US-10), uma réplica própria na consulta teria de chamar a consolidação a cada evento de qualquer forma — a "medição dos dois desenhos" pedida ao Marcos se reduz a análise estrutural: a réplica é estritamente mais complexa sem eliminar o acoplamento. TTL do cache = 5 min = meta de frescor da US-05 (invalidação perdida nunca viola a meta).
+- **IA entregou:** ADR-006; `PosicaoDaConta` em shared-contracts + `GET /interno/posicoes` na consolidação (par do futuro PACT, provider e consumer já nomeados); consulta cache-first (`@CacheResult` Caffeine), invalidação por evento, carimbo do dado, `?atualizar=true` com limite por cliente (429); 9 testes novos.
+- **Técnica de teste que vale registrar:** hit/miss/invalidação viram aceite *demonstrável* com um dublê da fonte (`@Mock`) que conta invocações — hit não incrementa, miss incrementa. Sem HTTP, sem Docker, sem inspecionar o cache por dentro.
+- **Validação manual:** `mvn verify -Pplano-b-jvm` no reator — BUILD SUCCESS, 19 testes (3 ingestão + 10 consolidação + 6 consulta), 0 falhas. Ambos os módulos novos passaram no primeiro build.
+
 ## Backlog de registros (preencher a cada incremento)
 
 - [x] Resultado do mvn verify do Inc-1 + surpresas: `mvn verify -Pplano-b-jvm` — BUILD SUCCESS, 5 módulos, 7 testes, 0 falhas, ~2min12s, sem Docker. Sem surpresas nesta rodada (a pendência do plugin Quarkus/propriedades do tópico, deixada truncada numa sessão anterior, já tinha sido completada antes deste build).
