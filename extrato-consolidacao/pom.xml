@@ -31,6 +31,28 @@
       <artifactId>quarkus-messaging-kafka</artifactId>
     </dependency>
 
+    <!-- Base segregada de posições (Inc-2 / ADR-002, ADR-004) -->
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-hibernate-orm-panache</artifactId>
+    </dependency>
+    <!-- Plano A: Postgres via Dev Services · Plano B/testes: H2 em memória (ADR-003).
+         Ambos em escopo compile: extensões Quarkus participam do augmentation;
+         o db-kind é selecionado por perfil no application.properties. -->
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-jdbc-postgresql</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-jdbc-h2</artifactId>
+    </dependency>
+    <!-- Publicador da outbox (ADR-005) -->
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-scheduler</artifactId>
+    </dependency>
+
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-junit</artifactId>

@@ -3,17 +3,21 @@ package br.com.escalacaotech.extrato.consolidacao;
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
 import io.smallrye.reactive.messaging.memory.InMemoryConnector;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Troca o canal Kafka pelo connector in-memory nos testes.
- * Garante suite pura-JVM, sem Docker (perfil B — critério 6 da rubrica).
+ * Troca os canais Kafka pelo connector in-memory nos testes.
+ * Garante suite pura-JVM, sem Docker (perfil B — critério 6 da rubrica, ADR-003).
  */
 public class RecursosEmMemoria implements QuarkusTestResourceLifecycleManager {
 
     @Override
     public Map<String, String> start() {
-        return InMemoryConnector.switchIncomingChannelsToInMemory("lancamentos-in");
+        var propriedades = new HashMap<String, String>();
+        propriedades.putAll(InMemoryConnector.switchIncomingChannelsToInMemory("lancamentos-in"));
+        propriedades.putAll(InMemoryConnector.switchOutgoingChannelsToInMemory("posicao-atualizada-out"));
+        return propriedades;
     }
 
     @Override
