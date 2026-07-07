@@ -73,6 +73,15 @@ Ferramenta principal: Claude (Cowork/desktop), com delegação por complexidade 
 - **Validação manual:** `mvn verify -Pplano-b-jvm` — BUILD SUCCESS, 24 testes (3+15+6), 0 falhas.
 - **Pendência para o plano A (anotar no roteiro da demo):** validar serialização de `YearMonth` no connector RabbitMQ (o in-memory passa o objeto por referência e não exercita o Jackson do canal) e ver a DLQ física com os headers de causa.
 
+## 07/07 — Incremento 6: observabilidade — e o dia em que o MDC mentiu
+
+- **Pedido:** correlação ponta a ponta (US-12) + logs JSON, fechando o "opcional obrigatório".
+- **O bug que virou aula:** o desenho inicial usava MDC (o mecanismo canônico) para carregar o correlation id dos consumidores de mensagem até a outbox. O teste ponta a ponta falhou. Diagnóstico por **probe empírico**, não por opinião: (1) as três APIs de MDC (slf4j, jboss-logging, jboss-logmanager) funcionam perfeitamente na thread de teste e nas threads HTTP (o header Kafka da ingestão saiu certo); (2) na thread de mensageria (`executor-thread` do SmallRye RM), `MDC.put` seguido de `MDC.get` **na mesma thread devolve null** — o VertxMDC do Quarkus com contextos duplicados do Vert.x não sustenta o roundtrip ali.
+- **Decisão de engenharia:** parar de brigar com o framework. Nos caminhos de mensageria a correlação passou a ser **explícita** (parâmetro na cadeia de chamadas + campo no texto do log); MDC/`%X`/campo JSON ficam nas bordas HTTP, onde funcionam. De quebra, o desenho ficou mais honesto: dependa do explícito, não do mágico.
+- **Segunda correção do build:** o scheduler da outbox disparava durante o startup e logava ERROR transitório de injeção do Emitter — resolvido com `delayed=2s`.
+- **Validação manual:** `mvn verify -Pplano-b-jvm` — BUILD SUCCESS, 29 testes (5+16+8), 0 falhas. O teste `CorrelacaoFluxoTest` prova o trecho mais difícil: o id sobrevive à fronteira assíncrona porque a **outbox o persiste** (coluna `correlacao_id`).
+- **Lição para a banca:** "usamos MDC" era a resposta de manual; a resposta real do nosso sistema é "MDC onde o framework sustenta, explícito onde não sustenta — e sabemos exatamente onde é cada um, porque testamos".
+
 ## Backlog de registros (preencher a cada incremento)
 
 - [x] Resultado do mvn verify do Inc-1 + surpresas: `mvn verify -Pplano-b-jvm` — BUILD SUCCESS, 5 módulos, 7 testes, 0 falhas, ~2min12s, sem Docker. Sem surpresas nesta rodada (a pendência do plugin Quarkus/propriedades do tópico, deixada truncada numa sessão anterior, já tinha sido completada antes deste build).
