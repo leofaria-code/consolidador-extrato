@@ -64,8 +64,18 @@ Ferramenta principal: Claude (Cowork/desktop), com delegação por complexidade 
 - **Técnica de teste que vale registrar:** hit/miss/invalidação viram aceite *demonstrável* com um dublê da fonte (`@Mock`) que conta invocações — hit não incrementa, miss incrementa. Sem HTTP, sem Docker, sem inspecionar o cache por dentro.
 - **Validação manual:** `mvn verify -Pplano-b-jvm` no reator — BUILD SUCCESS, 19 testes (3 ingestão + 10 consolidação + 6 consulta), 0 falhas. Ambos os módulos novos passaram no primeiro build.
 
+## 07/07 — Incremento 4: retry/DLQ + fila de reconsolidação
+
+- **Pedido:** implementar a ADR-007 (mesma sessão em que ela foi escrita — a spec virou código no mesmo dia): retry+DLQ no consumo Kafka, fila RabbitMQ do guichê, @Timeout na consulta.
+- **Tradução `@RetryableTopic` → Quarkus (fecha pendência da ADR-001):** funcionou como previsto, com uma nuance que a tabela da ADR-001 não capturava — em Quarkus a política se divide em DUAS camadas: `@Retry`/`@ExponentialBackoff` (SmallRye FT, em processo) para as tentativas, e `failure-strategy=dead-letter-queue` (connector) para o encaminhamento final. No Spring, `@RetryableTopic` faz os dois numa anotação. A separação até ajuda na defesa: política de tentativa e destino da falha são decisões independentes.
+- **Limite do plano B encontrado e documentado:** o connector in-memory não implementa DLQ (recurso do broker). Solução: `%test.failure-strategy=ignore` preserva o comportamento observável da US-08 (mensagem esgotada sai do caminho, fluxo segue) e o teste prova a política (contagem exata de tentativas via `@InjectSpy`); o encaminhamento físico fica para a demo do plano A — exatamente a divisão de responsabilidade que a ADR-003 previu.
+- **Detalhe fino de CDI que a IA acertou por análise:** injetar falhas por subclasse de teste quebraria o `@Transactional` (override perde o interceptor binding; super-call bypassa o proxy). `@InjectSpy` preserva a cadeia de interceptação do Arc. Registrado porque é o tipo de bug silencioso que só aparece em produção.
+- **Validação manual:** `mvn verify -Pplano-b-jvm` — BUILD SUCCESS, 24 testes (3+15+6), 0 falhas.
+- **Pendência para o plano A (anotar no roteiro da demo):** validar serialização de `YearMonth` no connector RabbitMQ (o in-memory passa o objeto por referência e não exercita o Jackson do canal) e ver a DLQ física com os headers de causa.
+
 ## Backlog de registros (preencher a cada incremento)
 
 - [x] Resultado do mvn verify do Inc-1 + surpresas: `mvn verify -Pplano-b-jvm` — BUILD SUCCESS, 5 módulos, 7 testes, 0 falhas, ~2min12s, sem Docker. Sem surpresas nesta rodada (a pendência do plugin Quarkus/propriedades do tópico, deixada truncada numa sessão anterior, já tinha sido completada antes deste build).
-- [ ] Tradução `@RetryableTopic` → failure-strategy: funcionou como a ADR-001 previu?
+- [x] Tradução `@RetryableTopic` → failure-strategy: funcionou, em duas camadas (ver registro de 07/07 do Inc-4).
 - [ ] PACT no Quarkus (Quarkiverse): documentar surpresas.
+- [ ] Plano A: DLQ física com headers de causa + serialização YearMonth no Rabbit (ver registro do Inc-4).

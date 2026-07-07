@@ -49,7 +49,8 @@ Cronograma comprimido (banca antecipada):
 - [x] 05–06/07 — Incremento 1: tópico de ingestão + consumidor idempotente (Kafka) — concluído (commit 88503a9), issue #1 fechada, `mvn verify -Pplano-b-jvm` verde (7 testes, 0 falhas)
 - [x] 07/07 — Incremento 2: consolidação + base segregada + evento posicao-atualizada (branch `feat/inc-2-consolidacao` → PR; ADR-004 idempotência na base, ADR-005 outbox; 11 testes verdes no plano B)
 - [x] 07/07 — Incremento 3: cache na consulta + invalidação + carimbo (branch `feat/inc-3-cache-consulta`, empilhada sobre o Inc-2; ADR-006 cache miss; 19 testes verdes no plano B)
-- [ ] 09–10/07 — Incremento 4: fila de reconsolidação (RabbitMQ) + retry/DLQ · Incremento 6: observabilidade (logs JSON + correlation id) — opcional obrigatório
+- [x] 07/07 — Incremento 4: fila de reconsolidação (RabbitMQ) + retry/DLQ (branch `feat/inc-4-resiliencia`; retry 3× backoff + DLQ Kafka/Rabbit conforme ADR-007; 24 testes verdes no plano B; DLQ física = validar no plano A)
+- [ ] 09–10/07 — Incremento 6: observabilidade (logs JSON + correlation id) — opcional obrigatório
 - [ ] 11/07 — Incremento 5: contract test PACT consulta↔consolidação
 - [ ] 12/07 — AVALIACAO.md preenchido + docker-compose/demo + ensaio da banca
 - [ ] 13–14/07 — banca (buffer no dia 13 de manhã se for dia 14)

@@ -13,9 +13,10 @@ Perfil de execução: A (docker) · Fallbacks usados: perfil B (pura-JVM) para t
    Evidência: 3 serviços por contexto (`extrato-ingestao`, `extrato-consolidacao`, `extrato-consulta`), bases segregadas (regra "ninguém lê a base do outro"), `docs/arquitetura.md`, `docs/adr/ADR-002-decomposicao-de-dominio.md`, linguagem ubíqua em `docs/requisitos/user-stories.md`.
 
 2. **Comunicação assíncrona** — _
-   Evidência (parcial — fila `reconsolidacao` fica para o Inc-4):
-   - Tópico `lancamentos-recebidos`: `PublicadorLancamentos` (chave = instituição+agência+conta, ordem por conta) → `ConsumidorLancamentos`.
-   - Tópico `posicao-atualizada` (US-10): publicado via outbox (`PublicadorPosicaoAtualizada`), entrega "pelo menos uma vez", só referência — garantias declaradas em `docs/arquitetura.md` §Fluxos e provadas em `FluxoConsolidacaoTest`.
+   Evidência (os 3 canais do desenho, cada um com a semântica certa):
+   - **Tópico** `lancamentos-recebidos` (publica-assina): `PublicadorLancamentos` (chave = instituição+agência+conta, ordem por conta) → `ConsumidorLancamentos`.
+   - **Tópico** `posicao-atualizada` (US-10): publicado via outbox (`PublicadorPosicaoAtualizada`), entrega "pelo menos uma vez", só referência — garantias em `docs/arquitetura.md` §Fluxos, provadas em `FluxoConsolidacaoTest`.
+   - **Fila de trabalho** `reconsolidacao` (US-09, RabbitMQ): producer/consumer com aceite imediato e consumo um a um — o "guichê" (`ReconsolidacaoResource` → `ConsumidorReconsolidacao`), provada em `ReconsolidacaoTest`.
 
 3. **Idempotência e consistência** — _
    Evidência:
@@ -33,9 +34,11 @@ Perfil de execução: A (docker) · Fallbacks usados: perfil B (pura-JVM) para t
    - Hit/miss/invalidação **demonstráveis** por teste (`ExtratoConsultaTest`, contador do dublê da fonte). Verde em `mvn verify -Pplano-b-jvm` (07/07).
 
 5. **Resiliência** — _
-   Evidência (parcial — política decidida; implementação no Inc-4):
-   - `docs/adr/ADR-007-resiliencia-retry-dlq.md`: 3 retentativas em processo com backoff exponencial (1s×2, jitter) + DLQ com causa nos headers; parâmetros rastreados à ata da Sessão 6 (decisão 8) e ajustáveis por configuração.
-   - Pendente (Inc-4, issue #4): implementação + teste falha transitória × permanente.
+   Evidência:
+   - Política em `docs/adr/ADR-007-resiliencia-retry-dlq.md`: 3 retentativas em processo com backoff exponencial (1s×2, jitter) + DLQ com causa nos headers; parâmetros da ata da Sessão 6 (decisão 8), ajustáveis por configuração.
+   - Implementação: `@Retry`+`@ExponentialBackoff` nos consumidores (`ConsumidorLancamentos`, `ConsumidorReconsolidacao`); `failure-strategy=dead-letter-queue` (Kafka) e `reject`+`auto-bind-dlq` (Rabbit); `@Timeout` 2s sem retry na chamada interna do cache miss.
+   - Fila de trabalho `reconsolidacao` (US-09): aceite imediato + guichê um a um (`max-outstanding-messages=1`); reapuração idempotente por recálculo absoluto.
+   - **Teste da banca** (`RetentativaEDlqTest`): falha transitória supera em exatamente 3 tentativas; mensagem envenenada consome 1+3 e o fluxo continua. `ReconsolidacaoTest`: contestação corrigida pela reapuração. Verde no plano B (07/07); encaminhamento físico à DLQ = demonstração no plano A (ADR-003).
 
 6. **Testabilidade** — _
    Evidência (parcial — PACT ainda não implementado):
