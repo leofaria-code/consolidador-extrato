@@ -47,6 +47,15 @@ Ferramenta principal: Claude (Cowork/desktop), com delegação por complexidade 
 - **Achados:** nenhum bug de código. Docs desatualizados em relação ao que já foi entregue — `CLAUDE.md` (checklist do Inc-1) e `AVALIACAO.md` (critérios 3 e 6 ainda em TODO apesar de já terem evidência real) foram corrigidos nesta sessão.
 - **Validação manual:** o próprio `mvn verify` é a validação — regra do grupo (verificação sempre por build real, nunca por opinião do modelo).
 
+## 07/07 — Incremento 2: base segregada + três efeitos + outbox
+
+- **Pedido:** consolidação com base própria (Panache), evento `posicao-atualizada`, e fechamento das ADRs 004 (idempotência) e 005 (consistência) que o bloqueavam. Fluxo Git cuidadoso: branch + PR, nada direto na main.
+- **Decisões humanas antes do código:** Leo ratificou via perguntas explícitas da IA (a) outbox transacional em vez de publicar-após-commit, e (b) Postgres via Dev Services no plano A (H2 só nos testes). As duas alternativas rejeitadas estão documentadas nas ADRs com o porquê.
+- **IA entregou:** ADR-004/005; entidades `LancamentoIncorporado` (UNIQUE = memória de dedup), `PosicaoConsolidada` (upsert reabre competência — US-03), `EventoPendente` (outbox só-referência); `ServicoConsolidacao` transacional; `PublicadorPosicaoAtualizada` (@Scheduled, marca `publicado_em` pós-ack, falha interrompe o lote para preservar ordem); remoção dos provisórios do Inc-1; 6 testes novos.
+- **O que o build ensinou (o build é o árbitro):** `quarkus.hibernate-orm.database.generation` está **deprecated** na 3.33 — a IA usou a propriedade antiga; o warning do primeiro build levou à troca por `schema-management.strategy`. Segundo caso do projeto de conhecimento de versão expirado (o primeiro foi `quarkus-junit5`→`quarkus-junit`).
+- **Mudança estrutural consciente:** a interface `GuardaIdempotencia` do Inc-1 foi **removida**, não reimplementada — a dedup precisa rodar dentro da transação dos três efeitos; mantê-la como componente separado não sustentaria a semântica (racional na ADR-004).
+- **Validação manual:** `mvn verify -Pplano-b-jvm` no reator completo — BUILD SUCCESS, 11 testes (3 ingestão + 7 consolidação + 1 consulta), 0 falhas, sem Docker.
+
 ## Backlog de registros (preencher a cada incremento)
 
 - [x] Resultado do mvn verify do Inc-1 + surpresas: `mvn verify -Pplano-b-jvm` — BUILD SUCCESS, 5 módulos, 7 testes, 0 falhas, ~2min12s, sem Docker. Sem surpresas nesta rodada (a pendência do plugin Quarkus/propriedades do tópico, deixada truncada numa sessão anterior, já tinha sido completada antes deste build).

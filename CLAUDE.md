@@ -47,7 +47,8 @@ O mount do Windows corrompe operações de lock/rename do git. **Não rodar `git
 Cronograma comprimido (banca antecipada):
 
 - [x] 05–06/07 — Incremento 1: tópico de ingestão + consumidor idempotente (Kafka) — concluído (commit 88503a9), issue #1 fechada, `mvn verify -Pplano-b-jvm` verde (7 testes, 0 falhas)
-- [ ] 07–08/07 — Incremento 2: consolidação + base segregada + evento posicao-atualizada · Incremento 3: cache na consulta + invalidação + carimbo
+- [x] 07/07 — Incremento 2: consolidação + base segregada + evento posicao-atualizada (branch `feat/inc-2-consolidacao` → PR; ADR-004 idempotência na base, ADR-005 outbox; 11 testes verdes no plano B)
+- [ ] 07–08/07 — Incremento 3: cache na consulta + invalidação + carimbo
 - [ ] 09–10/07 — Incremento 4: fila de reconsolidação (RabbitMQ) + retry/DLQ · Incremento 6: observabilidade (logs JSON + correlation id) — opcional obrigatório
 - [ ] 11/07 — Incremento 5: contract test PACT consulta↔consolidação
 - [ ] 12/07 — AVALIACAO.md preenchido + docker-compose/demo + ensaio da banca
