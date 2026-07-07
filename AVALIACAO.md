@@ -33,7 +33,9 @@ Perfil de execução: A (docker) · Fallbacks usados: perfil B (pura-JVM) para t
    - Hit/miss/invalidação **demonstráveis** por teste (`ExtratoConsultaTest`, contador do dublê da fonte). Verde em `mvn verify -Pplano-b-jvm` (07/07).
 
 5. **Resiliência** — _
-   Evidência: _(retry 3× backoff exponencial + DLQ; teste falha transitória × permanente)_ — TODO.
+   Evidência (parcial — política decidida; implementação no Inc-4):
+   - `docs/adr/ADR-007-resiliencia-retry-dlq.md`: 3 retentativas em processo com backoff exponencial (1s×2, jitter) + DLQ com causa nos headers; parâmetros rastreados à ata da Sessão 6 (decisão 8) e ajustáveis por configuração.
+   - Pendente (Inc-4, issue #4): implementação + teste falha transitória × permanente.
 
 6. **Testabilidade** — _
    Evidência (parcial — PACT ainda não implementado):
@@ -43,7 +45,7 @@ Perfil de execução: A (docker) · Fallbacks usados: perfil B (pura-JVM) para t
    - Pendente: contract test PACT consulta↔consolidação (Incremento 5, issue #6).
 
 7. **Decisões arquiteturais** — _
-   Evidência: `docs/adr/` (ADR-001 stack com alternativas e custos; ADR-002 decomposição; ADR-003 perfis de teste A/B; ADR-004 idempotência na base; ADR-005 outbox transacional — as duas últimas fecham os candidatos #3 e #4 da Sessão 6). Rastreabilidade decisão↔fala de stakeholder via `docs/requisitos/`. Pendentes: consulta em cache miss (Inc-3), resiliência (Inc-4).
+   Evidência: `docs/adr/` — 7 ADRs, todas com alternativas rejeitadas e o porquê (ADR-001 stack; ADR-002 decomposição; ADR-003 perfis de teste A/B; ADR-004 idempotência na base; ADR-005 outbox transacional; ADR-006 cache miss; ADR-007 resiliência). **Os 5 candidatos da Sessão 6 estão fechados** (o candidato #1 já havia sido fechado como ADR-002 no bootstrap; os 4 pendentes da issue #7 — cache miss, idempotência, consistência, resiliência — fecharam como ADRs 004–007). Rastreabilidade decisão↔fala de stakeholder via `docs/requisitos/`.
 
 8. **Uso crítico de IA** — _
    Como usamos IA e o que validamos manualmente: ver `docs/uso-de-ia.md` (log contínuo, honesto: inclui o que a IA errou e o que o grupo rejeitou/validou).
