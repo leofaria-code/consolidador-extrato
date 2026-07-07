@@ -58,7 +58,7 @@ flowchart LR
 
 ## Decisões
 
-Ver `docs/adr/` — índice: ADR-001 (stack Quarkus), ADR-002 (decomposição), ADR-003 (perfis de teste A/B — Docker-free × alta fidelidade). Pendentes (Sessão 6): desenho da consulta em cache miss, mecanismo de idempotência, consistência dos três efeitos, parâmetros de resiliência.
+Ver `docs/adr/` — índice: ADR-001 (stack Quarkus), ADR-002 (decomposição), ADR-003 (perfis de teste A/B — Docker-free × alta fidelidade), ADR-004 (idempotência: unicidade na base), ADR-005 (consistência dos três efeitos: outbox transacional). Pendentes (Sessão 6): desenho da consulta em cache miss, parâmetros de resiliência.
 
 ## Perfis de execução
 
