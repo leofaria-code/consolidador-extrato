@@ -25,7 +25,12 @@ Perfil de execução: A (docker) · Fallbacks usados: perfil B (pura-JVM) para t
    - Testes (US-02): `ConsumidorIdempotenteTest` — 3 reenvios + 1 distinto → 2 incorporados **e** totais de processamento único; `FluxoConsolidacaoTest.repetidoNaoGeraEventoNemRegistroNaOutbox`. Verde em `mvn verify -Pplano-b-jvm` (verificado 07/07).
 
 4. **Cache** — _
-   Evidência: _(cache mês corrente; invalidação por evento + TTL; ADR da estratégia; carimbo US-07)_ — TODO.
+   Evidência:
+   - `ServicoExtrato` (`@CacheResult`, Caffeine, chave cliente×competência) com **TTL 5 min = meta de frescor da US-05** — racional na `docs/adr/ADR-006-consulta-em-cache-miss.md` (réplica e Redis compartilhado rejeitados com o porquê).
+   - Invalidação por evento: `ConsumidorPosicaoAtualizada` (idempotente por natureza — premissa Sessão 6).
+   - Carimbo do **dado** (US-07): `ExtratoConsolidado.atualizadoEm` = mais recente entre as posições.
+   - Atualizar sob demanda com limite por cliente (Sessão 6, decisão 5): `ControleAtualizacaoForcada` → 429.
+   - Hit/miss/invalidação **demonstráveis** por teste (`ExtratoConsultaTest`, contador do dublê da fonte). Verde em `mvn verify -Pplano-b-jvm` (07/07).
 
 5. **Resiliência** — _
    Evidência: _(retry 3× backoff exponencial + DLQ; teste falha transitória × permanente)_ — TODO.
