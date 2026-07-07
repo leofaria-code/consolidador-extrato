@@ -42,6 +42,11 @@
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-messaging-kafka</artifactId>
     </dependency>
+    <!-- @Timeout na chamada interna em cache miss (Inc-4 / ADR-007) -->
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-smallrye-fault-tolerance</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>io.quarkus</groupId>
