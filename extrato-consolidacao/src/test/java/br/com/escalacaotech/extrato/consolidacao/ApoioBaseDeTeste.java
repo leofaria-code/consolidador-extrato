@@ -45,4 +45,14 @@ public class ApoioBaseDeTeste {
                 "instituicaoOrigem = ?1 and agencia = ?2 and conta = ?3 and competencia = ?4",
                 instituicao, agencia, conta, competencia).firstResult();
     }
+
+    /** Simula divergência (contestação da US-09): corrompe o saldo direto na base. */
+    @Transactional
+    public void corromperSaldo(String instituicao, String agencia, String conta,
+                               YearMonth competencia, String saldoErrado) {
+        PosicaoConsolidada p = PosicaoConsolidada.find(
+                "instituicaoOrigem = ?1 and agencia = ?2 and conta = ?3 and competencia = ?4",
+                instituicao, agencia, conta, competencia).firstResult();
+        p.saldo = new java.math.BigDecimal(saldoErrado);
+    }
 }

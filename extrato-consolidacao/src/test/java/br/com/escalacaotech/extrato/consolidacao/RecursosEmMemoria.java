@@ -15,8 +15,10 @@ public class RecursosEmMemoria implements QuarkusTestResourceLifecycleManager {
     @Override
     public Map<String, String> start() {
         var propriedades = new HashMap<String, String>();
-        propriedades.putAll(InMemoryConnector.switchIncomingChannelsToInMemory("lancamentos-in"));
-        propriedades.putAll(InMemoryConnector.switchOutgoingChannelsToInMemory("posicao-atualizada-out"));
+        propriedades.putAll(InMemoryConnector.switchIncomingChannelsToInMemory(
+                "lancamentos-in", "reconsolidacao-in"));
+        propriedades.putAll(InMemoryConnector.switchOutgoingChannelsToInMemory(
+                "posicao-atualizada-out", "reconsolidacao-out"));
         return propriedades;
     }
 
