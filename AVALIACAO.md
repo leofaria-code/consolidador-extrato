@@ -41,11 +41,11 @@ Perfil de execução: A (docker) · Fallbacks usados: perfil B (pura-JVM) para t
    - **Teste da banca** (`RetentativaEDlqTest`): falha transitória supera em exatamente 3 tentativas; mensagem envenenada consome 1+3 e o fluxo continua. `ReconsolidacaoTest`: contestação corrigida pela reapuração. Verde no plano B (07/07); encaminhamento físico à DLQ = demonstração no plano A (ADR-003).
 
 6. **Testabilidade** — _
-   Evidência (parcial — PACT ainda não implementado):
-   - `mvn verify -Pplano-b-jvm` verde sem Docker: 5 módulos, 7 testes, 0 falhas (verificado em 05/07 — critério satisfeito por build real, não por leitura de código).
-   - Connector in-memory do SmallRye (`RecursosEmMemoria`) substitui Kafka nos testes de ingestão e consolidação.
+   Evidência:
+   - `mvn verify -Pplano-b-jvm` verde sem Docker: 5 módulos, **32 testes, 0 falhas** (07/07) — critério satisfeito por build real, não por leitura de código.
+   - **PACT consulta↔consolidação** (Sessão 6, decisão 2): consumer `ContratoPosicoesConsumerPactTest` (deserializa no record real `PosicaoDaConta`; 2 interações — posições e extrato vazio), pact **em disco, versionado** (`pacts/`), provider `ContratoPosicoesProviderPactTest` verifica contra a aplicação real com estados semeados pelo caminho real. Roda no `mvn verify`, inclusive plano B.
+   - Connector in-memory do SmallRye (`RecursosEmMemoria`) substitui Kafka/RabbitMQ nos testes; dublês contáveis provam cache; `@InjectSpy` prova retry.
    - Estratégia dos dois perfis (A alta fidelidade × B Docker-free como gate) documentada em `docs/adr/ADR-003-perfis-de-teste.md`.
-   - Pendente: contract test PACT consulta↔consolidação (Incremento 5, issue #6).
 
 7. **Decisões arquiteturais** — _
    Evidência: `docs/adr/` — 7 ADRs, todas com alternativas rejeitadas e o porquê (ADR-001 stack; ADR-002 decomposição; ADR-003 perfis de teste A/B; ADR-004 idempotência na base; ADR-005 outbox transacional; ADR-006 cache miss; ADR-007 resiliência). **Os 5 candidatos da Sessão 6 estão fechados** (o candidato #1 já havia sido fechado como ADR-002 no bootstrap; os 4 pendentes da issue #7 — cache miss, idempotência, consistência, resiliência — fecharam como ADRs 004–007). Rastreabilidade decisão↔fala de stakeholder via `docs/requisitos/`.

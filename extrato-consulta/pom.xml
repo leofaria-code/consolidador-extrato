@@ -58,6 +58,12 @@
       <artifactId>quarkus-junit</artifactId>
       <scope>test</scope>
     </dependency>
+    <!-- Lado CONSUMER do contract test (Inc-5 / Sessão 6, decisão 2) -->
+    <dependency>
+      <groupId>io.quarkiverse.pact</groupId>
+      <artifactId>quarkus-pact-consumer</artifactId>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>io.smallrye.reactive</groupId>
       <artifactId>smallrye-reactive-messaging-in-memory</artifactId>
@@ -77,6 +83,16 @@
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <systemPropertyVariables>
+            <!-- pact em disco na raiz do repo (versionado) — o provider verifica de lá -->
+            <pact.rootDir>${project.basedir}/../pacts</pact.rootDir>
+          </systemPropertyVariables>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>io.quarkus</groupId>
         <artifactId>quarkus-maven-plugin</artifactId>
