@@ -30,6 +30,7 @@
 
     <compiler-plugin.version>3.14.0</compiler-plugin.version>
     <surefire-plugin.version>3.5.2</surefire-plugin.version>
+    <quarkus-pact.version>1.5.0</quarkus-pact.version>
   </properties>
 
   <dependencyManagement>
@@ -40,6 +41,17 @@
         <version>${quarkus.platform.version}</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+      <!-- PACT via Quarkiverse (Inc-5 / ADR-001) — versão própria, fora do BOM da plataforma -->
+      <dependency>
+        <groupId>io.quarkiverse.pact</groupId>
+        <artifactId>quarkus-pact-consumer</artifactId>
+        <version>${quarkus-pact.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.quarkiverse.pact</groupId>
+        <artifactId>quarkus-pact-provider</artifactId>
+        <version>${quarkus-pact.version}</version>
       </dependency>
       <dependency>
         <groupId>br.com.escalacaotech.extrato</groupId>

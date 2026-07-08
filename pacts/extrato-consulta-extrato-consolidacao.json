@@ -1,0 +1,194 @@
+{
+  "consumer": {
+    "name": "extrato-consulta"
+  },
+  "interactions": [
+    {
+      "comments": {
+        "testname": "br.com.escalacaotech.extrato.consulta.ContratoPosicoesConsumerPactTest.consumidorEntendeORespostaDoContrato(MockServer)",
+        "text": [
+
+        ]
+      },
+      "description": "busca de posicoes do cliente na competencia (cache miss)",
+      "key": "4313c96e",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "cliente cliente-001 tem posicao consolidada em 2026-07"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/interno/posicoes",
+        "query": {
+          "competencia": [
+            "2026-07"
+          ],
+          "idCliente": [
+            "cliente-001"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "content": [
+            {
+              "agencia": "0001",
+              "atualizadoEm": "2026-07-07T18:00:00.000-03:00",
+              "competencia": "2026-07",
+              "conta": "123456",
+              "entradas": 300.0,
+              "instituicaoOrigem": "00360305",
+              "saidas": 120.0,
+              "saldo": 180.0
+            }
+          ],
+          "contentType": "application/json; charset=UTF-8",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json;charset=UTF-8"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].agencia": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].atualizadoEm": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:\\d{2})"
+                }
+              ]
+            },
+            "$[*].competencia": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].conta": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].entradas": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "number"
+                }
+              ]
+            },
+            "$[*].instituicaoOrigem": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].saidas": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "number"
+                }
+              ]
+            },
+            "$[*].saldo": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "number"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "transport": "https",
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "comments": {
+        "testname": "br.com.escalacaotech.extrato.consulta.ContratoPosicoesConsumerPactTest.consumidorEntendeORespostaDoContrato(MockServer)",
+        "text": [
+
+        ]
+      },
+      "description": "busca de posicoes de cliente sem contas (extrato vazio, US-06)",
+      "key": "61f27657",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "cliente cliente-vazio nao tem posicoes"
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/interno/posicoes",
+        "query": {
+          "competencia": [
+            "2026-07"
+          ],
+          "idCliente": [
+            "cliente-vazio"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "content": [
+
+          ],
+          "contentType": "application/json; charset=UTF-8",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json;charset=UTF-8"
+          ]
+        },
+        "status": 200
+      },
+      "transport": "https",
+      "type": "Synchronous/HTTP"
+    }
+  ],
+  "metadata": {
+    "pact-jvm": {
+      "version": "4.6.11"
+    },
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  },
+  "provider": {
+    "name": "extrato-consolidacao"
+  }
+}
