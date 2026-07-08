@@ -82,9 +82,17 @@ Ferramenta principal: Claude (Cowork/desktop), com delegação por complexidade 
 - **Validação manual:** `mvn verify -Pplano-b-jvm` — BUILD SUCCESS, 29 testes (5+16+8), 0 falhas. O teste `CorrelacaoFluxoTest` prova o trecho mais difícil: o id sobrevive à fronteira assíncrona porque a **outbox o persiste** (coluna `correlacao_id`).
 - **Lição para a banca:** "usamos MDC" era a resposta de manual; a resposta real do nosso sistema é "MDC onde o framework sustenta, explícito onde não sustenta — e sabemos exatamente onde é cada um, porque testamos".
 
+## 07/07 — Incremento 5: PACT consulta↔consolidação
+
+- **Pedido:** fechar o contract test do par eleito na Sessão 6 (decisão 2) — o mesmo par HTTP que a ADR-006 tornou a fonte do cache miss.
+- **Surpresa de versão (a IA errou, o build corrigiu):** a IA assumiu que o quarkus-pact era membro do BOM da plataforma (`io.quarkus.platform:quarkus-pact-bom`) — o artefato não existe. Consulta ao Maven Central: `io.quarkiverse.pact` 1.5.0 com versão própria. Regra do grupo confirmada de novo: conhecimento de versão da IA expira; o build (e o Central) é o árbitro.
+- **Desenho que vale defender:** (1) o teste consumer deserializa no record real `PosicaoDaConta` — se o shape do contrato não hidratar o tipo compartilhado, quebra no consumer antes de produção; (2) o pact é **arquivo versionado** (`pacts/`), não broker — Docker-free, e o diff do contrato aparece em PR; (3) o provider semeia estados pelo caminho real (`ServicoConsolidacao.incorporar`), então a verificação exercita endpoint + serialização + banco de verdade.
+- **Ordem no reator:** o provider (consolidação) builda ANTES do consumer (consulta) — a verificação usa o pact **commitado** da rodada anterior; quem muda o contrato regenera o arquivo e o PR carrega o diff. É o fluxo "pact como artefato".
+- **Validação manual:** `mvn verify -Pplano-b-jvm` — BUILD SUCCESS, 32 testes (5+18+9), 0 falhas; log do provider mostra "Verifying a pact between extrato-consulta and extrato-consolidacao" nas 2 interações.
+
 ## Backlog de registros (preencher a cada incremento)
 
 - [x] Resultado do mvn verify do Inc-1 + surpresas: `mvn verify -Pplano-b-jvm` — BUILD SUCCESS, 5 módulos, 7 testes, 0 falhas, ~2min12s, sem Docker. Sem surpresas nesta rodada (a pendência do plugin Quarkus/propriedades do tópico, deixada truncada numa sessão anterior, já tinha sido completada antes deste build).
 - [x] Tradução `@RetryableTopic` → failure-strategy: funcionou, em duas camadas (ver registro de 07/07 do Inc-4).
-- [ ] PACT no Quarkus (Quarkiverse): documentar surpresas.
+- [x] PACT no Quarkus (Quarkiverse): documentado (registro de 07/07 do Inc-5 — não é membro do BOM da plataforma; pact como artefato versionado).
 - [ ] Plano A: DLQ física com headers de causa + serialização YearMonth no Rabbit (ver registro do Inc-4).
