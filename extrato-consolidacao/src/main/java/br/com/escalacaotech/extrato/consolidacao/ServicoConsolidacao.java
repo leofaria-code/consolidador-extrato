@@ -27,8 +27,14 @@ public class ServicoConsolidacao {
 
     public enum Resultado { INCORPORADO, REPETIDO }
 
+    /**
+     * @param correlacaoId id de correlação do fluxo (US-12) — carregado
+     *        <b>explicitamente</b> pela cadeia de chamadas: o MDC não é
+     *        confiável nas threads de mensageria (ver registro de 07/07 no
+     *        uso-de-ia.md); a outbox o preserva para o evento.
+     */
     @Transactional
-    public Resultado incorporar(LancamentoRecebido lancamento) {
+    public Resultado incorporar(LancamentoRecebido lancamento, String correlacaoId) {
         // Dedup pela identidade (ADR-004); a constraint UNIQUE de
         // lancamento_incorporado é a última linha de defesa contra corrida.
         if (LancamentoIncorporado.jaIncorporado(lancamento.identidade())) {
@@ -46,7 +52,7 @@ public class ServicoConsolidacao {
 
         // Efeito 3: registrar o evento na outbox — a publicação em si é
         // assíncrona (PublicadorPosicaoAtualizada), "pelo menos uma vez".
-        EventoPendente.de(posicao).persist();
+        EventoPendente.de(posicao, correlacaoId).persist();
 
         return Resultado.INCORPORADO;
     }
@@ -58,7 +64,7 @@ public class ServicoConsolidacao {
      * natureza</b>: reprocessar o mesmo pedido produz a mesma posição.
      */
     @Transactional
-    public void reconsolidar(PedidoReconsolidacao pedido) {
+    public void reconsolidar(PedidoReconsolidacao pedido, String correlacaoId) {
         List<LancamentoIncorporado> lancamentos = LancamentoIncorporado.list(
                 "instituicaoOrigem = ?1 and agencia = ?2 and conta = ?3 and competencia = ?4",
                 pedido.instituicaoOrigem(), pedido.agencia(), pedido.conta(), pedido.competencia());
@@ -87,9 +93,9 @@ public class ServicoConsolidacao {
         }
         posicao.atualizadoEm = OffsetDateTime.now();
 
-        EventoPendente.de(posicao).persist();
+        EventoPendente.de(posicao, correlacaoId).persist();
 
-        LOG.infof("Reconsolidação %s concluída: %d lançamento(s) reapurado(s) (motivo: %s)",
-                pedido.idPedido(), lancamentos.size(), pedido.motivo());
+        LOG.infof("Reconsolidação %s concluída: %d lançamento(s) reapurado(s) (motivo: %s) [corr=%s]",
+                pedido.idPedido(), lancamentos.size(), pedido.motivo(), correlacaoId);
     }
 }

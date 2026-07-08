@@ -58,5 +58,8 @@ Perfil de execução: A (docker) · Fallbacks usados: perfil B (pura-JVM) para t
 
 ## Opcionais entregues (grupo de 4 → mínimo 1)
 
-- **Observabilidade básica** (logs estruturados + correlação de id entre serviços) — exigência de negócio real (US-12/Sessão 5, LGPD) — TODO.
+- **Observabilidade básica** (logs estruturados + correlação de id entre serviços) — exigência de negócio real (US-12/Sessão 5, LGPD):
+  - Correlação ponta a ponta: `X-Correlation-Id` nas bordas HTTP (3 serviços, com eco no response) → header Kafka no tópico de ingestão → **persistido pela outbox** (`correlacao_id`) → header no evento `posicao-atualizada` → logado na invalidação da consulta. Fila de reconsolidação usa a propriedade AMQP. Provado em `CorrelacaoIngestaoTest`/`CorrelacaoFluxoTest`/`CorrelacaoConsultaTest`.
+  - Logs JSON (`quarkus-logging-json`) no plano A/prod; console legível com `corr=` em dev/teste. Logs só com identificadores opacos (US-12).
+  - Nota técnica de valor (critério 8): o MDC do Quarkus provou-se **não confiável em threads de mensageria** (probe: put+get na mesma thread → null) — consumidores carregam a correlação explicitamente; MDC/`%X` só nas bordas HTTP. Registro completo em `docs/uso-de-ia.md` (07/07).
 - **Uso documentado e crítico de IA** (bônus; também evidencia o critério 8) — `docs/uso-de-ia.md`, em andamento desde o início.

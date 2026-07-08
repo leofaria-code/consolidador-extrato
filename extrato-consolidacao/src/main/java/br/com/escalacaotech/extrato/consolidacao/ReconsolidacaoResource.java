@@ -1,6 +1,7 @@
 package br.com.escalacaotech.extrato.consolidacao;
 
 import br.com.escalacaotech.extrato.contratos.PedidoReconsolidacao;
+import io.smallrye.reactive.messaging.rabbitmq.OutgoingRabbitMQMetadata;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -9,6 +10,8 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
+import org.eclipse.microprofile.reactive.messaging.Message;
+import org.jboss.logging.MDC;
 
 import java.time.OffsetDateTime;
 import java.time.YearMonth;
@@ -70,7 +73,16 @@ public class ReconsolidacaoResource {
                 solicitacao.motivo(),
                 OffsetDateTime.now());
 
-        fila.send(pedido);
+        // correlação do request atravessa a fila (US-12): propriedade AMQP + metadado interno
+        var correlacao = (String) MDC.get(Correlacao.MDC_CHAVE);
+        var mensagem = Message.of(pedido);
+        if (correlacao != null) {
+            mensagem = mensagem
+                    .addMetadata(OutgoingRabbitMQMetadata.builder()
+                            .withCorrelationId(correlacao).build())
+                    .addMetadata(new CorrelacaoMetadata(correlacao));
+        }
+        fila.send(mensagem);
 
         // aceite imediato: o processamento é do guichê, não deste request
         return Response.accepted(Map.of("idPedido", pedido.idPedido(), "status", "ACEITO"))

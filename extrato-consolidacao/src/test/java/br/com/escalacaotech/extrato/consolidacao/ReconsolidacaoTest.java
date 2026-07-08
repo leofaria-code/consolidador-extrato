@@ -96,8 +96,8 @@ class ReconsolidacaoTest {
     @Test
     void guicheReapuraECorrigeADivergencia() {
         // posição legítima: crédito 100 - débito 30 = 70
-        servico.incorporar(lancamento("TX-600", TipoLancamento.CREDITO, "100.00"));
-        servico.incorporar(lancamento("TX-601", TipoLancamento.DEBITO, "30.00"));
+        servico.incorporar(lancamento("TX-600", TipoLancamento.CREDITO, "100.00"), "teste");
+        servico.incorporar(lancamento("TX-601", TipoLancamento.DEBITO, "30.00"), "teste");
 
         // contestação: saldo diverge dos lançamentos (corrompido de propósito)
         base.corromperSaldo("00360305", "0001", "123456", JUL, "999.99");

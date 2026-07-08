@@ -48,7 +48,16 @@ public class EventoPendente extends PanacheEntity {
     @Column(name = "publicado_em")
     public OffsetDateTime publicadoEm;
 
-    public static EventoPendente de(PosicaoConsolidada posicao) {
+    /**
+     * Correlação da requisição que originou a atualização (US-12/Inc-6): a
+     * outbox preserva o id através da fronteira assíncrona — o publicador o
+     * repõe como header do evento, e a invalidação na consulta loga o mesmo id
+     * do POST original.
+     */
+    @Column(name = "correlacao_id")
+    public String correlacaoId;
+
+    public static EventoPendente de(PosicaoConsolidada posicao, String correlacaoId) {
         var evento = new EventoPendente();
         evento.idCliente = posicao.idCliente;
         evento.instituicaoOrigem = posicao.instituicaoOrigem;
@@ -57,6 +66,7 @@ public class EventoPendente extends PanacheEntity {
         evento.competencia = posicao.competencia;
         evento.atualizadoEm = posicao.atualizadoEm;
         evento.criadoEm = OffsetDateTime.now();
+        evento.correlacaoId = correlacaoId;
         return evento;
     }
 

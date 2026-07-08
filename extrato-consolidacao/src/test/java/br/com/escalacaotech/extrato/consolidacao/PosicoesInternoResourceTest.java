@@ -37,8 +37,8 @@ class PosicoesInternoResourceTest {
 
     @Test
     void servePosicoesDoClienteNaCompetencia() {
-        servico.incorporar(lancamento("TX-400", TipoLancamento.CREDITO, "300.00"));
-        servico.incorporar(lancamento("TX-401", TipoLancamento.DEBITO, "120.00"));
+        servico.incorporar(lancamento("TX-400", TipoLancamento.CREDITO, "300.00"), "teste");
+        servico.incorporar(lancamento("TX-401", TipoLancamento.DEBITO, "120.00"), "teste");
 
         given().queryParam("idCliente", "cliente-001")
                 .queryParam("competencia", "2026-07")
