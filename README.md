@@ -23,10 +23,29 @@ Projeto final em grupo do módulo **BE-JV-010 — Arquitetura de Software Ágil 
 | Incremento 5 — contract test PACT consulta↔consolidação | ✅ |
 | AVALIACAO.md preenchido + docker-compose/demo + ensaio da banca | ⏳ 12/07 |
 
+## Arquitetura em 30 segundos
+
+Três serviços Quarkus independentes, cada um com sua própria base (ninguém lê a base do outro):
+
+```
+        POST /lancamentos                 evento posicao-atualizada         GET /extrato/{cliente}/{competencia}
+cliente ─────────────────► extrato-ingestao ──(tópico Kafka)──► extrato-consolidacao ──(tópico Kafka)──► extrato-consulta ◄───────── cliente
+                              :8081                                  :8082                                    :8083
+                                                                      ▲
+                                                                      │ POST /reconsolidacoes (fila RabbitMQ)
+                                                                      └── atendimento/operação
+```
+
+- **`extrato-ingestao`** (8081) recebe a ficha do lançamento, valida e publica no tópico `lancamentos-recebidos` (aceite assíncrono, `202`).
+- **`extrato-consolidacao`** (8082) consome o tópico, incorpora o lançamento de forma idempotente, atualiza a posição da conta×competência e publica `posicao-atualizada`; também atende pedidos de reconsolidação via fila.
+- **`extrato-consulta`** (8083) expõe o extrato consolidado com cache (Caffeine, TTL 5 min) e invalida a entrada quando recebe `posicao-atualizada`.
+
+Detalhes e garantias de cada fluxo: `docs/arquitetura.md`.
+
 ## Pré-requisitos
 
 - **Java 25** (LTS) e **Maven 3.9+** na `PATH`.
-- **Docker** — só necessário para o perfil A (`plano-a-docker`), que sobe Kafka/RabbitMQ/Redis via Quarkus Dev Services. O perfil B (`plano-b-jvm`) roda 100% sem Docker.
+- **Docker** — só necessário para o perfil A (`plano-a-docker`), que sobe Kafka/RabbitMQ via Quarkus Dev Services. O perfil B (`plano-b-jvm`) roda 100% sem Docker.
 
 ## Instalar dependências
 
@@ -62,18 +81,84 @@ Cada serviço sobe individualmente com `quarkus:dev` (live reload). Portas fixas
 | `extrato-consolidacao` | 8082 | `mvn -pl extrato-consolidacao quarkus:dev` |
 | `extrato-consulta` | 8083 | `mvn -pl extrato-consulta quarkus:dev` |
 
-Em modo dev o perfil A é o padrão: o Quarkus Dev Services sobe automaticamente os brokers/cache via Docker quando o serviço precisa deles.
+Em modo dev o perfil A é o padrão: o Quarkus Dev Services sobe automaticamente os brokers via Docker quando o serviço precisa deles (Kafka para `extrato-ingestao`/`extrato-consolidacao`/`extrato-consulta`, RabbitMQ para `extrato-consolidacao`) — não precisa subir nada manualmente, só ter o Docker rodando.
+
+## Testando o fluxo ponta a ponta
+
+Com Docker rodando, abra **três terminais** e suba cada serviço (a ordem não importa, mas espere aparecer `Listening on: http://localhost:80NN` em cada um antes de seguir):
+
+```bash
+mvn -pl extrato-ingestao quarkus:dev       # terminal 1
+mvn -pl extrato-consolidacao quarkus:dev   # terminal 2
+mvn -pl extrato-consulta quarkus:dev       # terminal 3
+```
+
+**1. Confirme que os três estão de pé:**
+
+```bash
+curl http://localhost:8081/q/health
+curl http://localhost:8082/q/health
+curl http://localhost:8083/q/health
+```
+
+**2. Envie um lançamento para a ingestão** (resposta `202 ACEITO` — o processamento é assíncrono):
+
+```bash
+curl -X POST http://localhost:8081/lancamentos \
+  -H "Content-Type: application/json" \
+  -d '{
+        "idCliente": "cliente-001",
+        "idLancamentoOrigem": "lanc-0001",
+        "instituicaoOrigem": "banco-a",
+        "agencia": "0001",
+        "conta": "12345-6",
+        "tipo": "CREDITO",
+        "valor": 150.00,
+        "moeda": "BRL",
+        "dataHoraOcorrencia": "2026-07-10T14:30:00-03:00",
+        "idConsentimento": "consent-001",
+        "descricao": "depósito",
+        "categoriaOrigem": "transferencia"
+      }'
+```
+
+**3. Consulte o extrato consolidado** (dê um segundo para o evento se propagar pelo tópico; a competência é o mês/ano de `dataHoraOcorrencia`, formato `AAAA-MM`):
+
+```bash
+curl http://localhost:8083/extrato/cliente-001/2026-07
+```
+
+O carimbo `atualizado às` do JSON de resposta muda quando a posição é reconsolidada. Para forçar a releitura ignorando o cache (sujeito ao limite de frequência da US-07):
+
+```bash
+curl "http://localhost:8083/extrato/cliente-001/2026-07?atualizar=true"
+```
+
+**4. (Opcional) Peça uma reconsolidação manual** — vai para a fila RabbitMQ e é processada de forma assíncrona (aceite imediato, `202`):
+
+```bash
+curl -X POST http://localhost:8082/reconsolidacoes \
+  -H "Content-Type: application/json" \
+  -d '{
+        "idCliente": "cliente-001",
+        "instituicaoOrigem": "banco-a",
+        "agencia": "0001",
+        "conta": "12345-6",
+        "competencia": "2026-07",
+        "motivo": "reprocessamento manual (teste)"
+      }'
+```
 
 ## Perfis de execução
 
 | Perfil | Quando usar | Comportamento |
 |---|---|---|
-| `plano-a-docker` (padrão, `-Pplano-a-docker` implícito) | Demo completa, dev local com Docker disponível | Dev Services sobe Kafka/RabbitMQ/Redis reais |
+| `plano-a-docker` (padrão, `-Pplano-a-docker` implícito) | Demo completa, dev local com Docker disponível | Dev Services sobe Kafka/RabbitMQ reais |
 | `plano-b-jvm` (`-Pplano-b-jvm`) | CI, ambientes sem Docker, banca | Dev Services desligado; conectores in-memory + Caffeine local — `mvn verify -Pplano-b-jvm` **tem que passar** (critério 6) |
 
 ## Stack (ADR-001)
 
-Java 25 (LTS) · Quarkus 3.33.2 (LTS, BOM `io.quarkus.platform`) · Maven multi-módulo · SmallRye Reactive Messaging (Kafka/RabbitMQ) · SmallRye Fault Tolerance · quarkus-cache/redis-cache · Panache · PACT (Quarkiverse).
+Java 25 (LTS) · Quarkus 3.33.2 (LTS, BOM `io.quarkus.platform`) · Maven multi-módulo · SmallRye Reactive Messaging (Kafka/RabbitMQ) · SmallRye Fault Tolerance · quarkus-cache (Caffeine) · Panache · PACT (Quarkiverse).
 
 ## Como começar
 
