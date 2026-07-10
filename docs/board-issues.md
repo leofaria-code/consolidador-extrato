@@ -1,23 +1,22 @@
 # Board de issues do grupo
 
 > Fonte: cronograma comprimido do `CLAUDE.md` (banca antecipada 13–14/07, entrega 12/07 à noite).
-> **Issues criadas no GitHub em 05/07 via `gh` CLI.** Sandy/Marcos/Rodrigo ainda sem assignee —
-> aguardando usernames reais (ver nota de cada issue); rodar `gh issue edit <n> --add-assignee <user>`
-> assim que chegarem.
+> **Issues criadas no GitHub em 05/07 via `gh` CLI.** Status e assignees abaixo conferidos direto
+> na API em 10/07 (`gh issue list --json ...`) — não é mais o rascunho inicial do bootstrap.
 
 **Milestone:** [`banca-2026-07`](https://github.com/leofaria-code/consolidador-extrato/milestone/1) · **Labels:** `incremento`, `adr`, `docs`, `p0` (bloqueia banca)
 
-| # | Issue | Título | Prazo | Responsável | Critérios da rubrica |
-|---|-------|--------|-------|-------------|----------------------|
-| 1 | [#1](https://github.com/leofaria-code/consolidador-extrato/issues/1) ✅ fechada | Incremento 1 — Tópico de ingestão + consumidor idempotente (Kafka) | 06/07 | Sandy | assíncrono (15), idempotência (12) |
-| 2 | [#2](https://github.com/leofaria-code/consolidador-extrato/issues/2) | Incremento 2 — Consolidação + base segregada + evento `posicao-atualizada` | 08/07 | Marcos + Sandy | decomposição (15), assíncrono (15) |
-| 3 | [#3](https://github.com/leofaria-code/consolidador-extrato/issues/3) | Incremento 3 — Cache na consulta + invalidação + carimbo | 08/07 | Marcos | cache (10) |
-| 4 | [#4](https://github.com/leofaria-code/consolidador-extrato/issues/4) | Incremento 4 — Fila de reconsolidação (RabbitMQ) + retry/DLQ | 10/07 | Sandy | resiliência (12) |
-| 5 | [#5](https://github.com/leofaria-code/consolidador-extrato/issues/5) | Incremento 6 — Observabilidade: logs JSON + correlation id | 10/07 | Leo | execução (5), resiliência (12) |
-| 6 | [#6](https://github.com/leofaria-code/consolidador-extrato/issues/6) | Incremento 5 — Contract test PACT consulta↔consolidação | 11/07 | Rodrigo | testabilidade (13) |
-| 7 | [#7](https://github.com/leofaria-code/consolidador-extrato/issues/7) | ADRs pendentes da Sessão 6 (cache miss, idempotência, consistência dos 3 efeitos, resiliência) | 09/07 | Leo | ADRs (13) |
-| 8 | [#8](https://github.com/leofaria-code/consolidador-extrato/issues/8) | Perfil `plano-b-jvm` — `mvn verify` verde sem Docker | 11/07 | Rodrigo | testabilidade (13) |
-| 9 | [#9](https://github.com/leofaria-code/consolidador-extrato/issues/9) | AVALIACAO.md preenchido + docker-compose/demo + ensaio da banca | 12/07 | Todos (Leo coordena) | todos os 9 |
+| # | Issue | Título | Status (GitHub, 10/07) | Prazo | Responsável | Critérios da rubrica |
+|---|-------|--------|-------------------------|-------|-------------|----------------------|
+| 1 | [#1](https://github.com/leofaria-code/consolidador-extrato/issues/1) | Incremento 1 — Tópico de ingestão + consumidor idempotente (Kafka) | ✅ fechada (05/07) | 06/07 | Sandy | assíncrono (15), idempotência (12) |
+| 2 | [#2](https://github.com/leofaria-code/consolidador-extrato/issues/2) | Incremento 2 — Consolidação + base segregada + evento `posicao-atualizada` | ✅ fechada (07/07, PR [#10](https://github.com/leofaria-code/consolidador-extrato/pull/10)) | 08/07 | Marcos + Sandy | decomposição (15), assíncrono (15) |
+| 3 | [#3](https://github.com/leofaria-code/consolidador-extrato/issues/3) | Incremento 3 — Cache na consulta + invalidação + carimbo | ✅ fechada (07/07, PR [#11](https://github.com/leofaria-code/consolidador-extrato/pull/11)) | 08/07 | Marcos | cache (10) |
+| 4 | [#4](https://github.com/leofaria-code/consolidador-extrato/issues/4) | Incremento 4 — Fila de reconsolidação (RabbitMQ) + retry/DLQ | ✅ fechada (07/07, PR [#13](https://github.com/leofaria-code/consolidador-extrato/pull/13)) | 10/07 | Sandy | resiliência (12) |
+| 5 | [#5](https://github.com/leofaria-code/consolidador-extrato/issues/5) | Incremento 6 — Observabilidade: logs JSON + correlation id | ✅ fechada (08/07, PR [#14](https://github.com/leofaria-code/consolidador-extrato/pull/14)) | 10/07 | Leo | execução (5), resiliência (12) |
+| 6 | [#6](https://github.com/leofaria-code/consolidador-extrato/issues/6) | Incremento 5 — Contract test PACT consulta↔consolidação | ⚠️ **aberta no GitHub apesar do merge** — PR [#15](https://github.com/leofaria-code/consolidador-extrato/pull/15) (08/07) diz "Fecha a issue #6", mas GitHub só reconhece a keyword de auto-close em inglês (`Closes`/`Fixes`/`Resolves #6`); "Fecha" não fechou nada. Fechar manualmente (ver §Pendências). | 11/07 | Rodrigo | testabilidade (13) |
+| 7 | [#7](https://github.com/leofaria-code/consolidador-extrato/issues/7) | ADRs pendentes da Sessão 6 (cache miss, idempotência, consistência dos 3 efeitos, resiliência) | ✅ fechada (07/07) | 09/07 | Leo | ADRs (13) |
+| 8 | [#8](https://github.com/leofaria-code/consolidador-extrato/issues/8) | Perfil `plano-b-jvm` — `mvn verify` verde sem Docker | ⏳ aberta — critério de aceite já satisfeito (`mvn verify -Pplano-b-jvm`: 32 testes, 0 falhas, reverificado 10/07); fechar é decisão do Rodrigo/grupo | 11/07 | Rodrigo | testabilidade (13) |
+| 9 | [#9](https://github.com/leofaria-code/consolidador-extrato/issues/9) | AVALIACAO.md preenchido + docker-compose/demo + ensaio da banca | ⏳ aberta (em andamento — notas 0–100 propostas em rascunho, ver AVALIACAO.md) | 12/07 | Todos (Leo coordena) | todos os 9 |
 
 ## Corpos das issues
 
@@ -48,24 +47,26 @@ Quatro ADRs: consulta em cache miss; idempotência; consistência dos 3 efeitos;
 ### 9. Entrega final
 AVALIACAO.md completo (critério → evidência), docker-compose de demo, roteiro de apresentação, ensaio. **Aceite:** demo roda do zero com um comando.
 
-## Pendência: atribuir Sandy/Marcos/Rodrigo
+## Assignees — resolvido
 
-Usernames confirmados — Sandy: `mycrosan` · Marcos: `marcospaim` · Rodrigo: `RBisso`.
-Convites de colaborador (`write`) já enviados em 05/07 pelo Leo, **ainda pendentes de aceite**
-(GitHub só permite `--add-assignee` depois que o convidado aceita — tentativa em 05/07 falhou
-com "not found" por isso, não por username errado).
+Sandy (`mycrosan`), Marcos (`marcospaim`) e Rodrigo (`RBisso`) aceitaram o convite de colaborador
+e já aparecem como assignee em todas as issues correspondentes (conferido via
+`gh api repos/.../collaborators` e `gh issue list --json assignees` em 10/07 — sem convites
+pendentes). Nada a fazer aqui.
 
-Assim que cada um aceitar, rodar:
+## Pendências
 
-```bash
-REPO=leofaria-code/consolidador-extrato
-gh issue edit 1 -R $REPO --add-assignee mycrosan     # já fechada, mas mantém rastreabilidade
-gh issue edit 2 -R $REPO --add-assignee marcospaim,mycrosan
-gh issue edit 3 -R $REPO --add-assignee marcospaim
-gh issue edit 4 -R $REPO --add-assignee mycrosan
-gh issue edit 6 -R $REPO --add-assignee RBisso
-gh issue edit 8 -R $REPO --add-assignee RBisso
-```
-
-Conferir aceite: `gh api repos/$REPO/invitations` (some da lista quando aceito) ou
-`gh api repos/$REPO/collaborators --jq '.[].login'` (aparece na lista quando aceito).
+- **Fechar a issue #6 manualmente** — o PR #15 já entregou e mergeou o Incremento 5, mas a
+  keyword de auto-close ("Fecha a issue #6") não é reconhecida pelo GitHub em português.
+  Lição para os próximos PRs: usar `Closes #N`/`Fixes #N`/`Resolves #N` (inglês) se quiser o
+  auto-close, ou fechar manualmente:
+  ```bash
+  gh issue close 6 -R leofaria-code/consolidador-extrato -c "Entregue via PR #15 (merged 08/07) — fechando manualmente porque a keyword em PT não aciona o auto-close do GitHub."
+  ```
+- **Avaliar fechar a issue #8** — o critério de aceite (`mvn verify -Pplano-b-jvm` verde sem
+  Docker) está satisfeito desde o Inc-1 e foi reverificado em 10/07 (32 testes, 0 falhas). Não há
+  PR dedicado a essa issue porque o critério é transversal a todos os incrementos; fechar fica a
+  critério do Rodrigo/grupo:
+  ```bash
+  gh issue close 8 -R leofaria-code/consolidador-extrato -c "mvn verify -Pplano-b-jvm verde (32 testes, 0 falhas) desde o Inc-1, reverificado em 10/07 — critério 6 satisfeito de forma contínua."
+  ```
