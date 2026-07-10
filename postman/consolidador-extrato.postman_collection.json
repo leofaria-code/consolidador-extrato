@@ -1,0 +1,377 @@
+{
+  "info": {
+    "name": "Consolidador de Extrato — Demo da banca",
+    "description": "Requests da demo (docs/roteiro-banca.md), na ordem de apresentação. Pré-requisito: `./demo.ps1` (ou os 3 serviços em quarkus:dev). Variáveis na aba Variables da coleção. Rode a coleção inteira (Run Collection) para ver todos os testes verdes — a pausa entre requests já está configurada para dar tempo ao fluxo assíncrono.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "urlIngestao", "value": "http://localhost:8081" },
+    { "key": "urlConsolidacao", "value": "http://localhost:8082" },
+    { "key": "urlConsulta", "value": "http://localhost:8083" },
+    { "key": "idCliente", "value": "cliente-postman" },
+    { "key": "competencia", "value": "2026-07" },
+    { "key": "correlacao", "value": "banca-postman-01" },
+    { "key": "idLancamento", "value": "lanc-postman-0001" }
+  ],
+  "item": [
+    {
+      "name": "0 · Saúde dos 3 serviços",
+      "item": [
+        {
+          "name": "Health — ingestão (8081)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('ingestão UP', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{urlIngestao}}/q/health"
+          }
+        },
+        {
+          "name": "Health — consolidação (8082)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('consolidação UP', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{urlConsolidacao}}/q/health"
+          }
+        },
+        {
+          "name": "Health — consulta (8083)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('consulta UP', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{urlConsulta}}/q/health"
+          }
+        }
+      ]
+    },
+    {
+      "name": "1 · Fluxo feliz (aceite assíncrono → extrato)",
+      "item": [
+        {
+          "name": "POST lançamento → 202 ACEITO",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('202 Accepted (aceite assíncrono — US-01)', () => pm.response.to.have.status(202));",
+                  "pm.test('correlation id ecoado (US-12)', () =>",
+                  "    pm.expect(pm.response.headers.get('X-Correlation-Id')).to.eql(pm.variables.get('correlacao')));",
+                  "pm.test('status ACEITO com identidade', () => {",
+                  "    const corpo = pm.response.json();",
+                  "    pm.expect(corpo.status).to.eql('ACEITO');",
+                  "    pm.expect(corpo.identidade.idLancamentoOrigem).to.eql(pm.variables.get('idLancamento'));",
+                  "});",
+                  "// dá tempo do fluxo assíncrono (tópico → posição → evento → invalidação)",
+                  "setTimeout(() => {}, 3000);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Correlation-Id", "value": "{{correlacao}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idCliente\": \"{{idCliente}}\",\n  \"idLancamentoOrigem\": \"{{idLancamento}}\",\n  \"instituicaoOrigem\": \"banco-a\",\n  \"agencia\": \"0001\",\n  \"conta\": \"77777-0\",\n  \"tipo\": \"CREDITO\",\n  \"valor\": 150.00,\n  \"moeda\": \"BRL\",\n  \"dataHoraOcorrencia\": \"{{competencia}}-10T14:30:00-03:00\",\n  \"idConsentimento\": \"consent-001\",\n  \"descricao\": \"depósito (demo Postman)\"\n}"
+            },
+            "url": "{{urlIngestao}}/lancamentos"
+          }
+        },
+        {
+          "name": "GET extrato → posição com carimbo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 com posições', () => {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(pm.response.json().posicoes.length).to.be.above(0);",
+                  "});",
+                  "pm.test('carimbo \\'atualizado às\\' presente — do DADO (US-07)', () =>",
+                  "    pm.expect(pm.response.json().atualizadoEm).to.not.be.null);",
+                  "// linha de base para a prova de idempotência (asserção relativa — independe de estado anterior)",
+                  "pm.collectionVariables.set('entradasBase', Number(pm.response.json().totais.entradas));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Correlation-Id", "value": "{{correlacao}}" }
+            ],
+            "url": "{{urlConsulta}}/extrato/{{idCliente}}/{{competencia}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2 · Idempotência (US-02)",
+      "item": [
+        {
+          "name": "POST o MESMO lançamento de novo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('202 — reenvio é comportamento normal da origem', () => pm.response.to.have.status(202));",
+                  "// guarda o saldo atual para comparar no próximo request",
+                  "setTimeout(() => {}, 2000);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Correlation-Id", "value": "{{correlacao}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idCliente\": \"{{idCliente}}\",\n  \"idLancamentoOrigem\": \"{{idLancamento}}\",\n  \"instituicaoOrigem\": \"banco-a\",\n  \"agencia\": \"0001\",\n  \"conta\": \"77777-0\",\n  \"tipo\": \"CREDITO\",\n  \"valor\": 150.00,\n  \"moeda\": \"BRL\",\n  \"dataHoraOcorrencia\": \"{{competencia}}-10T14:30:00-03:00\",\n  \"idConsentimento\": \"consent-001\",\n  \"descricao\": \"depósito (demo Postman)\"\n}"
+            },
+            "url": "{{urlIngestao}}/lancamentos"
+          }
+        },
+        {
+          "name": "GET extrato → NADA duplicou",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "pm.test('repetido foi ignorado silenciosamente — entradas NÃO mudaram (US-02/ADR-004)', () =>",
+                  "    pm.expect(Number(pm.response.json().totais.entradas))",
+                  "        .to.eql(pm.collectionVariables.get('entradasBase')));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{urlConsulta}}/extrato/{{idCliente}}/{{competencia}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3 · Cache e atualizar sob demanda (US-06/US-07)",
+      "item": [
+        {
+          "name": "GET ?atualizar=true → 200 (ignora o cache)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 — releitura forçada do dado', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{urlConsulta}}/extrato/{{idCliente}}/{{competencia}}?atualizar=true",
+              "host": ["{{urlConsulta}}"],
+              "path": ["extrato", "{{idCliente}}", "{{competencia}}"],
+              "query": [{ "key": "atualizar", "value": "true" }]
+            }
+          }
+        },
+        {
+          "name": "GET ?atualizar=true de novo → 429 (limite por cliente)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('429 — cliente ansioso respeita o intervalo mínimo (Sessão 6, decisão 5)', () =>",
+                  "    pm.response.to.have.status(429));",
+                  "pm.test('resposta informa o intervalo', () =>",
+                  "    pm.expect(pm.response.json().intervaloMinimoSegundos).to.be.above(0));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{urlConsulta}}/extrato/{{idCliente}}/{{competencia}}?atualizar=true",
+              "host": ["{{urlConsulta}}"],
+              "path": ["extrato", "{{idCliente}}", "{{competencia}}"],
+              "query": [{ "key": "atualizar", "value": "true" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4 · Reconsolidação — o guichê (US-09)",
+      "item": [
+        {
+          "name": "POST /reconsolidacoes → 202 aceite imediato",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('202 — aceite imediato; o guichê processa um a um', () => pm.response.to.have.status(202));",
+                  "pm.test('idPedido devolvido para acompanhamento', () =>",
+                  "    pm.expect(pm.response.json().idPedido).to.not.be.undefined);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Correlation-Id", "value": "{{correlacao}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idCliente\": \"{{idCliente}}\",\n  \"instituicaoOrigem\": \"banco-a\",\n  \"agencia\": \"0001\",\n  \"conta\": \"77777-0\",\n  \"competencia\": \"{{competencia}}\",\n  \"motivo\": \"contestação do cliente (demo Postman)\"\n}"
+            },
+            "url": "{{urlConsolidacao}}/reconsolidacoes"
+          }
+        },
+        {
+          "name": "GET /interno/posicoes → a fonte, sem cache",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 — a API interna que a consulta usa no cache miss (ADR-006)', () =>",
+                  "    pm.response.to.have.status(200));",
+                  "pm.test('posição reapurada continua íntegra (recálculo absoluto = mesmo total)', () => {",
+                  "    const posicoes = pm.response.json();",
+                  "    pm.expect(posicoes.length).to.be.above(0);",
+                  "    pm.expect(Number(posicoes[0].entradas))",
+                  "        .to.eql(pm.collectionVariables.get('entradasBase'));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{urlConsolidacao}}/interno/posicoes?idCliente={{idCliente}}&competencia={{competencia}}",
+              "host": ["{{urlConsolidacao}}"],
+              "path": ["interno", "posicoes"],
+              "query": [
+                { "key": "idCliente", "value": "{{idCliente}}" },
+                { "key": "competencia", "value": "{{competencia}}" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5 · Validação de entrada",
+      "item": [
+        {
+          "name": "POST lançamento sem campos → 400 nomeando o que faltou",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400 — ficha inválida não entra na esteira (US-01)', () => pm.response.to.have.status(400));",
+                  "pm.test('resposta NOMEIA os campos faltantes', () => {",
+                  "    const faltantes = pm.response.json().camposFaltantes;",
+                  "    pm.expect(faltantes).to.include('valor');",
+                  "    pm.expect(faltantes).to.include('idConsentimento');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idCliente\": \"{{idCliente}}\",\n  \"idLancamentoOrigem\": \"lanc-invalido\",\n  \"instituicaoOrigem\": \"banco-a\",\n  \"agencia\": \"0001\",\n  \"conta\": \"77777-0\",\n  \"tipo\": \"DEBITO\",\n  \"moeda\": \"BRL\",\n  \"dataHoraOcorrencia\": \"{{competencia}}-10T15:00:00-03:00\"\n}"
+            },
+            "url": "{{urlIngestao}}/lancamentos"
+          }
+        },
+        {
+          "name": "GET extrato de cliente sem contas → 200 vazio (não erro)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 — extrato vazio é resposta bem definida (US-06)', () => pm.response.to.have.status(200));",
+                  "pm.test('posições vazias, carimbo nulo', () => {",
+                  "    const corpo = pm.response.json();",
+                  "    pm.expect(corpo.posicoes).to.be.empty;",
+                  "    pm.expect(corpo.atualizadoEm).to.be.null;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{urlConsulta}}/extrato/cliente-sem-contas/{{competencia}}"
+          }
+        }
+      ]
+    }
+  ]
+}

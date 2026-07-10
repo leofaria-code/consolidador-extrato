@@ -1,6 +1,7 @@
 package br.com.escalacaotech.extrato.consulta;
 
 import br.com.escalacaotech.extrato.contratos.PosicaoAtualizadaEvento;
+import io.smallrye.reactive.messaging.annotations.Blocking;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
@@ -30,7 +31,12 @@ public class ConsumidorPosicaoAtualizada {
     @Inject
     ServicoExtrato servico;
 
+    // @Blocking é obrigatório: com Kafka real a entrega vem no EVENT LOOP do
+    // Vert.x e o @CacheInvalidate bloqueia -> "current thread cannot be
+    // blocked" mata a subscription do canal (achado do plano A/Postman, 10/07;
+    // o in-memory do plano B entrega em outra thread e nunca exercita isso).
     @Incoming("posicao-atualizada-in")
+    @Blocking
     public CompletionStage<Void> aoAtualizarPosicao(Message<PosicaoAtualizadaEvento> mensagem) {
         var correlacao = Correlacao.deMensagem(mensagem).orElse("(sem-correlacao)");
         var evento = mensagem.getPayload();
