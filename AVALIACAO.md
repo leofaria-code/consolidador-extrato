@@ -57,8 +57,8 @@ Nota final = Σ (peso × nota ÷ 100). Peso e nota são independentes — se um 
    - Política em `docs/adr/ADR-007-resiliencia-retry-dlq.md`: 3 retentativas em processo com backoff exponencial (1s×2, jitter) + DLQ com causa nos headers; parâmetros da ata da Sessão 6 (decisão 8), ajustáveis por configuração.
    - Implementação: `@Retry`+`@ExponentialBackoff` nos consumidores (`ConsumidorLancamentos`, `ConsumidorReconsolidacao`); `failure-strategy=dead-letter-queue` (Kafka) e `reject`+`auto-bind-dlq` (Rabbit); `@Timeout` 2s sem retry na chamada interna do cache miss.
    - Fila de trabalho `reconsolidacao` (US-09): aceite imediato + guichê um a um (`max-outstanding-messages=1`); reapuração idempotente por recálculo absoluto.
-   - **Teste da banca** (`RetentativaEDlqTest`): falha transitória supera em exatamente 3 tentativas; mensagem envenenada consome 1+3 e o fluxo continua. `ReconsolidacaoTest`: contestação corrigida pela reapuração. Verde no plano B (07/07); encaminhamento físico à DLQ = demonstração no plano A (ADR-003).
-   - Gap conhecido (não 100/100): o encaminhamento físico à DLQ (Kafka/Rabbit reais) ainda não foi demonstrado no plano A — pendente para o docker-compose/demo de 12/07.
+   - **Teste da banca** (`RetentativaEDlqTest`): falha transitória supera em exatamente 3 tentativas; mensagem envenenada consome 1+3 e o fluxo continua. `ReconsolidacaoTest`: contestação corrigida pela reapuração. Verde no plano B (07/07).
+   - **DLQ física validada no plano A (10/07)**: veneno injetado direto no tópico → 1+3 tentativas → `lancamentos-recebidos-dlq` com **mensagem original + causa nos headers** (`dead-letter-reason` com a violação exata, classe da exceção, tópico/partição/offset — o contrato da Sessão 4) e o fluxo seguiu (lançamento válido atrás do veneno incorporado). DLQ do Rabbit (`reconsolidacao-dlq`) visível na management UI. Dois bugs reais de config/conversão encontrados e corrigidos nessa validação — registro em `docs/uso-de-ia.md` (10/07). *(Gap original desta nota fechado — grupo pode reavaliar o 85.)*
 
 6. **Testabilidade** — peso 13 · nota proposta **100/100**
    Evidência:
@@ -74,7 +74,7 @@ Nota final = Σ (peso × nota ÷ 100). Peso e nota são independentes — se um 
    Como usamos IA e o que validamos manualmente: ver `docs/uso-de-ia.md` (log contínuo, honesto: inclui o que a IA errou e o que o grupo rejeitou/validou) — inclusive a sessão de 10/07 (README + estas notas propostas), que registra o próprio processo de propor uma nota sem escala oficial disponível.
 
 9. **Execução** — peso 5 · nota proposta **100/100**
-   Como rodar: `README.md` §Arquitetura em 30 segundos (visão dos 3 serviços/portas), §Instalar dependências/§Compilar/§Testar/§Rodar em modo dev, e §Testando o fluxo ponta a ponta (roteiro de `curl` completo: health check → `POST /lancamentos` → `GET /extrato` → `atualizar=true` → `POST /reconsolidacoes`) — quem só lê o README consegue subir e exercitar os 3 serviços sem contexto adicional. Perfil A (Docker) para a demo, perfil B (pura-JVM) para os testes/CI (§Perfis de execução).
+   Como rodar: `README.md` §Arquitetura em 30 segundos (visão dos 3 serviços/portas), §Instalar dependências/§Compilar/§Testar/§Rodar em modo dev, e §Testando o fluxo ponta a ponta (roteiro de `curl` completo: health check → `POST /lancamentos` → `GET /extrato` → `atualizar=true` → `POST /reconsolidacoes`) — quem só lê o README consegue subir e exercitar os 3 serviços sem contexto adicional. **Demo do zero com um comando** (`./demo.ps1` → `docker-compose.yml` com Kafka/RabbitMQ/Postgres + os 3 serviços — aceite da issue #9), incluindo roteiro da DLQ ao vivo (§Demo da banca). Perfil A (Docker) para a demo, perfil B (pura-JVM) para os testes/CI (§Perfis de execução).
 
 ## Opcionais entregues (grupo de 4 → mínimo 1)
 

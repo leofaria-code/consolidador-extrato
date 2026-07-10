@@ -1,0 +1,10 @@
+# Demo da banca (plano A) — imagem JVM do fast-jar do Quarkus.
+# Build: mvn -DskipTests package && docker compose up --build (ver demo.ps1)
+FROM eclipse-temurin:25-jre
+WORKDIR /app
+COPY target/quarkus-app/lib/ /app/lib/
+COPY target/quarkus-app/*.jar /app/
+COPY target/quarkus-app/app/ /app/app/
+COPY target/quarkus-app/quarkus/ /app/quarkus/
+EXPOSE 8083
+ENTRYPOINT ["java", "-jar", "/app/quarkus-run.jar"]

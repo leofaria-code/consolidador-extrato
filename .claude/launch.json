@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "extrato-ingestao",
+      "runtimeExecutable": "mvn",
+      "runtimeArgs": ["-pl", "extrato-ingestao", "quarkus:dev"],
+      "port": 8081
+    },
+    {
+      "name": "extrato-consolidacao",
+      "runtimeExecutable": "mvn",
+      "runtimeArgs": ["-pl", "extrato-consolidacao", "quarkus:dev"],
+      "port": 8082
+    },
+    {
+      "name": "extrato-consulta",
+      "runtimeExecutable": "mvn",
+      "runtimeArgs": ["-pl", "extrato-consulta", "quarkus:dev"],
+      "port": 8083
+    }
+  ]
+}

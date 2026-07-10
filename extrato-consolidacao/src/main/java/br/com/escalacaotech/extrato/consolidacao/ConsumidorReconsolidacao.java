@@ -2,6 +2,7 @@ package br.com.escalacaotech.extrato.consolidacao;
 
 import br.com.escalacaotech.extrato.contratos.PedidoReconsolidacao;
 import io.smallrye.reactive.messaging.annotations.Blocking;
+import io.vertx.core.json.JsonObject;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
@@ -19,6 +20,13 @@ import java.util.concurrent.CompletionStage;
  * fila como propriedade AMQP e segue <b>explícito</b> pela cadeia (MDC não é
  * confiável em thread de mensageria — ver uso-de-ia.md, 07/07). Falha esgotada
  * (política no {@link ProcessadorReconsolidacao}) → nack → dead-letter exchange.
+ * <p>
+ * Deserialização (achado do plano A, 10/07): quem consome {@code Message<T>}
+ * não ganha conversão automática de payload do SmallRye — o connector Rabbit
+ * entrega {@link JsonObject} cru (diferente do Kafka, onde o Quarkus gera
+ * deserializer tipado no próprio connector). Por isso o payload é convertido
+ * aqui, explicitamente; no plano B (in-memory) o objeto chega como o próprio
+ * record e passa direto.
  */
 @ApplicationScoped
 public class ConsumidorReconsolidacao {
@@ -28,14 +36,21 @@ public class ConsumidorReconsolidacao {
 
     @Incoming("reconsolidacao-in")
     @Blocking
-    public CompletionStage<Void> processar(Message<PedidoReconsolidacao> mensagem) {
+    public CompletionStage<Void> processar(Message<?> mensagem) {
         var correlacao = Correlacao.deMensagem(mensagem)
                 .orElseGet(() -> UUID.randomUUID().toString());
         try {
-            processador.processar(mensagem.getPayload(), correlacao);
+            processador.processar(comoPedido(mensagem.getPayload()), correlacao);
             return mensagem.ack();
         } catch (Exception falha) {
             return mensagem.nack(falha);
         }
+    }
+
+    private static PedidoReconsolidacao comoPedido(Object payload) {
+        if (payload instanceof JsonObject json) {
+            return json.mapTo(PedidoReconsolidacao.class);
+        }
+        return (PedidoReconsolidacao) payload;
     }
 }
