@@ -53,9 +53,8 @@ Perfil de execução: A (docker) · Fallbacks usados: perfil B (pura-JVM) para t
 7. **Decisões arquiteturais** — nível proposto: **5/5 (Excelente)**
    Evidência: `docs/adr/` — 7 ADRs, todas com alternativas rejeitadas e o porquê (ADR-001 stack; ADR-002 decomposição; ADR-003 perfis de teste A/B; ADR-004 idempotência na base; ADR-005 outbox transacional; ADR-006 cache miss; ADR-007 resiliência). **Os 5 candidatos da Sessão 6 estão fechados** (o candidato #1 já havia sido fechado como ADR-002 no bootstrap; os 4 pendentes da issue #7 — cache miss, idempotência, consistência, resiliência — fecharam como ADRs 004–007). Rastreabilidade decisão↔fala de stakeholder via `docs/requisitos/`.
 
-8. **Uso crítico de IA** — nível proposto: **4/5 (Bom)**
-   Como usamos IA e o que validamos manualmente: ver `docs/uso-de-ia.md` (log contínuo, honesto: inclui o que a IA errou e o que o grupo rejeitou/validou).
-   Gap conhecido (não 5/5): esta sessão (reorganização do README + auto-avaliação dos níveis, 10/07) ainda não tem entrada em `docs/uso-de-ia.md` — registrar antes do fechamento.
+8. **Uso crítico de IA** — nível proposto: **5/5 (Excelente)**
+   Como usamos IA e o que validamos manualmente: ver `docs/uso-de-ia.md` (log contínuo, honesto: inclui o que a IA errou e o que o grupo rejeitou/validou) — inclusive a sessão de 10/07 (README + estes níveis propostos), que registra o próprio processo de propor uma nota sem escala oficial disponível.
 
 9. **Execução** — nível proposto: **5/5 (Excelente)**
    Como rodar: `README.md` §Arquitetura em 30 segundos (visão dos 3 serviços/portas), §Instalar dependências/§Compilar/§Testar/§Rodar em modo dev, e §Testando o fluxo ponta a ponta (roteiro de `curl` completo: health check → `POST /lancamentos` → `GET /extrato` → `atualizar=true` → `POST /reconsolidacoes`) — quem só lê o README consegue subir e exercitar os 3 serviços sem contexto adicional. Perfil A (Docker) para a demo, perfil B (pura-JVM) para os testes/CI (§Perfis de execução).
