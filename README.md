@@ -149,6 +149,32 @@ curl -X POST http://localhost:8082/reconsolidacoes \
       }'
 ```
 
+## Demo da banca — tudo de uma vez (docker-compose)
+
+Sobe brokers reais (Kafka, RabbitMQ, Postgres) **e** os três serviços com um comando:
+
+```powershell
+./demo.ps1        # Windows (ou ./demo.sh no Linux/macOS)
+```
+
+Portas: `8081` ingestão · `8082` consolidação · `8083` consulta · `15672` RabbitMQ Management (`guest`/`guest`).
+O roteiro `curl` da seção anterior funciona igual. A base é **descartável** (`drop-and-create` a cada subida do container da consolidação).
+
+**Demonstrando a DLQ ao vivo** (US-08 — falha permanente não trava o fluxo):
+
+```bash
+# 1. injete um lançamento envenenado DIRETO no tópico (bypassa a validação da ingestão):
+echo '{"idCliente":"c1","idLancamentoOrigem":"veneno-1","instituicaoOrigem":"banco-x","agencia":"0001","conta":"999","dataHoraOcorrencia":"2026-07-10T12:00:00-03:00"}' | \
+  docker compose exec -T kafka sh -c "exec /opt/kafka/bin/kafka-console-producer.sh --bootstrap-server localhost:9092 --topic lancamentos-recebidos"
+
+# 2. após 1+3 tentativas (~7s de backoff), a mensagem está na DLQ com a CAUSA nos headers:
+docker compose exec -T kafka sh -c "exec /opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic lancamentos-recebidos-dlq --from-beginning --max-messages 1 --timeout-ms 30000 --property print.headers=true"
+```
+
+A DLQ da fila de reconsolidação (`reconsolidacao-dlq`) é visível na UI do RabbitMQ em `http://localhost:15672`.
+
+> No Git Bash do Windows, o `sh -c "exec /opt/..."` evita a conversão automática de caminhos (MSYS) que quebraria o `/opt/kafka/...`.
+
 ## Perfis de execução
 
 | Perfil | Quando usar | Comportamento |
