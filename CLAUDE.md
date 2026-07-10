@@ -12,7 +12,7 @@ Leo (arquiteto) · Sandy (dev mensageria) · Marcos (dev cache/dados) · Rodrigo
 
 ## Stack (ADR-001 — não rediscutir sem motivo)
 
-Java 25 LTS · Quarkus **3.33.2** (LTS, BOM `io.quarkus.platform`) · Maven multi-módulo · SmallRye Reactive Messaging (Kafka/RabbitMQ) · SmallRye Fault Tolerance · quarkus-cache/redis-cache · Panache · PACT (Quarkiverse). Equivalências Spring→Quarkus: tabela na ADR-001.
+Java 25 LTS · Quarkus **3.33.2** (LTS, BOM `io.quarkus.platform`) · Maven multi-módulo · SmallRye Reactive Messaging (Kafka/RabbitMQ) · SmallRye Fault Tolerance · quarkus-cache (Caffeine — sem Redis, nenhum pom depende dele) · Panache · PACT (Quarkiverse). Equivalências Spring→Quarkus: tabela na ADR-001.
 
 ## Estrutura
 
@@ -52,5 +52,6 @@ Cronograma comprimido (banca antecipada):
 - [x] 07/07 — Incremento 4: fila de reconsolidação (RabbitMQ) + retry/DLQ (branch `feat/inc-4-resiliencia`; retry 3× backoff + DLQ Kafka/Rabbit conforme ADR-007; 24 testes verdes no plano B; DLQ física = validar no plano A)
 - [x] 07/07 — Incremento 6: observabilidade (branch `feat/inc-6-observabilidade`; correlação ponta a ponta HTTP→Kafka→outbox→evento→invalidação + fila AMQP; logs JSON no plano A; 29 testes verdes. **Achado importante: MDC do Quarkus não funciona em thread de mensageria — correlação vai explícita nos consumidores; ver uso-de-ia.md**)
 - [x] 07/07 — Incremento 5: contract test PACT consulta↔consolidação (branch `feat/inc-5-pact`; pact em disco versionado em `pacts/`; Quarkiverse quarkus-pact 1.5.0 — versão própria, fora do BOM da plataforma; 32 testes verdes no plano B)
-- [ ] 12/07 — AVALIACAO.md preenchido + docker-compose/demo + ensaio da banca
+- [x] 10/07 — README.md reescrito para ser autossuficiente (branch `feat/inc-5-pact`; seções "Arquitetura em 30 segundos" + "Testando o fluxo ponta a ponta" com roteiro `curl` completo dos 3 serviços; corrigidas menções indevidas a Redis — o cache é só Caffeine) e AVALIACAO.md reestruturado: nota 0–100 por critério + peso explícito ao lado, tabela-resumo que calcula peso×nota÷100 (total proposto: 96,7/100). **Notas são rascunho de IA** — não há escala oficial da rubrica documentada no material do curso, só os pesos (linha acima); grupo ainda precisa validar/ajustar antes do fechamento.
+- [ ] 12/07 — Validar/ajustar as notas do AVALIACAO.md com o grupo + docker-compose/demo + ensaio da banca
 - [ ] 13–14/07 — banca (buffer no dia 13 de manhã se for dia 14)
