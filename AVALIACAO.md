@@ -42,7 +42,7 @@ Perfil de execução: A (docker) · Fallbacks usados: perfil B (pura-JVM) para t
 
 6. **Testabilidade** — _
    Evidência:
-   - `mvn verify -Pplano-b-jvm` verde sem Docker: 5 módulos, **32 testes, 0 falhas** (07/07) — critério satisfeito por build real, não por leitura de código.
+   - `mvn verify -Pplano-b-jvm` verde sem Docker: 5 módulos, **32 testes, 0 falhas** (07/07, reverificado 10/07) — critério satisfeito por build real, não por leitura de código.
    - **PACT consulta↔consolidação** (Sessão 6, decisão 2): consumer `ContratoPosicoesConsumerPactTest` (deserializa no record real `PosicaoDaConta`; 2 interações — posições e extrato vazio), pact **em disco, versionado** (`pacts/`), provider `ContratoPosicoesProviderPactTest` verifica contra a aplicação real com estados semeados pelo caminho real. Roda no `mvn verify`, inclusive plano B.
    - Connector in-memory do SmallRye (`RecursosEmMemoria`) substitui Kafka/RabbitMQ nos testes; dublês contáveis provam cache; `@InjectSpy` prova retry.
    - Estratégia dos dois perfis (A alta fidelidade × B Docker-free como gate) documentada em `docs/adr/ADR-003-perfis-de-teste.md`.
@@ -54,7 +54,7 @@ Perfil de execução: A (docker) · Fallbacks usados: perfil B (pura-JVM) para t
    Como usamos IA e o que validamos manualmente: ver `docs/uso-de-ia.md` (log contínuo, honesto: inclui o que a IA errou e o que o grupo rejeitou/validou).
 
 9. **Execução** — _
-   Como rodar: `README.md` §Como rodar (TODO); perfil A declarado, testes no perfil B.
+   Como rodar: `README.md` §Arquitetura em 30 segundos (visão dos 3 serviços/portas), §Instalar dependências/§Compilar/§Testar/§Rodar em modo dev, e §Testando o fluxo ponta a ponta (roteiro de `curl` completo: health check → `POST /lancamentos` → `GET /extrato` → `atualizar=true` → `POST /reconsolidacoes`) — quem só lê o README consegue subir e exercitar os 3 serviços sem contexto adicional. Perfil A (Docker) para a demo, perfil B (pura-JVM) para os testes/CI (§Perfis de execução).
 
 ## Opcionais entregues (grupo de 4 → mínimo 1)
 
