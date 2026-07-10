@@ -9,7 +9,8 @@
 
 - [ ] `./demo.ps1` rodado **antes** — a stack leva ~2 min para ficar saudável; conferir `curl http://localhost:808{1,2,3}/q/health`.
 - [ ] Portas 8081–8083 e 15672 livres (nenhum `quarkus:dev` esquecido).
-- [ ] Terminal com fonte grande + os comandos deste roteiro prontos para colar.
+- [ ] **Postman aberto com a coleção importada** (`postman/consolidador-extrato.postman_collection.json`) — é o caminho visual dos passos 0–5; fallback: `npx newman run postman/...json` no terminal.
+- [ ] Terminal com fonte grande + os comandos deste roteiro prontos para colar (fallback dos passos do Postman e caminho único dos passos 6–7).
 - [ ] UI do RabbitMQ logada (`localhost:15672`, guest/guest) numa aba.
 - [ ] **Plano B da demo** (se o Docker falhar na hora): `mvn verify -Pplano-b-jvm` ao vivo (32 testes, ~1 min, zero infra) + prints da validação de 10/07 no `uso-de-ia.md`. A rubrica pede o gate sem Docker de qualquer forma.
 
@@ -26,6 +27,13 @@
 | 6 | Sandy | **Resiliência (o clímax)**: veneno direto no tópico → fluxo NÃO trava → DLQ com mensagem original + causa nos headers | README §Demo da banca (2 comandos); mostrar `reconsolidacao-dlq` na UI do Rabbit |
 | 7 | Leo | **Correlação ponta a ponta**: o mesmo id do POST aparece no log da ingestão, consolidação e invalidação da consulta (JSON) | `docker compose logs \| grep banca-01` |
 | 8 | Rodrigo | **Testabilidade**: suíte inteira sem Docker + PACT verificando o contrato | `mvn verify -Pplano-b-jvm` (ou output salvo) + `pacts/*.json` no repo |
+
+**Como executar os passos 0–5 (duas opções):**
+
+- **Visual (recomendada): Run Collection no Postman** — a coleção espelha exatamente esses passos em pastas (`0 · Saúde` … `5 · Validação`), com **22 asserções que ficam verdes na tela** enquanto quem está apresentando narra cada pasta. As asserções são relativas ao estado, então pode rodar de novo sem medo (inclusive no ensaio).
+- **Terminal (fallback):** os `curl` do README §Testando o fluxo ponta a ponta.
+
+Os passos **6–7 continuam no terminal + UI do Rabbit de propósito**: DLQ e correlação são onde a banca precisa ver o *broker* de verdade (headers de causa no tópico, `x-death` na fila, o mesmo `corr` nos logs JSON dos 3 serviços) — não uma abstração de client HTTP.
 
 ## Arguição — perguntas prováveis × resposta curta (e onde está escrito)
 
