@@ -62,6 +62,6 @@ Ver `docs/adr/` — índice: ADR-001 (stack Quarkus), ADR-002 (decomposição), 
 
 ## Perfis de execução
 
-- **A (docker, padrão):** brokers reais (Kafka, RabbitMQ, Redis) via Dev Services/Compose.
+- **A (docker, padrão):** brokers e banco reais (Kafka, RabbitMQ, Postgres) via Dev Services/Compose.
 - **B (pura-JVM):** `mvn verify -Pplano-b-jvm` sem Docker — connector in-memory + Caffeine + H2. Perfil dos testes/CI e **gate obrigatório** (critério 6). Racional em ADR-003.
 - **C (conceitual):** este documento + ADRs + requisitos.

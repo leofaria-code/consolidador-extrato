@@ -44,7 +44,7 @@ O mount do Windows corrompe operações de lock/rename do git. **Não rodar `git
 - [x] Bootstrap multi-módulo: 4 módulos, esqueleto REST+health+teste smoke
 - [x] ADR-001 (stack), ADR-002 (decomposição), arquitetura.md, AVALIACAO.md esqueleto
 - [x] Board de issues drafado em `docs/board-issues.md` (9 issues, milestone banca-2026-07). **GitHub MCP não autorizado** (autorizar conector engineering:github nas configurações) e sandbox sem rede para api.github.com — criar issues via MCP na próxima sessão ou via bloco `gh` do próprio arquivo.
-Cronograma comprimido (banca antecipada):
+Cronograma (entradas datadas = história como aconteceu):
 
 - [x] 05–06/07 — Incremento 1: tópico de ingestão + consumidor idempotente (Kafka) — concluído (commit 88503a9), issue #1 fechada, `mvn verify -Pplano-b-jvm` verde (7 testes, 0 falhas)
 - [x] 07/07 — Incremento 2: consolidação + base segregada + evento posicao-atualizada (branch `feat/inc-2-consolidacao` → PR; ADR-004 idempotência na base, ADR-005 outbox; 11 testes verdes no plano B)

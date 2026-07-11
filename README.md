@@ -10,7 +10,7 @@ Projeto final em grupo do módulo **BE-JV-010 — Arquitetura de Software Ágil 
 
 ## Estado atual
 
-🚧 **Incrementos 1–6 concluídos** — falta consolidar a avaliação e ensaiar a banca (antecipada para 13–14/07/2026).
+✅ **Projeto entregue** — 6 incrementos, 7 ADRs, CI duplo (plano B + e2e) verde. Resta o ensaio cronometrado; **banca em 15/07/2026**.
 
 | Entregável | Status |
 |---|---|
@@ -23,7 +23,8 @@ Projeto final em grupo do módulo **BE-JV-010 — Arquitetura de Software Ágil 
 | Incremento 4 — fila de reconsolidação (RabbitMQ) + retry/DLQ (ADR-007) | ✅ |
 | Incremento 6 — observabilidade: correlação ponta a ponta + logs JSON | ✅ |
 | Incremento 5 — contract test PACT consulta↔consolidação | ✅ |
-| AVALIACAO.md preenchido + docker-compose/demo + ensaio da banca | ⏳ 12/07 |
+| AVALIACAO.md (notas validadas pelo grupo) + demo docker-compose de um comando + coleções Postman + CI e2e | ✅ |
+| Ensaio cronometrado da banca (roteiro pronto em `docs/roteiro-banca.md`) | ⏳ até 14/07 |
 
 ## Arquitetura em 30 segundos
 

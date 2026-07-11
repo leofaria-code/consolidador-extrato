@@ -66,7 +66,7 @@ Nota final = Σ (peso × nota ÷ 100). Peso e nota são independentes — se um 
 
 6. **Testabilidade** — peso 13 · nota proposta **100/100**
    Evidência:
-   - `mvn verify -Pplano-b-jvm` verde sem Docker: 5 módulos, **35 testes, 0 falhas** (reverificado 11/07) — e **rodando em CI a cada PR** (`.github/workflows/verify.yml`, selo verde no repo): a mesma condição da correção, provada continuamente.
+   - `mvn verify -Pplano-b-jvm` verde sem Docker: 5 módulos, **38 testes, 0 falhas** (reverificado 11/07, pós-disjuntor) — e **rodando em CI a cada PR** (`.github/workflows/verify.yml`, selo verde no repo): a mesma condição da correção, provada continuamente.
    - **PACT consulta↔consolidação** (Sessão 6, decisão 2): consumer `ContratoPosicoesConsumerPactTest` (deserializa no record real `PosicaoDaConta`; 2 interações — posições e extrato vazio), pact **em disco, versionado** (`pacts/`), provider `ContratoPosicoesProviderPactTest` verifica contra a aplicação real com estados semeados pelo caminho real. Roda no `mvn verify`, inclusive plano B.
    - **PACT de MENSAGEM do tópico `lancamentos-recebidos`** (o 2º par da Sessão 6, fechado pós-aula-08): consumidor declara o shape mínimo (identidade da ADR-004, tipo, valor, ocorrência — opcionais do erratum #1 fora, de propósito); provider verifica contra a serialização real. Os DOIS estilos de contrato da aula-08 (request/response e mensagem) presentes. Pact em disco × Broker: decisão documentada na ADR-003 (nota de 11/07).
    - Connector in-memory do SmallRye (`RecursosEmMemoria`) substitui Kafka/RabbitMQ nos testes; dublês contáveis provam cache; `@InjectSpy` prova retry.

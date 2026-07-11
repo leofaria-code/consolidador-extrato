@@ -1,6 +1,6 @@
 # Board de issues do grupo
 
-> Fonte: cronograma comprimido do `CLAUDE.md` (banca antecipada 13–14/07, entrega 12/07 à noite).
+> Fonte: cronograma do `CLAUDE.md`. **Banca: 15/07** (antecipação desfeita em 11/07).
 > **Issues criadas no GitHub em 05/07 via `gh` CLI.** Status e assignees abaixo conferidos direto
 > na API em 10/07 (`gh issue list --json ...`) — não é mais o rascunho inicial do bootstrap.
 
@@ -13,10 +13,10 @@
 | 3 | [#3](https://github.com/leofaria-code/consolidador-extrato/issues/3) | Incremento 3 — Cache na consulta + invalidação + carimbo | ✅ fechada (07/07, PR [#11](https://github.com/leofaria-code/consolidador-extrato/pull/11)) | 08/07 | Marcos | cache (10) |
 | 4 | [#4](https://github.com/leofaria-code/consolidador-extrato/issues/4) | Incremento 4 — Fila de reconsolidação (RabbitMQ) + retry/DLQ | ✅ fechada (07/07, PR [#13](https://github.com/leofaria-code/consolidador-extrato/pull/13)) | 10/07 | Sandy | resiliência (12) |
 | 5 | [#5](https://github.com/leofaria-code/consolidador-extrato/issues/5) | Incremento 6 — Observabilidade: logs JSON + correlation id | ✅ fechada (08/07, PR [#14](https://github.com/leofaria-code/consolidador-extrato/pull/14)) | 10/07 | Leo | execução (5), resiliência (12) |
-| 6 | [#6](https://github.com/leofaria-code/consolidador-extrato/issues/6) | Incremento 5 — Contract test PACT consulta↔consolidação | ⚠️ **aberta no GitHub apesar do merge** — PR [#15](https://github.com/leofaria-code/consolidador-extrato/pull/15) (08/07) diz "Fecha a issue #6", mas GitHub só reconhece a keyword de auto-close em inglês (`Closes`/`Fixes`/`Resolves #6`); "Fecha" não fechou nada. Fechar manualmente (ver §Pendências). | 11/07 | Rodrigo | testabilidade (13) |
+| 6 | [#6](https://github.com/leofaria-code/consolidador-extrato/issues/6) | Incremento 5 — Contract test PACT consulta↔consolidação | ✅ fechada manualmente (10/07) — lição: keyword de auto-close só em inglês; "Fecha #N" não fecha (e "Closes #9?" numa frase fecha sem querer — aconteceu). | 11/07 | Rodrigo | testabilidade (13) |
 | 7 | [#7](https://github.com/leofaria-code/consolidador-extrato/issues/7) | ADRs pendentes da Sessão 6 (cache miss, idempotência, consistência dos 3 efeitos, resiliência) | ✅ fechada (07/07) | 09/07 | Leo | ADRs (13) |
-| 8 | [#8](https://github.com/leofaria-code/consolidador-extrato/issues/8) | Perfil `plano-b-jvm` — `mvn verify` verde sem Docker | ⏳ aberta — critério de aceite já satisfeito (`mvn verify -Pplano-b-jvm`: 32 testes, 0 falhas, reverificado 10/07); fechar é decisão do Rodrigo/grupo | 11/07 | Rodrigo | testabilidade (13) |
-| 9 | [#9](https://github.com/leofaria-code/consolidador-extrato/issues/9) | AVALIACAO.md preenchido + docker-compose/demo + ensaio da banca | ⏳ aberta (em andamento — notas 0–100 propostas em rascunho, ver AVALIACAO.md) | 12/07 | Todos (Leo coordena) | todos os 9 |
+| 8 | [#8](https://github.com/leofaria-code/consolidador-extrato/issues/8) | Perfil `plano-b-jvm` — `mvn verify` verde sem Docker | ✅ fechada (10/07, com OK do Rodrigo) — critério satisfeito de forma contínua; hoje provado no CI a cada PR | 11/07 | Rodrigo | testabilidade (13) |
+| 9 | [#9](https://github.com/leofaria-code/consolidador-extrato/issues/9) | AVALIACAO.md preenchido + docker-compose/demo + ensaio da banca | ⏳ aberta — notas validadas pelo grupo (100,0) e demo/coleções/CI entregues; **resta só o ensaio cronometrado** | 12/07 | Todos (Leo coordena) | todos os 9 |
 
 ## Corpos das issues
 
