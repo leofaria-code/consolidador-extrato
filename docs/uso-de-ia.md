@@ -144,6 +144,12 @@ Ferramenta principal: Claude (Cowork/desktop), com delegação por complexidade 
 - **Alarme falso instrutivo:** no teste de escala, o evento "sumiu" — diagnóstico por camadas (fonte vazia → lag do consumer group = 0 → mensagem no tópico) revelou que era só a latência de rejoin do consumer após stop/start; o experimento controlado seguinte confirmou o fluxo inteiro são. Lição: leia o lag antes de culpar o código.
 - **Validação:** reator 38 testes, 0 falhas, sem Docker; CI verde.
 
+## 10/07 (noite) — Validação das notas pelo grupo: 100,0 ratificado
+
+- **O processo, que é o que importa registrar:** a IA propôs notas com gaps NOMEADOS (4 e 5 em 85); em vez de negociar número, o grupo mandou **fechar os gaps com código** — disjuntor + última resposta boa + DLQ scriptada (crit. 5) e broadcast de invalidação provado com 2 réplicas (crit. 4). Só então o total virou 100,0 — e o grupo validou a proposta final nesta noite. A autoavaliação não é a IA dando nota para o próprio trabalho: é o grupo cobrando evidência executável para cada ponto, com os trade-offs remanescentes escritos como decisão (hits locais por réplica; reprocesso de ilegível volta à DLQ).
+- **Ressalva mantida no AVALIACAO:** sem escala oficial da rubrica no material, 100,0 é a leitura do grupo sobre a própria evidência — a banca calibra; a defesa é a evidência, não o número.
+- *Nota de datação: os registros "11/07" desta sessão referem-se a esta mesma noite de trabalho (10/07, 20h–23h — os logs em UTC cruzaram a meia-noite e contaminaram a datação; fica o erratum em vez de reescrever histórico commitado).*
+
 ## Backlog de registros (preencher a cada incremento)
 
 - [x] Resultado do mvn verify do Inc-1 + surpresas: `mvn verify -Pplano-b-jvm` — BUILD SUCCESS, 5 módulos, 7 testes, 0 falhas, ~2min12s, sem Docker. Sem surpresas nesta rodada (a pendência do plugin Quarkus/propriedades do tópico, deixada truncada numa sessão anterior, já tinha sido completada antes deste build).

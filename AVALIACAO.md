@@ -4,7 +4,7 @@ Grupo: Leo (arquiteto) · Sandy (dev mensageria) · Marcos (dev cache/dados) · 
 Tema/domínio: Consolidador de extrato Open Finance — ingestão de lançamentos de múltiplas instituições por tópicos, consolidação por conta×competência e consulta com cache.
 Perfil de execução: A (docker) · Fallbacks usados: perfil B (pura-JVM) para toda a suíte de testes.
 
-> ⚠️ **Documento em construção** — pesos, notas e evidências são preenchidos a cada incremento.
+> ✅ **Notas validadas pelo grupo em 10/07 (noite)** — Leo, Sandy, Marcos e Rodrigo. Processo no `docs/uso-de-ia.md`: gaps nomeados foram fechados com código e prova ao vivo antes da ratificação.
 > Convenção: evidência = caminho de arquivo/classe/teste ou hash de commit.
 > **Notas abaixo são uma proposta gerada em sessão de IA (10/07, reavaliada em 11/07 após o hardening pré-banca)**, para o grupo ajustar antes do fechamento. Escala 0–100 por critério (independente do peso) — **não há escala oficial da rubrica documentada no material do curso**, então não é possível confirmar se é a mesma que a banca usa; os pesos por critério (que somam 100) vêm do enunciado do projeto (`CLAUDE.md`). Trajetória das notas: os critérios 4 e 5 começaram em 85 **com gaps nomeados** — e em vez de argumentar por nota, o grupo **fechou os gaps com código e prova ao vivo** (disjuntor+última-boa+DLQ scriptada; broadcast de invalidação com 2 instâncias). O 100,0 proposto é ousado de propósito: cada critério tem evidência executável e os trade-offs remanescentes estão documentados como decisão, não como falta. Cabe ao grupo calibrar.
 

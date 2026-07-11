@@ -56,5 +56,6 @@ Cronograma comprimido (banca antecipada):
 - [x] 10/07 — Demo docker-compose + validação plano A (PR #17: `./demo.ps1` um comando; **2 bugs reais achados e corrigidos** — `dlx.declare` e conversão de payload `Message<T>` no Rabbit; DLQ Kafka com causa nos headers demonstrada; ver uso-de-ia.md "o dia em que o plano A pagou o aluguel") + roteiro da banca (PR #18: demo em 8 passos, 10 perguntas de arguição com ADR, titular/backup)
 - [x] 11/07 — Auditoria de aderência às aulas 5–8 + projeto-final.pdf (nenhum requisito descoberto): message pact do tópico implementado (34 testes; branch `feat/pact-mensagem`), nota pact-em-disco×Broker na ADR-003, nomenclatura conferida
 - [x] 11/07 (noite) — Rumo ao 100 (PR #23): disjuntor + última resposta boa no cache miss, reprocessar-dlq.ps1/.sh, broadcast de invalidação (2 réplicas ao vivo, --profile escala); AVALIACAO total proposto 100,0; 38 testes; CI verde
-- [ ] até 14/07 — **Só falta o humano**: validar/ajustar as notas 0–100 do AVALIACAO.md com o grupo (registrar no uso-de-ia) + ensaio cronometrado (preencher pós-ensaio do roteiro-banca.md)
+- [x] 10/07 (noite) — Notas do AVALIACAO.md validadas pelo grupo (100,0 ratificado; registro no uso-de-ia — inclui erratum de datação: registros "11/07" = noite de 10/07)
+- [ ] até 14/07 — ensaio cronometrado (preencher pós-ensaio do roteiro-banca.md)
 - [ ] 15/07 — banca. Lembrete: rodar `./demo.ps1` ~10 min antes de entrar na sala
