@@ -1,0 +1,9 @@
+# Dashboards provisionados por arquivo (ADR-008) — o JSON versionado no repo
+# é a fonte de verdade; edições pela UI não sobrevivem ao restart (proposital).
+apiVersion: 1
+
+providers:
+  - name: consolidador-extrato
+    type: file
+    options:
+      path: /var/lib/grafana/dashboards

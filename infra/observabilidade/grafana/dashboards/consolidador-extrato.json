@@ -1,0 +1,135 @@
+{
+  "title": "Consolidador de Extrato — visão da banca",
+  "uid": "consolidador-extrato",
+  "tags": ["banca", "adr-008"],
+  "timezone": "browser",
+  "refresh": "5s",
+  "time": { "from": "now-15m", "to": "now" },
+  "schemaVersion": 39,
+  "panels": [
+    {
+      "id": 1,
+      "title": "Fluxo de lançamentos (por segundo)",
+      "description": "Aceitos na borda (ingestão) x incorporados e repetidos na consolidação — a distância entre aceito e incorporado é o assíncrono; a série 'repetido' é a idempotência (ADR-004) trabalhando.",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 9, "w": 14, "x": 0, "y": 0 },
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "drawStyle": "line", "fillOpacity": 12, "lineWidth": 2, "showPoints": "never" },
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate(extrato_ingestao_lancamentos_total{resultado=\"aceito\"}[1m]))",
+          "legendFormat": "aceitos (ingestão)"
+        },
+        {
+          "refId": "B",
+          "expr": "sum(rate(extrato_consolidacao_lancamentos_total{resultado=\"incorporado\"}[1m]))",
+          "legendFormat": "incorporados (consolidação)"
+        },
+        {
+          "refId": "C",
+          "expr": "sum(rate(extrato_consolidacao_lancamentos_total{resultado=\"repetido\"}[1m]))",
+          "legendFormat": "repetidos ignorados (idempotência)"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Cache hit ratio (consulta)",
+      "description": "Built-in do Caffeine (ADR-006) — proporção de consultas servidas sem ir à consolidação.",
+      "type": "gauge",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 9, "w": 5, "x": 14, "y": 0 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "orange", "value": null },
+              { "color": "green", "value": 0.5 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate(cache_gets_total{cache=\"extrato-consolidado\",result=\"hit\"}[5m])) / sum(rate(cache_gets_total{cache=\"extrato-consolidado\"}[5m]))",
+          "legendFormat": "hit ratio"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "DLQ (acumulado)",
+      "description": "Mensagens envenenadas separadas para inspeção (US-08/ADR-007), por motivo. Vermelho = tem lançamento aguardando reprocesso (reprocessar-dlq.ps1).",
+      "type": "stat",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 9, "w": 5, "x": 19, "y": 0 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 1 }
+            ]
+          },
+          "noValue": "0"
+        },
+        "overrides": []
+      },
+      "options": { "colorMode": "background", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (motivo) (extrato_consolidacao_dlq_enviados_total)",
+          "legendFormat": "{{motivo}}"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Disjuntor e fallback do cache miss (ADR-007)",
+      "description": "Chamadas de fallback (última resposta boa) e retentativas do SmallRye FT. Se o fallback mexer, a consolidação caiu e a consulta continuou respondendo.",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 9 },
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "drawStyle": "line", "fillOpacity": 12, "lineWidth": 2, "showPoints": "never" },
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate(ft_invocations_total{fallback=\"applied\"}[1m]))",
+          "legendFormat": "fallbacks (consulta degradada com última resposta boa)"
+        },
+        {
+          "refId": "B",
+          "expr": "sum(rate(ft_retry_retries_total[1m]))",
+          "legendFormat": "retentativas (consolidação)"
+        },
+        {
+          "refId": "C",
+          "expr": "max(ft_circuitbreaker_state_current{state=\"open\"})",
+          "legendFormat": "disjuntor aberto (1 = sim)"
+        }
+      ]
+    }
+  ]
+}

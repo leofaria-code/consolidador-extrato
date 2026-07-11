@@ -1,0 +1,11 @@
+# Datasource provisionado por arquivo (ADR-008) — nada clicado à mão:
+# a stack sobe pronta do zero, mesmo espírito do demo.ps1.
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    uid: prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
