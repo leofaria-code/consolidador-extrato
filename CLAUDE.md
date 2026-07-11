@@ -4,7 +4,7 @@
 
 ## O que é
 
-Projeto final do módulo BE-JV-010 (Arquitetura de Software Ágil II — curso Java Especialista, turma Caixa). Tema: **Consolidador de Extrato / Open Finance** — ingestão por tópicos → agregação → cache de consulta. **Banca: 13–14/07/2026 (antecipada; era 15/07 — entrega fechada até 12/07 à noite).** Avaliação por rubrica de 9 critérios (pesos: decomposição 15, assíncrono 15, idempotência 12, resiliência 12, testabilidade 13, ADRs 13, cache 10, IA 5, execução 5) — o `AVALIACAO.md` mapeia critério → evidência e é obrigatório.
+Projeto final do módulo BE-JV-010 (Arquitetura de Software Ágil II — curso Java Especialista, turma Caixa). Tema: **Consolidador de Extrato / Open Finance** — ingestão por tópicos → agregação → cache de consulta. **Banca: 15/07/2026 (voltou à data original — a antecipação para 13–14 foi desfeita em 11/07; folga extra usada para fechar gaps de contrato pós-aula-08).** Avaliação por rubrica de 9 critérios (pesos: decomposição 15, assíncrono 15, idempotência 12, resiliência 12, testabilidade 13, ADRs 13, cache 10, IA 5, execução 5) — o `AVALIACAO.md` mapeia critério → evidência e é obrigatório.
 
 ## Grupo e papéis
 
@@ -54,5 +54,6 @@ Cronograma comprimido (banca antecipada):
 - [x] 07/07 — Incremento 5: contract test PACT consulta↔consolidação (branch `feat/inc-5-pact`; pact em disco versionado em `pacts/`; Quarkiverse quarkus-pact 1.5.0 — versão própria, fora do BOM da plataforma; 32 testes verdes no plano B)
 - [x] 10/07 — README.md reescrito para ser autossuficiente (branch `feat/inc-5-pact`; seções "Arquitetura em 30 segundos" + "Testando o fluxo ponta a ponta" com roteiro `curl` completo dos 3 serviços; corrigidas menções indevidas a Redis — o cache é só Caffeine) e AVALIACAO.md reestruturado: nota 0–100 por critério + peso explícito ao lado, tabela-resumo que calcula peso×nota÷100 (total proposto: 96,7/100). **Notas são rascunho de IA** — não há escala oficial da rubrica documentada no material do curso, só os pesos (linha acima); grupo ainda precisa validar/ajustar antes do fechamento.
 - [x] 10/07 — Demo docker-compose + validação plano A (PR #17: `./demo.ps1` um comando; **2 bugs reais achados e corrigidos** — `dlx.declare` e conversão de payload `Message<T>` no Rabbit; DLQ Kafka com causa nos headers demonstrada; ver uso-de-ia.md "o dia em que o plano A pagou o aluguel") + roteiro da banca (PR #18: demo em 8 passos, 10 perguntas de arguição com ADR, titular/backup)
-- [ ] 12/07 — **Só falta o humano**: validar/ajustar as notas 0–100 do AVALIACAO.md com o grupo (registrar no uso-de-ia) + ensaio cronometrado (preencher pós-ensaio do roteiro-banca.md)
-- [ ] 13–14/07 — banca (buffer no dia 13 de manhã se for dia 14). Lembrete: rodar `./demo.ps1` ~10 min antes de entrar na sala
+- [x] 11/07 — Auditoria de aderência às aulas 5–8 + projeto-final.pdf (nenhum requisito descoberto): message pact do tópico implementado (34 testes; branch `feat/pact-mensagem`), nota pact-em-disco×Broker na ADR-003, nomenclatura conferida
+- [ ] até 14/07 — **Só falta o humano**: validar/ajustar as notas 0–100 do AVALIACAO.md com o grupo (registrar no uso-de-ia) + ensaio cronometrado (preencher pós-ensaio do roteiro-banca.md)
+- [ ] 15/07 — banca. Lembrete: rodar `./demo.ps1` ~10 min antes de entrar na sala

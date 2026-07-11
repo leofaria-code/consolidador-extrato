@@ -79,10 +79,17 @@
       <artifactId>quarkus-junit-mockito</artifactId>
       <scope>test</scope>
     </dependency>
-    <!-- Lado PROVIDER do contract test (Inc-5 / Sessão 6, decisão 2) -->
+    <!-- Lado PROVIDER do contract test HTTP (Inc-5 / Sessão 6, decisão 2) -->
     <dependency>
       <groupId>io.quarkiverse.pact</groupId>
       <artifactId>quarkus-pact-provider</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <!-- Lado CONSUMER do contrato de MENSAGEM do tópico de ingestão
+         (2º candidato da Sessão 6, decisão 2 — fechado pós-aula-08) -->
+    <dependency>
+      <groupId>io.quarkiverse.pact</groupId>
+      <artifactId>quarkus-pact-consumer</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -104,6 +111,16 @@
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <systemPropertyVariables>
+            <!-- pact de mensagem gravado na raiz versionada (como no extrato-consulta) -->
+            <pact.rootDir>${project.basedir}/../pacts</pact.rootDir>
+          </systemPropertyVariables>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>io.quarkus</groupId>
         <artifactId>quarkus-maven-plugin</artifactId>

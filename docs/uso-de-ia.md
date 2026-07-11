@@ -117,6 +117,16 @@ Ferramenta principal: Claude (Cowork/desktop), com delegação por complexidade 
 - **Lição de teste de API registrada:** a 1ª versão da coleção assertava valores absolutos (entradas == 150) e quebrou quando a base descartável da demo foi recriada. Correção: asserções RELATIVAS (linha de base capturada no 1º GET; idempotência = "não mudou") — a coleção agora roda N vezes contra qualquer estado. Validação: `npx newman run` → 22/22.
 - **Total do plano A: 3 bugs reais** que a suíte (32 testes verdes) não pegaria — dlx.declare, conversão de payload do Rabbit, @Blocking no consumidor de eventos. Nenhum é "bug de lógica"; todos são fronteira código↔infra — exatamente o que a ADR-003 disse que o plano B não cobre.
 
+## 11/07 — Auditoria de aderência (aulas 5–8 + projeto-final.pdf) e o pact de mensagem
+
+- **Pedido:** com as aulas 5–8 em mãos, verificar aderência do projeto ao curso e ao projeto-final.pdf, com atenção especial a testes/contratos. Banca adiada para 15/07 — prazo extra usado para fechar gaps em vez de só documentá-los.
+- **Resultado da auditoria:** nenhum requisito formal descoberto; aderência forte em mensageria (a distinção fila×tópico do complemento da aula-06 é exatamente a nossa defesa), resiliência e cache. Três gaps em testes/contratos, todos fechados:
+  1. **Message pact do tópico** (aula-08-contract): implementado — consolidação como consumer do shape mínimo (opcionais do erratum #1 fora do contrato de propósito), ingestão como provider contra a serialização real. Reator: 34 testes.
+  2. **Pact em disco × Broker**: a escolha existia mas não estava escrita — agora é a nota de 11/07 na ADR-003 (monorepo + reator = o git é o broker; `can-i-deploy` vira evolução para deploys independentes).
+  3. **Nomenclatura das interações** conferida contra o vocabulário da aula (expectsToReceive/provider states descritivos).
+- **Surpresa técnica (a IA errou, o framework corrigiu):** o DSL clássico de message pact (`MessagePactBuilder`/`List<Message>`) não roda no default do pact-jvm 4.6 — o spec V4 exige outra assinatura (`V4Pact xxx(PactBuilder)`). O erro do runner diz exatamente isso; `pactVersion = V3` na anotação resolve. Registrado porque a aula usa o DSL clássico e o erro vai aparecer para qualquer colega que copiar o exemplo em versão nova.
+- **Validação:** `mvn verify -Pplano-b-jvm` — 34 testes, 0 falhas; "Verifying a pact between extrato-consolidacao and extrato-ingestao" no log do build da ingestão.
+
 ## Backlog de registros (preencher a cada incremento)
 
 - [x] Resultado do mvn verify do Inc-1 + surpresas: `mvn verify -Pplano-b-jvm` — BUILD SUCCESS, 5 módulos, 7 testes, 0 falhas, ~2min12s, sem Docker. Sem surpresas nesta rodada (a pendência do plugin Quarkus/propriedades do tópico, deixada truncada numa sessão anterior, já tinha sido completada antes deste build).

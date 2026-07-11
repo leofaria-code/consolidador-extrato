@@ -1,0 +1,122 @@
+{
+  "consumer": {
+    "name": "extrato-consolidacao"
+  },
+  "messages": [
+    {
+      "contents": {
+        "agencia": "0001",
+        "conta": "123456",
+        "dataHoraOcorrencia": "2026-07-10T14:30:00-03:00",
+        "idCliente": "cliente-001",
+        "idConsentimento": "consent-001",
+        "idLancamentoOrigem": "TX-0001",
+        "instituicaoOrigem": "00360305",
+        "moeda": "BRL",
+        "tipo": "CREDITO",
+        "valor": 150.0
+      },
+      "description": "um lancamento validado publicado no topico lancamentos-recebidos",
+      "matchingRules": {
+        "body": {
+          "$.agencia": {
+            "combine": "AND",
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          },
+          "$.conta": {
+            "combine": "AND",
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          },
+          "$.dataHoraOcorrencia": {
+            "combine": "AND",
+            "matchers": [
+              {
+                "match": "regex",
+                "regex": "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:\\d{2})"
+              }
+            ]
+          },
+          "$.idCliente": {
+            "combine": "AND",
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          },
+          "$.idConsentimento": {
+            "combine": "AND",
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          },
+          "$.idLancamentoOrigem": {
+            "combine": "AND",
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          },
+          "$.instituicaoOrigem": {
+            "combine": "AND",
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          },
+          "$.moeda": {
+            "combine": "AND",
+            "matchers": [
+              {
+                "match": "type"
+              }
+            ]
+          },
+          "$.tipo": {
+            "combine": "AND",
+            "matchers": [
+              {
+                "match": "regex",
+                "regex": "CREDITO|DEBITO"
+              }
+            ]
+          },
+          "$.valor": {
+            "combine": "AND",
+            "matchers": [
+              {
+                "match": "number"
+              }
+            ]
+          }
+        }
+      },
+      "metaData": {
+        "contentType": "application/json"
+      }
+    }
+  ],
+  "metadata": {
+    "pact-jvm": {
+      "version": "4.6.11"
+    },
+    "pactSpecification": {
+      "version": "3.0.0"
+    }
+  },
+  "provider": {
+    "name": "extrato-ingestao"
+  }
+}

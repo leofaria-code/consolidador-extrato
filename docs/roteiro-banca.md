@@ -1,4 +1,4 @@
-# Roteiro da banca — 13–14/07/2026
+# Roteiro da banca — 15/07/2026
 
 > Ensaiar em ~20 min de apresentação + arguição. Quem responde o quê: cada um defende o
 > critério que implementou — a banca percebe quando só um sabe tudo.

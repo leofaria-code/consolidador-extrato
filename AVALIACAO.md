@@ -64,6 +64,7 @@ Nota final = Σ (peso × nota ÷ 100). Peso e nota são independentes — se um 
    Evidência:
    - `mvn verify -Pplano-b-jvm` verde sem Docker: 5 módulos, **32 testes, 0 falhas** (07/07, reverificado 10/07) — critério satisfeito por build real, não por leitura de código.
    - **PACT consulta↔consolidação** (Sessão 6, decisão 2): consumer `ContratoPosicoesConsumerPactTest` (deserializa no record real `PosicaoDaConta`; 2 interações — posições e extrato vazio), pact **em disco, versionado** (`pacts/`), provider `ContratoPosicoesProviderPactTest` verifica contra a aplicação real com estados semeados pelo caminho real. Roda no `mvn verify`, inclusive plano B.
+   - **PACT de MENSAGEM do tópico `lancamentos-recebidos`** (o 2º par da Sessão 6, fechado pós-aula-08): consumidor declara o shape mínimo (identidade da ADR-004, tipo, valor, ocorrência — opcionais do erratum #1 fora, de propósito); provider verifica contra a serialização real. Os DOIS estilos de contrato da aula-08 (request/response e mensagem) presentes. Pact em disco × Broker: decisão documentada na ADR-003 (nota de 11/07).
    - Connector in-memory do SmallRye (`RecursosEmMemoria`) substitui Kafka/RabbitMQ nos testes; dublês contáveis provam cache; `@InjectSpy` prova retry.
    - Estratégia dos dois perfis (A alta fidelidade × B Docker-free como gate) documentada em `docs/adr/ADR-003-perfis-de-teste.md`.
 
