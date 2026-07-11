@@ -1,6 +1,6 @@
 # Roteiro da banca — 15/07/2026
 
-> Ensaiar em ~20 min de apresentação + arguição. Quem responde o quê: cada um defende o
+> **Tempo combinado: 20 min + tolerância de 5 (teto 25).** Ensaiar mirando 20–22 para sobrar respiro. Quem responde o quê: cada um defende o
 > critério que implementou — a banca percebe quando só um sabe tudo.
 > **Regra de ouro do Fábio (Sessão 6):** a resposta nunca é "porque funcionou" —
 > é "consideramos X e Y, escolhemos Y por isso" (toda resposta abaixo aponta a ADR).
@@ -13,7 +13,8 @@
 - [ ] Terminal com fonte grande + os comandos deste roteiro prontos para colar (fallback dos passos do Postman e caminho único dos passos 6–7).
 - [ ] UI do RabbitMQ logada (`localhost:15672`, guest/guest) numa aba.
 - [ ] **Swagger UI aberto** (`:8081|:8082|:8083/q/swagger-ui`) — superfície exploratória para a arguição: "e se mandar X?" se responde ao vivo, sem sair da tela.
-- [ ] **Plano B da demo** (se o Docker falhar na hora): `mvn verify -Pplano-b-jvm` ao vivo (32 testes, ~1 min, zero infra) + prints da validação de 10/07 no `uso-de-ia.md`. A rubrica pede o gate sem Docker de qualquer forma.
+- [ ] **Cronometrista definido** (sugestão: Rodrigo até o passo 7b, Marcos depois) — sinais no minuto 10 e no 18.
+- [ ] **Plano B da demo** (se o Docker falhar na hora): `mvn verify -Pplano-b-jvm` ao vivo (38 testes, ~1 min, zero infra) + prints da validação de 10/07 no `uso-de-ia.md`. A rubrica pede o gate sem Docker de qualquer forma.
 
 ## Sequência da demo (com narrativa)
 
@@ -29,7 +30,9 @@
 | 6 | Sandy | **Resiliência (o clímax)**: veneno direto no tópico → fluxo NÃO trava → DLQ com mensagem original + causa nos headers | README §Demo da banca (2 comandos); mostrar `reconsolidacao-dlq` na UI do Rabbit |
 | 6b | Sandy | **Final feliz do veneno**: reprocesso da DLQ em um comando — corrigidos entram pelo fluxo normal, seguro pela idempotência | `./reprocessar-dlq.ps1` |
 | 7 | Leo | **Correlação ponta a ponta**: o mesmo id do POST aparece no log da ingestão, consolidação e invalidação da consulta (JSON) | `docker compose logs \| grep banca-01` |
-| 8 | Rodrigo | **Testabilidade**: suíte inteira sem Docker + PACT verificando o contrato | `mvn verify -Pplano-b-jvm` (ou output salvo) + `pacts/*.json` no repo |
+| 7b | Marcos | **Disjuntor + última resposta boa (promovido a ato principal)**: derrubar a consolidação AO VIVO → miss forçado serve a última cópia com carimbo antigo (transparência); cliente sem cópia → 503 com Retry-After; religar → normaliza | `docker compose stop consolidacao` → GET `?atualizar=true` → GET cliente novo → `docker compose start consolidacao` |
+| 8 | Rodrigo | **Testabilidade**: suíte inteira sem Docker + os DOIS contratos PACT (HTTP e mensagem) verificados no build + CI duplo (verify + e2e com Newman e guarda semântico) | `mvn verify -Pplano-b-jvm` (ou output salvo) + `pacts/*.json` + aba Actions com os selos verdes |
+| 9 | Leo | **Fechamento — a jornada de engenharia (critério 8 no palco)**: 4 bugs reais que só os brokers de verdade revelaram (DLX, payload do Rabbit, @Blocking, deserialização que TRAVAVA a partição) + o guarda de CI que reprovou o próprio criador na estreia. Mensagem final: "o repositório se auto-fiscaliza — 38 testes, 27 asserções e2e e 2 contratos a cada PR" | 1 min de fala, aba do `uso-de-ia.md` aberta |
 
 **Como executar os passos 0–5 (duas opções):**
 
@@ -38,10 +41,28 @@
 
 Os passos **6–7 continuam no terminal + UI do Rabbit de propósito**: DLQ e correlação são onde a banca precisa ver o *broker* de verdade (headers de causa no tópico, `x-death` na fila, o mesmo `corr` nos logs JSON dos 3 serviços) — não uma abstração de client HTTP.
 
-## Atos bônus (só se perguntarem ou sobrar tempo — já validados ao vivo)
+## Mapa de tempo (teto 25 — mirar 20–22)
 
-- **Escala horizontal**: `docker compose --profile escala up -d consulta-replica` → réplica na 8084; um POST invalida as DUAS (broadcast — ADR-006 nota).
-- **Disjuntor + última resposta boa**: `docker compose stop consolidacao` → GET com `?atualizar=true` serve a última cópia (carimbo antigo = transparência); cliente sem cópia → 503 com Retry-After; `docker compose start consolidacao` normaliza.
+| Minuto | Ato(s) | Quem |
+|---|---|---|
+| 0–2 | 0 · arquitetura em 30s + o que vão ver | Leo |
+| 2–5 | 1, 1b · aceite assíncrono, lote/fora de ordem | Sandy |
+| 5–8 | 2, 4 · cache miss→hit, carimbo, 429 | Marcos |
+| 8–10 | 3, 5 · idempotência, guichê | Sandy |
+| **10** | ☑️ *checkpoint: começar o veneno agora* | |
+| 10–14 | 6, 6b · veneno → DLQ → reprocesso (clímax 1) | Sandy |
+| 14–16 | 7 · correlação ponta a ponta | Leo |
+| 16–18 | 7b · disjuntor + última-boa (clímax 2) | Marcos |
+| **18** | ☑️ *checkpoint: Rodrigo assume* | |
+| 18–21 | 8 · testes, PACT ×2, CI duplo | Rodrigo |
+| 21–22 | 9 · fechamento: a jornada | Leo |
+| 22–25 | respiro/transição para a arguição | — |
+
+*Se o checkpoint dos 10 min estourar: cortar o passo 4 (429) e o 6b (reprocesso) — são os de menor peso na rubrica; nunca cortar 6, 7b nem 8.*
+
+## Ato bônus (só se perguntarem — já validado ao vivo)
+
+- **Escala horizontal**: `docker compose --profile escala up -d consulta-replica` → réplica na 8084; um POST invalida as DUAS (broadcast — ADR-006 nota). *Se pretenderem usar, subir a réplica ANTES da sala (leva ~40s).*
 
 ## Arguição — perguntas prováveis × resposta curta (e onde está escrito)
 
@@ -67,13 +88,13 @@ Os passos **6–7 continuam no terminal + UI do Rabbit de propósito**: DLQ e co
    Decisão estratégica (adoção na Caixa + próximo módulo); os PADRÕES são os mesmos e a tradução foi parte do aprendizado. `@RetryableTopic` vira DUAS camadas no Quarkus: `@Retry` (política de tentativa) + `failure-strategy` (destino da falha) — separação que até ajuda: são decisões independentes. → ADR-001 (tabela de equivalências).
 
 8. **"O que a IA errou? Como vocês sabem que o código é de vocês?"** (IA, peso 5)
-   Log honesto no `uso-de-ia.md`: a IA propôs Spring (rejeitamos com contexto), errou versão do quarkus-pact (Central corrigiu), e o MDC "de manual" falhou em thread de mensageria — provado por probe, resolvido com correlação explícita. Regra do grupo: **o build é o árbitro, nunca a opinião do modelo**. E o plano A de 10/07 achou 2 bugs que os testes não pegariam — está tudo lá, com data.
+   Log honesto no `uso-de-ia.md`: a IA propôs Spring (rejeitamos com contexto), errou versão do quarkus-pact (Central corrigiu), e o MDC "de manual" falhou em thread de mensageria — provado por probe, resolvido com correlação explícita. Regra do grupo: **o build é o árbitro, nunca a opinião do modelo**. E o plano A achou 4 bugs que os testes não pegariam — inclusive um que travava a partição —, e até o guarda de CI reprovou o próprio artefato na estreia (não-determinismo do gerador): está tudo lá, com data e diagnóstico.
 
 9. **"O que quebra se alguém mudar o endpoint interno?"** (testabilidade, peso 13)
    O provider reproduz o pact versionado (`pacts/`) contra a aplicação real no `mvn verify` — mudança incompatível quebra o build da consolidação antes de quebrar a consulta em produção; a mudança de contrato aparece como diff em PR. → Inc-5, ADR-006.
 
 10. **"Os testes passam sem Docker — então para que os brokers?"**
-    Plano B prova domínio e fiação (o gate, critério 6); plano A prova o que só broker real prova: partição, DLQ física, binds. E pagou o aluguel: 3 bugs reais achados em 10/07 (DLX não declarado; conversão de payload do Rabbit; @Blocking no consumidor de eventos). → ADR-003 + uso-de-ia 10/07. O CI roda o plano B a cada PR — mesma condição da correção.
+    Plano B prova domínio e fiação (o gate, critério 6); plano A prova o que só broker real prova: partição, DLQ física, binds. E pagou o aluguel: 4 bugs reais (DLX não declarado; conversão de payload do Rabbit; @Blocking no consumidor de eventos; deserialização de lixo travando a partição). → ADR-003 + uso-de-ia 10/07. O CI roda o plano B a cada PR — mesma condição da correção.
 
 11. **"Cadê a US-04 (consentimento) e a US-11 (expurgo)?"**
     Corte de escopo consciente, não esquecimento: a Sessão 6 (decisão 6) fixou que consentimento é **externo** — o sistema *reage* a eventos de uma plataforma simulada, não gere ciclo de vida. Priorizamos os padrões que a rubrica avalia; US-04/US-11 estão rastreadas como próximos incrementos nos properties de cada serviço, e a parte **difícil** delas já está pensada e escrita: a interação expurgo × memória de dedup (nota de 11/07 na ADR-004 — expurgo apaga a dedup junto, então US-11 exige US-04 antes; reenvio pós-expurgo é bloqueado na ingestão, não na idempotência).
@@ -89,6 +110,7 @@ Os passos **6–7 continuam no terminal + UI do Rabbit de propósito**: DLQ e co
 
 ## Pós-ensaio (preencher no ensaio de 12/07)
 
-- [ ] Tempo total medido: ____ min (alvo ≤ 20)
+- [ ] Tempo total medido: ____ min (alvo 20–22; teto 25)
+- [ ] Checkpoints respeitados? min 10: ____ · min 18: ____
 - [ ] Passo mais lento da demo: ____________
 - [ ] Pergunta que travou alguém: ____________ → reforçar resposta
