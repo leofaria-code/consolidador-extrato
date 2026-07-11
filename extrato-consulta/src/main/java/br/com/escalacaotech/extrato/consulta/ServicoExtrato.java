@@ -24,7 +24,7 @@ public class ServicoExtrato {
     public static final String CACHE = "extrato-consolidado";
 
     @Inject
-    FontePosicoes fonte;
+    FonteResiliente fonte;
 
     @CacheResult(cacheName = CACHE)
     public ExtratoConsolidado buscar(String idCliente, String competencia) {

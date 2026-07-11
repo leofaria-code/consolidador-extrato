@@ -99,3 +99,23 @@ services:
         condition: service_healthy
       consolidacao:
         condition: service_started
+
+  # Réplica da consulta para a demo de escala horizontal (ADR-006, nota 11/07):
+  # broadcast de invalidação — as DUAS instâncias invalidam no mesmo evento.
+  # Sobe só com: docker compose --profile escala up -d consulta-replica
+  consulta-replica:
+    profiles: ["escala"]
+    build:
+      context: ./extrato-consulta
+      dockerfile: src/main/docker/Dockerfile.jvm
+    ports:
+      - "8084:8083"
+    environment:
+      QUARKUS_HTTP_PORT: "8083"
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      QUARKUS_REST_CLIENT_CONSOLIDACAO_URL: http://consolidacao:8082
+    depends_on:
+      kafka:
+        condition: service_healthy
+      consolidacao:
+        condition: service_started

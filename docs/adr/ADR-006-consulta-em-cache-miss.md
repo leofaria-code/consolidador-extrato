@@ -28,6 +28,10 @@ Requisitos que pesam: resposta em fração de segundo no caso típico (US-06), c
 - **Atualizar sob demanda (US-07)**: `?atualizar=true` invalida a entrada e recarrega do banco — com **limite por cliente** (intervalo mínimo configurável, padrão 30s; excedente recebe 429). Sessão 6, decisão 5.
 - **Multi-instância**: Caffeine é local por instância; com N instâncias, cada uma invalida a sua (todas assinam o tópico) e o TTL cobre janelas de rebalance. Se a consulta escalar horizontalmente com exigência de hit compartilhado, `quarkus-redis-cache` é o upgrade documentado — a anotação `@CacheResult` não muda.
 
+## Nota (11/07): broadcast de invalidação — correção em escala horizontal
+
+O "cada uma invalida a sua" acima virou implementação: o consumer group do canal `posicao-atualizada-in` é **único por instância** (`${quarkus.uuid}`) — o evento deixa de ser *distribuído entre* as réplicas (semântica de fila) e passa a ser **entregue a todas** (semântica de broadcast, que é o correto para invalidação). `auto.offset.reset=latest`: instância recém-nascida tem cache frio, invalidar histórico não lhe diz nada; evento perdido enquanto estava fora é coberto pelo TTL. **Provado ao vivo com 2 instâncias** (compose `--profile escala`): um POST → as duas logam a invalidação → as duas servem o dado novo. Com isso, a limitação de escala horizontal se reduz a **eficiência** (hits não compartilhados entre réplicas — cada uma aquece o seu cache), não a **correção**; compartilhar hits segue sendo o upgrade Redis documentado acima, a adotar por medição, não por precaução.
+
 ## Consequências
 
 - (+) O par HTTP mais estável do sistema vira contrato verificado (PACT, Inc-5) — o custo da dependência síncrona é pago com governança, não com esperança.
