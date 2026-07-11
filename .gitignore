@@ -20,3 +20,10 @@ Thumbs.db
 .quarkus/
 *.log
 .env
+
+# Postman: estado pessoal de workspace (sync por conta) fica fora do git —
+# o artefato do time é o JSON canônico em postman/*.postman_collection.json
+.postman/
+postman/collections/
+postman/environments/
+postman/globals/

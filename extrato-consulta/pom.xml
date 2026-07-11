@@ -26,6 +26,11 @@
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-smallrye-health</artifactId>
     </dependency>
+    <!-- Swagger UI na demo (apoio da arguição — sempre incluído, ver properties) -->
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-smallrye-openapi</artifactId>
+    </dependency>
     <!-- Cache do extrato (Inc-3 / US-06, ADR-006) — Caffeine em processo;
          upgrade para redis-cache documentado na ADR-006 se escalar horizontal. -->
     <dependency>

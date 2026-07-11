@@ -5,13 +5,34 @@
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    { "key": "urlIngestao", "value": "http://localhost:8081" },
-    { "key": "urlConsolidacao", "value": "http://localhost:8082" },
-    { "key": "urlConsulta", "value": "http://localhost:8083" },
-    { "key": "idCliente", "value": "cliente-postman" },
-    { "key": "competencia", "value": "2026-07" },
-    { "key": "correlacao", "value": "banca-postman-01" },
-    { "key": "idLancamento", "value": "lanc-postman-0001" }
+    {
+      "key": "urlIngestao",
+      "value": "http://localhost:8081"
+    },
+    {
+      "key": "urlConsolidacao",
+      "value": "http://localhost:8082"
+    },
+    {
+      "key": "urlConsulta",
+      "value": "http://localhost:8083"
+    },
+    {
+      "key": "idCliente",
+      "value": "cliente-postman"
+    },
+    {
+      "key": "competencia",
+      "value": "2026-07"
+    },
+    {
+      "key": "correlacao",
+      "value": "banca-postman-01"
+    },
+    {
+      "key": "idLancamento",
+      "value": "lanc-postman-0001"
+    }
   ],
   "item": [
     {
@@ -101,8 +122,14 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "X-Correlation-Id", "value": "{{correlacao}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Correlation-Id",
+                "value": "{{correlacao}}"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -134,7 +161,10 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "X-Correlation-Id", "value": "{{correlacao}}" }
+              {
+                "key": "X-Correlation-Id",
+                "value": "{{correlacao}}"
+              }
             ],
             "url": "{{urlConsulta}}/extrato/{{idCliente}}/{{competencia}}"
           }
@@ -162,8 +192,14 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "X-Correlation-Id", "value": "{{correlacao}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Correlation-Id",
+                "value": "{{correlacao}}"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -215,9 +251,20 @@
             "method": "GET",
             "url": {
               "raw": "{{urlConsulta}}/extrato/{{idCliente}}/{{competencia}}?atualizar=true",
-              "host": ["{{urlConsulta}}"],
-              "path": ["extrato", "{{idCliente}}", "{{competencia}}"],
-              "query": [{ "key": "atualizar", "value": "true" }]
+              "host": [
+                "{{urlConsulta}}"
+              ],
+              "path": [
+                "extrato",
+                "{{idCliente}}",
+                "{{competencia}}"
+              ],
+              "query": [
+                {
+                  "key": "atualizar",
+                  "value": "true"
+                }
+              ]
             }
           }
         },
@@ -241,9 +288,20 @@
             "method": "GET",
             "url": {
               "raw": "{{urlConsulta}}/extrato/{{idCliente}}/{{competencia}}?atualizar=true",
-              "host": ["{{urlConsulta}}"],
-              "path": ["extrato", "{{idCliente}}", "{{competencia}}"],
-              "query": [{ "key": "atualizar", "value": "true" }]
+              "host": [
+                "{{urlConsulta}}"
+              ],
+              "path": [
+                "extrato",
+                "{{idCliente}}",
+                "{{competencia}}"
+              ],
+              "query": [
+                {
+                  "key": "atualizar",
+                  "value": "true"
+                }
+              ]
             }
           }
         }
@@ -270,8 +328,14 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "X-Correlation-Id", "value": "{{correlacao}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Correlation-Id",
+                "value": "{{correlacao}}"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -304,11 +368,22 @@
             "method": "GET",
             "url": {
               "raw": "{{urlConsolidacao}}/interno/posicoes?idCliente={{idCliente}}&competencia={{competencia}}",
-              "host": ["{{urlConsolidacao}}"],
-              "path": ["interno", "posicoes"],
+              "host": [
+                "{{urlConsolidacao}}"
+              ],
+              "path": [
+                "interno",
+                "posicoes"
+              ],
               "query": [
-                { "key": "idCliente", "value": "{{idCliente}}" },
-                { "key": "competencia", "value": "{{competencia}}" }
+                {
+                  "key": "idCliente",
+                  "value": "{{idCliente}}"
+                },
+                {
+                  "key": "competencia",
+                  "value": "{{competencia}}"
+                }
               ]
             }
           }
@@ -339,7 +414,10 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
             "body": {
               "mode": "raw",
@@ -369,6 +447,86 @@
           "request": {
             "method": "GET",
             "url": "{{urlConsulta}}/extrato/cliente-sem-contas/{{competencia}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "6 · Domínio: lote e fora de ordem (US-01/US-03)",
+      "item": [
+        {
+          "name": "POST /lancamentos/lote — julho + JUNHO no mesmo lote",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('202 — lote aceito', () => pm.response.to.have.status(202));",
+                  "pm.test('2 aceitos, 0 rejeitados', () => {",
+                  "    const c = pm.response.json();",
+                  "    pm.expect(c.aceitos).to.eql(2); pm.expect(c.rejeitados).to.eql(0);",
+                  "});",
+                  "setTimeout(() => {}, 3000); // fluxo assíncrono"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "[\n  {\"idCliente\":\"cliente-postman-lote\",\"idLancamentoOrigem\":\"lote-jul-1\",\"instituicaoOrigem\":\"banco-a\",\"agencia\":\"0001\",\"conta\":\"22222-2\",\"tipo\":\"CREDITO\",\"valor\":120.00,\"moeda\":\"BRL\",\"dataHoraOcorrencia\":\"2026-07-05T09:00:00-03:00\",\"idConsentimento\":\"consent-001\"},\n  {\"idCliente\":\"cliente-postman-lote\",\"idLancamentoOrigem\":\"lote-jun-1\",\"instituicaoOrigem\":\"banco-a\",\"agencia\":\"0001\",\"conta\":\"22222-2\",\"tipo\":\"CREDITO\",\"valor\":80.00,\"moeda\":\"BRL\",\"dataHoraOcorrencia\":\"2026-06-15T10:00:00-03:00\",\"idConsentimento\":\"consent-001\"}\n]"
+            },
+            "url": "{{urlIngestao}}/lancamentos/lote"
+          }
+        },
+        {
+          "name": "GET extrato de JUNHO — competência antiga reaberta (US-03)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 — fora de ordem incorporado na competência da OCORRÊNCIA', () => {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(pm.response.json().posicoes.length).to.be.above(0);",
+                  "});",
+                  "pm.test('junho tem exatamente o lançamento atrasado (dedup estabiliza reruns)', () =>",
+                  "    pm.expect(Number(pm.response.json().totais.entradas)).to.eql(80));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{urlConsulta}}/extrato/cliente-postman-lote/2026-06"
+          }
+        },
+        {
+          "name": "GET extrato de JULHO — o outro item do lote",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 e julho com o item do lote', () =>",
+                  "    pm.expect(Number(pm.response.json().totais.entradas)).to.eql(120));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{urlConsulta}}/extrato/cliente-postman-lote/2026-07"
           }
         }
       ]
