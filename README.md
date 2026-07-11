@@ -1,5 +1,7 @@
 # Consolidador de Extrato — Open Finance
 
+[![verify (plano B — sem Docker)](https://github.com/leofaria-code/consolidador-extrato/actions/workflows/verify.yml/badge.svg)](https://github.com/leofaria-code/consolidador-extrato/actions/workflows/verify.yml)
+
 Projeto final em grupo do módulo **BE-JV-010 — Arquitetura de Software Ágil II** (Escalação Tech · Dev. Back-End Java Especialista · turma Caixa).
 
 **Tema:** Consolidador de extrato / Open Finance — ingestão por tópicos → agregação → cache de consulta.
