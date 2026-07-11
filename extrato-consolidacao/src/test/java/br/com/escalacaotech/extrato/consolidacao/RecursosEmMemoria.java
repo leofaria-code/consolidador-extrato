@@ -18,7 +18,7 @@ public class RecursosEmMemoria implements QuarkusTestResourceLifecycleManager {
         propriedades.putAll(InMemoryConnector.switchIncomingChannelsToInMemory(
                 "lancamentos-in", "reconsolidacao-in"));
         propriedades.putAll(InMemoryConnector.switchOutgoingChannelsToInMemory(
-                "posicao-atualizada-out", "reconsolidacao-out"));
+                "posicao-atualizada-out", "reconsolidacao-out", "lancamentos-dlq-out"));
         return propriedades;
     }
 
