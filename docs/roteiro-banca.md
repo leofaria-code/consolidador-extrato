@@ -64,6 +64,7 @@ Os passos **6–7 continuam no terminal + UI do Rabbit de propósito**: DLQ e co
 ## Ato bônus (só se perguntarem — já validado ao vivo)
 
 - **Escala horizontal**: `docker compose --profile escala up -d consulta-replica` → réplica na 8084; um POST invalida as DUAS (broadcast — ADR-006 nota). *Se pretenderem usar, subir a réplica ANTES da sala (leva ~40s).*
+- **Dashboard ao vivo (ADR-008)**: subir com `docker compose --profile observabilidade up -d` ANTES da sala → Grafana em `localhost:3000` (sem login), dashboard "visão da banca". Roteiro de 1 min: lote da coleção Postman → o gráfico de **fluxo** mexe (aceito × incorporado) e a série **repetidos ignorados** sobe ao repetir o POST (idempotência SEM olhar log); veneno do ato 6 → painel **DLQ fica vermelho na hora**; derrubar a consolidação (ato 7b) → painel do **disjuntor/fallback** mexe. Prometheus cru em `localhost:9090/targets` (a réplica aparece DOWN se o profile `escala` não subiu — esperado). Frase de efeito: "a idempotência não é uma linha de log — é uma série temporal".
 
 ## Arguição — perguntas prováveis × resposta curta (e onde está escrito)
 
