@@ -18,12 +18,12 @@ Nota final = Σ (peso × nota ÷ 100). Peso e nota são independentes — se um 
 | 2 | Comunicação assíncrona | 15 | 100 | 15,0 |
 | 3 | Idempotência e consistência | 12 | 100 | 12,0 |
 | 4 | Cache | 10 | 85 | 8,5 |
-| 5 | Resiliência | 12 | 95 | 11,4 |
+| 5 | Resiliência | 12 | 100 | 12,0 |
 | 6 | Testabilidade | 13 | 100 | 13,0 |
 | 7 | Decisões arquiteturais (ADRs) | 13 | 100 | 13,0 |
 | 8 | Uso crítico de IA | 5 | 100 | 5,0 |
 | 9 | Execução | 5 | 100 | 5,0 |
-| | **Total** | **100** | | **97,9** |
+| | **Total** | **100** | | **98,5** |
 
 ## Evidências por critério
 
@@ -52,7 +52,7 @@ Nota final = Σ (peso × nota ÷ 100). Peso e nota são independentes — se um 
    - Hit/miss/invalidação **demonstráveis** por teste (`ExtratoConsultaTest`, contador do dublê da fonte) **e a invalidação por evento provada no plano A com Kafka real** (10/07, pós-fix do `@Blocking` — extrato cacheado vazio → evento → dado novo em segundos, com o `corr` no log; o TTL de 300s mascarava o bug até então).
    - Gap conhecido (não 100/100; **inalterado na reavaliação de 11/07**): cache Caffeine é local à instância — decisão consciente e justificada na ADR-006, mas é uma limitação real caso `extrato-consulta` escale horizontalmente (instâncias não compartilham cache/invalidação entre si).
 
-5. **Resiliência** — peso 12 · nota proposta **95/100** *(reavaliada em 11/07; era 85)*
+5. **Resiliência** — peso 12 · nota proposta **100/100** *(85 → 95 → 100; os dois gaps nomeados foram fechados em 11/07)*
    Evidência:
    - Política em `docs/adr/ADR-007-resiliencia-retry-dlq.md`: 3 retentativas em processo com backoff exponencial (1s×2, jitter) + DLQ com causa nos headers; parâmetros da ata da Sessão 6 (decisão 8), ajustáveis por configuração.
    - Implementação: `@Retry`+`@ExponentialBackoff` nos consumidores (`ConsumidorLancamentos`, `ConsumidorReconsolidacao`); `failure-strategy=dead-letter-queue` (Kafka) e `reject`+`auto-bind-dlq` (Rabbit); `@Timeout` 2s sem retry na chamada interna do cache miss.
@@ -60,7 +60,9 @@ Nota final = Σ (peso × nota ÷ 100). Peso e nota são independentes — se um 
    - **Teste da banca** (`RetentativaEDlqTest`): falha transitória supera em exatamente 3 tentativas; mensagem envenenada consome 1+3 e o fluxo continua. `ReconsolidacaoTest`: contestação corrigida pela reapuração. Verde no plano B (07/07).
    - **DLQ física validada no plano A (10/07)**: veneno injetado direto no tópico → 1+3 tentativas → `lancamentos-recebidos-dlq` com **mensagem original + causa nos headers** (`dead-letter-reason` com a violação exata, classe da exceção, tópico/partição/offset — o contrato da Sessão 4) e o fluxo seguiu (lançamento válido atrás do veneno incorporado). DLQ do Rabbit (`reconsolidacao-dlq`) visível na management UI.
    - **Régua de veneno em 3 camadas (11/07)**: mensagem **ilegível** → `FalhaDeserializacaoLancamentos` encaminha os bytes crus à DLQ com a causa e libera o fluxo (sem o handler, o poll re-tenta para sempre e a **partição trava** — o 4º bug do plano A, demonstrado e corrigido ao vivo); falha **transitória** → 3× backoff; falha **permanente** → DLQ. Nota na ADR-007; `FalhaDeserializacaoTest` no plano B. Ao todo, **4 bugs reais de fronteira código↔infra** achados e corrigidos na validação com brokers reais — registro em `docs/uso-de-ia.md` (10–11/07).
-   - Gaps restantes nomeados (não 100/100): `@CircuitBreaker`/`@Fallback` da tabela de equivalências (ADR-001) não exercitados — o `@Timeout` simples bastou ao caso e a ADR-007 justifica, mas o padrão não está demonstrado; reprocesso da DLQ é procedimento documentado (republicar no tópico), não automatizado.
+   - **Disjuntor + última resposta boa no cache miss (11/07)**: `FonteResiliente` com `@Timeout` + `@CircuitBreaker` (nomeado, resetável via `CircuitBreakerMaintenance`) + `@Fallback` que serve a última cópia conhecida — degradação com transparência (US-05), o carimbo (US-07) expõe a idade; sem cópia → **503 com `Retry-After`**, nunca 500 opaco. Provado em `DisjuntorFonteTest` (abre com 4 falhas e **para de chamar a fonte**) e ao vivo no plano A (consolidação derrubada → última-boa/503; religada → normal).
+   - **Reprocesso da DLQ automatizado (11/07)**: `reprocessar-dlq.ps1`/`.sh` — um comando, consumer group com memória de offset, seguro pela dedup (ADR-004); ilegível volta à DLQ pelo handler. Fecha o terceiro critério de aceite da US-08 de ponta a ponta.
+   - *(Gaps anteriores desta nota — "@CircuitBreaker/@Fallback não exercitados" e "reprocesso manual" — fechados; por isso 100.)*
 
 6. **Testabilidade** — peso 13 · nota proposta **100/100**
    Evidência:

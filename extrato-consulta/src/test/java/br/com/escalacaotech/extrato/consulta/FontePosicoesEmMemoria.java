@@ -21,11 +21,21 @@ public class FontePosicoesEmMemoria implements FontePosicoes {
 
     private final Map<String, List<PosicaoDaConta>> porChave = new ConcurrentHashMap<>();
     private final AtomicInteger chamadas = new AtomicInteger();
+    private final AtomicInteger falhasProgramadas = new AtomicInteger();
 
     @Override
     public List<PosicaoDaConta> posicoes(String idCliente, YearMonth competencia) {
         chamadas.incrementAndGet();
+        if (falhasProgramadas.get() > 0) {
+            falhasProgramadas.decrementAndGet();
+            throw new IllegalStateException("fonte de posições fora (falha simulada)");
+        }
         return porChave.getOrDefault(chave(idCliente, competencia), List.of());
+    }
+
+    /** Programa as próximas N chamadas para falhar (teste do disjuntor/fallback). */
+    public void falharProximas(int n) {
+        falhasProgramadas.set(n);
     }
 
     public void programar(String idCliente, YearMonth competencia, List<PosicaoDaConta> posicoes) {
@@ -39,6 +49,7 @@ public class FontePosicoesEmMemoria implements FontePosicoes {
     public void zerar() {
         porChave.clear();
         chamadas.set(0);
+        falhasProgramadas.set(0);
     }
 
     private static String chave(String idCliente, YearMonth competencia) {
