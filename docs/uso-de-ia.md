@@ -135,6 +135,15 @@ Ferramenta principal: Claude (Cowork/desktop), com delegação por complexidade 
 - **Também nesta sessão:** CI GitHub Actions rodando `mvn verify -Pplano-b-jvm` a cada PR (a alegação "roda em CI" da ADR-003 virou selo verde); índice `docs/adr/README.md`; nota expurgo×dedup na ADR-004 (US-11 exige US-04 — a pergunta difícil da banca respondida por escrito); nota de retenção da outbox na ADR-005; pergunta 11 (escopo US-04/US-11) no roteiro.
 - **Placar do plano A: 4 bugs reais** — todos de fronteira código↔infra, nenhum visível no plano B. A régua de veneno agora tem três camadas documentadas na ADR-007: ilegível → handler → DLQ; transitória → backoff; permanente → DLQ.
 
+## 11/07 (noite) — Em busca do 100: fechar gaps com código, não com argumento
+
+- **Pedido:** em vez de aceitar os descontos nomeados dos critérios 5 (85→95) e 4 (85), fechar os gaps de verdade.
+- **Resiliência → 100:** `FonteResiliente` (`@Timeout` + `@CircuitBreaker` nomeado + `@Fallback` = **última resposta boa** — degradação com transparência, o carimbo expõe a idade; sem cópia → 503 com Retry-After) + `reprocessar-dlq.ps1/.sh` (reprocesso vira um comando com memória de offset). Validado ao vivo: consolidação derrubada → última-boa/503; religada → normal.
+- **Cache → 100:** broadcast de invalidação — consumer group único por instância (`${quarkus.uuid}`); provado com **2 instâncias no compose** (`--profile escala`): um POST, as duas invalidam, as duas servem o dado novo. Escala horizontal deixou de ser gap de correção.
+- **Flakiness achada e eliminada na primeira rodada:** o estado do disjuntor é global — a "cura" por sleep vazava circuito aberto entre classes de teste (4 falhas em cascata no ExtratoConsultaTest). Solução correta: `@CircuitBreakerName` + `CircuitBreakerMaintenance.reset()` — determinístico, sem sleep. Registrado porque é a diferença entre conhecer a anotação e conhecer o ciclo de vida dela.
+- **Alarme falso instrutivo:** no teste de escala, o evento "sumiu" — diagnóstico por camadas (fonte vazia → lag do consumer group = 0 → mensagem no tópico) revelou que era só a latência de rejoin do consumer após stop/start; o experimento controlado seguinte confirmou o fluxo inteiro são. Lição: leia o lag antes de culpar o código.
+- **Validação:** reator 38 testes, 0 falhas, sem Docker; CI verde.
+
 ## Backlog de registros (preencher a cada incremento)
 
 - [x] Resultado do mvn verify do Inc-1 + surpresas: `mvn verify -Pplano-b-jvm` — BUILD SUCCESS, 5 módulos, 7 testes, 0 falhas, ~2min12s, sem Docker. Sem surpresas nesta rodada (a pendência do plugin Quarkus/propriedades do tópico, deixada truncada numa sessão anterior, já tinha sido completada antes deste build).
