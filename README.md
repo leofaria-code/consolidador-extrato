@@ -30,13 +30,25 @@ Projeto final em grupo do módulo **BE-JV-010 — Arquitetura de Software Ágil 
 
 Três serviços Quarkus independentes, cada um com sua própria base (ninguém lê a base do outro):
 
-```
-        POST /lancamentos                 evento posicao-atualizada         GET /extrato/{cliente}/{competencia}
-cliente ─────────────────► extrato-ingestao ──(tópico Kafka)──► extrato-consolidacao ──(tópico Kafka)──► extrato-consulta ◄───────── cliente
-                              :8081                                  :8082                                    :8083
-                                                                      ▲
-                                                                      │ POST /reconsolidacoes (fila RabbitMQ)
-                                                                      └── atendimento/operação
+```mermaid
+flowchart LR
+    APP([cliente / app])
+    OP([atendimento / operação])
+    ING["extrato-ingestao<br/>:8081"]
+    CON["extrato-consolidacao<br/>:8082"]
+    CSQ["extrato-consulta<br/>:8083"]
+    DB[("base segregada<br/>Postgres")]
+    CACHE[("cache Caffeine<br/>TTL 5 min")]
+
+    APP -- "POST /lancamentos → 202" --> ING
+    ING -- "tópico<br/>lancamentos-recebidos" --> CON
+    CON --- DB
+    OP -- "POST /reconsolidacoes → 202" --> CON
+    CON -. "fila reconsolidacao<br/>(RabbitMQ, guichê)" .-> CON
+    CON -- "tópico<br/>posicao-atualizada" --> CSQ
+    CSQ --- CACHE
+    APP -- "GET /extrato<br/>(carimbo do dado)" --> CSQ
+    CSQ -- "miss: GET /interno/posicoes<br/>(par do PACT)" --> CON
 ```
 
 - **`extrato-ingestao`** (8081) recebe a ficha do lançamento, valida e publica no tópico `lancamentos-recebidos` (aceite assíncrono, `202`).
