@@ -86,4 +86,19 @@ flowchart TD
     DLQ -. "reprocessar-dlq.ps1<br/>(seguro: dedup ADR-004)" .-> M
 ```
 
-*(Diagrama 4 — cache/disjuntor — e os links no README/roteiro na próxima sessão.)*
+## 4 · Cache da consulta: hit, miss, broadcast e disjuntor (ADR-006/007)
+
+```mermaid
+flowchart TD
+    G[GET /extrato] --> C{cache Caffeine?<br/>TTL 5min = meta US-05}
+    C -- hit --> R[200 + carimbo do DADO]
+    C -- miss --> CB{disjuntor<br/>fonte-posicoes}
+    CB -- fechado --> F[GET /interno/posicoes<br/>par do PACT, Timeout 2s]
+    F -- ok --> P[popula cache + guarda última-boa] --> R
+    F -- falha --> FB{tem última<br/>resposta boa?}
+    CB -- aberto: para de<br/>martelar a fonte --> FB
+    FB -- sim --> UB[serve cópia — carimbo antigo<br/>expõe a idade US-05/07] --> R
+    FB -- não --> E503[503 + Retry-After<br/>nunca 500 opaco]
+    EV[evento posicao-atualizada] -. broadcast: group.id<br/>por instância .-> INV[invalida entrada<br/>em TODAS as réplicas] -.-> C
+```
+

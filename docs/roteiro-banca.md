@@ -12,6 +12,7 @@
 - [ ] **Postman aberto com a coleção importada** (`postman/consolidador-extrato.postman_collection.json`) — é o caminho visual dos passos 0–5; fallback: `npx newman run postman/...json` no terminal.
 - [ ] Terminal com fonte grande + os comandos deste roteiro prontos para colar (fallback dos passos do Postman e caminho único dos passos 6–7).
 - [ ] UI do RabbitMQ logada (`localhost:15672`, guest/guest) numa aba.
+- [ ] **`docs/resumo-visual.md` aberto no GitHub** — a cola: 4 diagramas para apontar durante a arguição (transação dos 3 efeitos, ER da dedup/outbox, régua de veneno, cache/disjuntor).
 - [ ] **Swagger UI aberto** (`:8081|:8082|:8083/q/swagger-ui`) — superfície exploratória para a arguição: "e se mandar X?" se responde ao vivo, sem sair da tela.
 - [ ] **Cronometrista definido** (sugestão: Rodrigo até o passo 7b, Marcos depois) — sinais no minuto 10 e no 18.
 - [ ] **Plano B da demo** (se o Docker falhar na hora): `mvn verify -Pplano-b-jvm` ao vivo (38 testes, ~1 min, zero infra) + prints da validação de 10/07 no `uso-de-ia.md`. A rubrica pede o gate sem Docker de qualquer forma.

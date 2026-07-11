@@ -43,7 +43,7 @@ cliente ─────────────────► extrato-ingestao 
 - **`extrato-consolidacao`** (8082) consome o tópico, incorpora o lançamento de forma idempotente, atualiza a posição da conta×competência e publica `posicao-atualizada`; também atende pedidos de reconsolidação via fila.
 - **`extrato-consulta`** (8083) expõe o extrato consolidado com cache (Caffeine, TTL 5 min) e invalida a entrada quando recebe `posicao-atualizada`.
 
-Detalhes e garantias de cada fluxo: `docs/arquitetura.md`.
+Detalhes e garantias de cada fluxo: `docs/arquitetura.md` · **diagramas de sequência/ER/resiliência/cache: [`docs/resumo-visual.md`](docs/resumo-visual.md)**.
 
 ## Pré-requisitos
 
