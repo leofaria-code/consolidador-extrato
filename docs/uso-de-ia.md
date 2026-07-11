@@ -150,6 +150,14 @@ Ferramenta principal: Claude (Cowork/desktop), com delegação por complexidade 
 - **Ressalva mantida no AVALIACAO:** sem escala oficial da rubrica no material, 100,0 é a leitura do grupo sobre a própria evidência — a banca calibra; a defesa é a evidência, não o número.
 - *Nota de datação: os registros "11/07" desta sessão referem-se a esta mesma noite de trabalho (10/07, 20h–23h — os logs em UTC cruzaram a meia-noite e contaminaram a datação; fica o erratum em vez de reescrever histórico commitado).*
 
+## 11/07 (madrugada) — Ciclo de vida das coleções: e o guarda que reprovou o próprio criador
+
+- **Contexto:** com a fonte-da-verdade estabelecida (JSON canônico), o Leo pediu a substituição das coleções manuais/AI do workspace por algo que "fique em dia com o código". Decisão de desenho: **sincronia por mecanismo, não por disciplina** — coleções de referência **geradas do OpenAPI** (`postman/api/`, 1 por serviço, espelhando os bounded contexts) + guarda no CI que falha o PR se defasarem.
+- **A estreia do guarda foi reprová-lo a si mesmo:** o primeiro CI vermelho do projeto em semanas — comparação byte a byte acusou "defasagem" no artefato gerado minutos antes. Diagnóstico: o `openapi-to-postmanv2` é **não-determinístico por natureza** (ids aleatórios em cada item, sorteio do valor de enum nos exemplos — `DEBITO` vs `CREDITO` —, contagem variável de chaves em exemplos de mapa), comprovado com duas execuções locais divergindo. Pinar a versão não bastava.
+- **Correção pela raiz, não por remendo:** o invariante que importa nunca foi o byte — é a **superfície da API**. O guarda virou **semântico** (`verificar-api.sh`): compara conjuntos (método, path) do `/q/openapi` da stack que o próprio CI subiu contra as requests das coleções commitadas. Endpoint novo sem regenerar = PR vermelho; cosmética aleatória = irrelevante. Passou verde na re-estreia e os PRs #26/#27 entraram com o mecanismo provado.
+- **Lição de arguição:** "verificar o que importa" > "verificar o que é fácil". O byte-diff era fácil e mentia; a comparação semântica exige parsear dois formatos, mas fiscaliza o contrato real. Mesma família da escolha PACT-em-disco e do teste com dublê contável: o teste certo mira o invariante, não a representação.
+- **Fechamento da topologia Postman:** demo/banca (manual + 27 asserções Newman) · referência de API (gerada, guarda no CI) · Swagger (exploração viva) · workspace pessoal (gitignorado — estado de conta, "o .idea/ do Postman"). Coleções AI antigas deletadas pelo Leo; canônicas importadas.
+
 ## Backlog de registros (preencher a cada incremento)
 
 - [x] Resultado do mvn verify do Inc-1 + surpresas: `mvn verify -Pplano-b-jvm` — BUILD SUCCESS, 5 módulos, 7 testes, 0 falhas, ~2min12s, sem Docker. Sem surpresas nesta rodada (a pendência do plugin Quarkus/propriedades do tópico, deixada truncada numa sessão anterior, já tinha sido completada antes deste build).
