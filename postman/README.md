@@ -1,3 +1,14 @@
+# Coleções Postman
+
+Duas coleções, dois papéis — cada uma com um mecanismo de sincronia próprio:
+
+| Coleção | Papel | Sincronia |
+|---|---|---|
+| `consolidador-extrato.postman_collection.json` | **Demo/banca**: roteiro ensaiado com 27 asserções | Manual disciplinada (editar → Newman validar → PR) |
+| `api/*.postman_collection.json` (1 por serviço) | **Referência de API**: toda a superfície HTTP | **Gerada do OpenAPI** (`gerar-api.ps1`/`.sh`) — nunca editar à mão; o CI falha o PR se defasarem |
+
+Mudou/adicionou endpoint? Suba a demo e rode `./postman/gerar-api.ps1`, commite o diff. O guarda no workflow `e2e` garante que ninguém esqueça.
+
 # Coleção Postman da demo
 
 **Fonte de verdade:** `consolidador-extrato.postman_collection.json` — roda **sem conta Postman** e é o que o CI e a banca executam:
