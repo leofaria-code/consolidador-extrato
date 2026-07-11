@@ -2,7 +2,7 @@
 
 - **Status:** aceita · 07/07/2026
 - **Decisores:** Leo, Sandy, Marcos, Rodrigo
-- **Origem:** ADR candidato #4 da Sessão 6 (dúvida da Sandy: "são três efeitos — se o serviço cair no meio, o que pode ficar pela metade?")
+- **Origem:** ADR candidato #4 da Sessão 6 (dúvida do Sandy: "são três efeitos — se o serviço cair no meio, o que pode ficar pela metade?")
 - **Relaciona-se com:** ADR-004 (a dedup na base é o que torna a reentrega segura), ADR-002 (evento é a fronteira consolidação→mundo)
 
 ## Contexto

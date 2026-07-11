@@ -2,7 +2,7 @@
 
 - **Status:** aceita · 07/07/2026
 - **Decisores:** Leo, Sandy, Marcos, Rodrigo
-- **Origem:** ADR candidato #5 da Sessão 6 (dúvida da Sandy: "quantas tentativas, quais intervalos?" — negócio não tem número; decisão técnica documentada do time, com ponto de partida proposto em ata: 3× backoff exponencial, configurável)
+- **Origem:** ADR candidato #5 da Sessão 6 (dúvida do Sandy: "quantas tentativas, quais intervalos?" — negócio não tem número; decisão técnica documentada do time, com ponto de partida proposto em ata: 3× backoff exponencial, configurável)
 - **Relaciona-se com:** ADR-004 (a idempotência é o que torna o reprocesso da DLQ seguro), ADR-001 (tradução `@RetryableTopic` → failure-strategy + SmallRye Fault Tolerance), ADR-006 (timeout da chamada interna consulta→consolidação)
 
 ## Contexto

@@ -2,7 +2,7 @@
 
 - **Status:** aceita · 07/07/2026
 - **Decisores:** Leo, Sandy, Marcos, Rodrigo
-- **Origem:** ADR candidato #3 da Sessão 6 (dúvida da Sandy: "guardamos toda identidade já vista, pra sempre?")
+- **Origem:** ADR candidato #3 da Sessão 6 (dúvida do Sandy: "guardamos toda identidade já vista, pra sempre?")
 - **Relaciona-se com:** ADR-002 (a base segregada da consolidação é quem guarda a memória), ADR-005 (a verificação participa da mesma transação dos três efeitos)
 
 ## Contexto
