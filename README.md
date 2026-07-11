@@ -212,6 +212,8 @@ Sobe tudo da demo **mais** Prometheus (`http://localhost:9090` — em `/targets`
 
 Cada serviço expõe as métricas cruas em `/q/metrics` (formato Prometheus): contadores de negócio `extrato_*`, cache do Caffeine (`cache_gets_total`) e SmallRye FT (`ft_*`), além de JVM/HTTP. Portas 9090/3000 ocupadas na sua máquina? `PROMETHEUS_PORT=9091 GRAFANA_PORT=3001 docker compose --profile observabilidade up -d`.
 
+Guia completo da observabilidade (logs + correlação + métricas + dashboard, com a tabela de todas as métricas): [`docs/observabilidade.md`](docs/observabilidade.md).
+
 ## Perfis de execução
 
 | Perfil | Quando usar | Comportamento |

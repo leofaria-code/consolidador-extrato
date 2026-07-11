@@ -54,11 +54,11 @@ flowchart LR
 
 1. **Nenhum serviço lê a base do outro** (Sessão 6). Integração só por mensagem/evento ou API explícita.
 2. `shared-contracts` contém **apenas** tipos que cruzam fronteiras.
-3. Logs estruturados **sem dado pessoal**, com correlation id propagado por HTTP/tópico/fila (US-12 — opcional de observabilidade).
+3. Logs estruturados **sem dado pessoal**, com correlation id propagado por HTTP/tópico/fila (US-12 — opcional de observabilidade; métricas e dashboard na ADR-008). Guia consolidado: `docs/observabilidade.md`.
 
 ## Decisões
 
-Ver `docs/adr/` — índice: ADR-001 (stack Quarkus), ADR-002 (decomposição), ADR-003 (perfis de teste A/B — Docker-free × alta fidelidade), ADR-004 (idempotência: unicidade na base), ADR-005 (consistência dos três efeitos: outbox transacional), ADR-006 (consulta em cache miss: chamada interna + Caffeine + TTL), ADR-007 (resiliência: 3× backoff exponencial + DLQ). **Todos os ADRs candidatos da Sessão 6 estão fechados.**
+Ver `docs/adr/` — índice: ADR-001 (stack Quarkus), ADR-002 (decomposição), ADR-003 (perfis de teste A/B — Docker-free × alta fidelidade), ADR-004 (idempotência: unicidade na base), ADR-005 (consistência dos três efeitos: outbox transacional), ADR-006 (consulta em cache miss: chamada interna + Caffeine + TTL), ADR-007 (resiliência: 3× backoff exponencial + DLQ), ADR-008 (métricas: Micrometer/Prometheus, built-in primeiro, cardinalidade baixa). **Todos os ADRs candidatos da Sessão 6 estão fechados.**
 
 ## Perfis de execução
 
