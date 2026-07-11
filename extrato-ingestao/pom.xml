@@ -41,6 +41,12 @@
       <artifactId>quarkus-junit</artifactId>
       <scope>test</scope>
     </dependency>
+    <!-- Lado PROVIDER do contrato de MENSAGEM do tópico (2º candidato, Sessão 6) -->
+    <dependency>
+      <groupId>io.quarkiverse.pact</groupId>
+      <artifactId>quarkus-pact-provider</artifactId>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>io.smallrye.reactive</groupId>
       <artifactId>smallrye-reactive-messaging-in-memory</artifactId>
