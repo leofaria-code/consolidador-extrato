@@ -1,367 +1,366 @@
 {
-    "item": [
+  "item": [
+    {
+      "name": "Info Resource",
+      "description": "",
+      "item": [
         {
-            "name": "Info Resource",
-            "description": "",
-            "item": [
+          "id": "9d47851b-c595-4af0-a649-18b11f447a7e",
+          "name": "Info",
+          "request": {
+            "name": "Info",
+            "description": {},
+            "url": {
+              "path": [
+                "info"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "body": {},
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "38f070f2-575c-4f51-9124-bc547d5b765a",
+              "name": "OK",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "info"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
                 {
-                    "id": "0c46ca08-dbb4-4d95-8415-eaf65d3e0c4f",
-                    "name": "Info",
-                    "request": {
-                        "name": "Info",
-                        "description": {},
-                        "url": {
-                            "path": [
-                                "info"
-                            ],
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "query": [],
-                            "variable": []
-                        },
-                        "header": [
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
-                        "method": "GET",
-                        "body": {},
-                        "auth": null
-                    },
-                    "response": [
-                        {
-                            "id": "28482362-fac4-4789-8e54-3f6166e304f7",
-                            "name": "OK",
-                            "originalRequest": {
-                                "url": {
-                                    "path": [
-                                        "info"
-                                    ],
-                                    "host": [
-                                        "{{baseUrl}}"
-                                    ],
-                                    "query": [],
-                                    "variable": []
-                                },
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    }
-                                ],
-                                "method": "GET",
-                                "body": {}
-                            },
-                            "status": "OK",
-                            "code": 200,
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                }
-                            ],
-                            "body": "{\n  \"key_0\": \"<string>\"\n}",
-                            "cookie": [],
-                            "_postman_previewlanguage": "json"
-                        }
-                    ],
-                    "event": [],
-                    "protocolProfileBehavior": {
-                        "disableBodyPruning": true
-                    }
+                  "key": "Content-Type",
+                  "value": "application/json"
                 }
-            ]
+              ],
+              "body": "{\n  \"key_0\": \"<string>\",\n  \"key_1\": \"<string>\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ]
+    },
+    {
+      "name": "Lancamento Resource",
+      "description": "",
+      "item": [
+        {
+          "id": "44deab03-3a64-403f-a14b-468c14a341cf",
+          "name": "Receber",
+          "request": {
+            "name": "Receber",
+            "description": {},
+            "url": {
+              "path": [
+                "lancamentos"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idCliente\": \"<string>\",\n  \"idLancamentoOrigem\": \"<string>\",\n  \"instituicaoOrigem\": \"<string>\",\n  \"agencia\": \"<string>\",\n  \"conta\": \"<string>\",\n  \"tipo\": \"CREDITO\",\n  \"valor\": \"<number>\",\n  \"moeda\": \"<string>\",\n  \"dataHoraOcorrencia\": \"<dateTime>\",\n  \"idConsentimento\": \"<string>\",\n  \"descricao\": \"<string>\",\n  \"categoriaOrigem\": \"<string>\"\n}",
+              "options": {
+                "raw": {
+                  "headerFamily": "json",
+                  "language": "json"
+                }
+              }
+            },
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "3da8cbe7-3a9d-4902-abce-fae0877c3ed2",
+              "name": "OK",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "lancamentos"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"idCliente\": \"<string>\",\n  \"idLancamentoOrigem\": \"<string>\",\n  \"instituicaoOrigem\": \"<string>\",\n  \"agencia\": \"<string>\",\n  \"conta\": \"<string>\",\n  \"tipo\": \"CREDITO\",\n  \"valor\": \"<number>\",\n  \"moeda\": \"<string>\",\n  \"dataHoraOcorrencia\": \"<dateTime>\",\n  \"idConsentimento\": \"<string>\",\n  \"descricao\": \"<string>\",\n  \"categoriaOrigem\": \"<string>\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "6a7281db-d513-446c-9a7c-72df35803afd",
+              "name": "Bad Request",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "lancamentos"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"idCliente\": \"<string>\",\n  \"idLancamentoOrigem\": \"<string>\",\n  \"instituicaoOrigem\": \"<string>\",\n  \"agencia\": \"<string>\",\n  \"conta\": \"<string>\",\n  \"tipo\": \"CREDITO\",\n  \"valor\": \"<number>\",\n  \"moeda\": \"<string>\",\n  \"dataHoraOcorrencia\": \"<dateTime>\",\n  \"idConsentimento\": \"<string>\",\n  \"descricao\": \"<string>\",\n  \"categoriaOrigem\": \"<string>\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [],
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
         },
         {
-            "name": "Lancamento Resource",
-            "description": "",
-            "item": [
-                {
-                    "id": "8583e34f-a90f-49d1-b8fa-56b8785a6017",
-                    "name": "Receber",
-                    "request": {
-                        "name": "Receber",
-                        "description": {},
-                        "url": {
-                            "path": [
-                                "lancamentos"
-                            ],
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "query": [],
-                            "variable": []
-                        },
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
-                        "method": "POST",
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n  \"idCliente\": \"<string>\",\n  \"idLancamentoOrigem\": \"<string>\",\n  \"instituicaoOrigem\": \"<string>\",\n  \"agencia\": \"<string>\",\n  \"conta\": \"<string>\",\n  \"tipo\": \"CREDITO\",\n  \"valor\": \"<number>\",\n  \"moeda\": \"<string>\",\n  \"dataHoraOcorrencia\": \"<dateTime>\",\n  \"idConsentimento\": \"<string>\",\n  \"descricao\": \"<string>\",\n  \"categoriaOrigem\": \"<string>\"\n}",
-                            "options": {
-                                "raw": {
-                                    "headerFamily": "json",
-                                    "language": "json"
-                                }
-                            }
-                        },
-                        "auth": null
-                    },
-                    "response": [
-                        {
-                            "id": "4f358552-3f7d-4392-b79a-1226005bdd92",
-                            "name": "OK",
-                            "originalRequest": {
-                                "url": {
-                                    "path": [
-                                        "lancamentos"
-                                    ],
-                                    "host": [
-                                        "{{baseUrl}}"
-                                    ],
-                                    "query": [],
-                                    "variable": []
-                                },
-                                "header": [
-                                    {
-                                        "key": "Content-Type",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    }
-                                ],
-                                "method": "POST",
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n  \"idCliente\": \"<string>\",\n  \"idLancamentoOrigem\": \"<string>\",\n  \"instituicaoOrigem\": \"<string>\",\n  \"agencia\": \"<string>\",\n  \"conta\": \"<string>\",\n  \"tipo\": \"CREDITO\",\n  \"valor\": \"<number>\",\n  \"moeda\": \"<string>\",\n  \"dataHoraOcorrencia\": \"<dateTime>\",\n  \"idConsentimento\": \"<string>\",\n  \"descricao\": \"<string>\",\n  \"categoriaOrigem\": \"<string>\"\n}",
-                                    "options": {
-                                        "raw": {
-                                            "headerFamily": "json",
-                                            "language": "json"
-                                        }
-                                    }
-                                }
-                            },
-                            "status": "OK",
-                            "code": 200,
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                }
-                            ],
-                            "body": "",
-                            "cookie": [],
-                            "_postman_previewlanguage": "json"
-                        },
-                        {
-                            "id": "badb88b1-6dea-4f3e-b2b2-ed4b59dc82bb",
-                            "name": "Bad Request",
-                            "originalRequest": {
-                                "url": {
-                                    "path": [
-                                        "lancamentos"
-                                    ],
-                                    "host": [
-                                        "{{baseUrl}}"
-                                    ],
-                                    "query": [],
-                                    "variable": []
-                                },
-                                "header": [
-                                    {
-                                        "key": "Content-Type",
-                                        "value": "application/json"
-                                    }
-                                ],
-                                "method": "POST",
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n  \"idCliente\": \"<string>\",\n  \"idLancamentoOrigem\": \"<string>\",\n  \"instituicaoOrigem\": \"<string>\",\n  \"agencia\": \"<string>\",\n  \"conta\": \"<string>\",\n  \"tipo\": \"CREDITO\",\n  \"valor\": \"<number>\",\n  \"moeda\": \"<string>\",\n  \"dataHoraOcorrencia\": \"<dateTime>\",\n  \"idConsentimento\": \"<string>\",\n  \"descricao\": \"<string>\",\n  \"categoriaOrigem\": \"<string>\"\n}",
-                                    "options": {
-                                        "raw": {
-                                            "headerFamily": "json",
-                                            "language": "json"
-                                        }
-                                    }
-                                }
-                            },
-                            "status": "Bad Request",
-                            "code": 400,
-                            "header": [],
-                            "cookie": [],
-                            "_postman_previewlanguage": "text"
-                        }
-                    ],
-                    "event": [],
-                    "protocolProfileBehavior": {
-                        "disableBodyPruning": true
-                    }
-                },
-                {
-                    "id": "d42d4e8b-c1de-40f0-b376-9e2f903846a1",
-                    "name": "Receber Lote",
-                    "request": {
-                        "name": "Receber Lote",
-                        "description": {},
-                        "url": {
-                            "path": [
-                                "lancamentos",
-                                "lote"
-                            ],
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "query": [],
-                            "variable": []
-                        },
-                        "header": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            },
-                            {
-                                "key": "Accept",
-                                "value": "application/json"
-                            }
-                        ],
-                        "method": "POST",
-                        "body": {
-                            "mode": "raw",
-                            "raw": "[\n  {\n    \"idCliente\": \"<string>\",\n    \"idLancamentoOrigem\": \"<string>\",\n    \"instituicaoOrigem\": \"<string>\",\n    \"agencia\": \"<string>\",\n    \"conta\": \"<string>\",\n    \"tipo\": \"DEBITO\",\n    \"valor\": \"<number>\",\n    \"moeda\": \"<string>\",\n    \"dataHoraOcorrencia\": \"<dateTime>\",\n    \"idConsentimento\": \"<string>\",\n    \"descricao\": \"<string>\",\n    \"categoriaOrigem\": \"<string>\"\n  },\n  {\n    \"idCliente\": \"<string>\",\n    \"idLancamentoOrigem\": \"<string>\",\n    \"instituicaoOrigem\": \"<string>\",\n    \"agencia\": \"<string>\",\n    \"conta\": \"<string>\",\n    \"tipo\": \"DEBITO\",\n    \"valor\": \"<number>\",\n    \"moeda\": \"<string>\",\n    \"dataHoraOcorrencia\": \"<dateTime>\",\n    \"idConsentimento\": \"<string>\",\n    \"descricao\": \"<string>\",\n    \"categoriaOrigem\": \"<string>\"\n  }\n]",
-                            "options": {
-                                "raw": {
-                                    "headerFamily": "json",
-                                    "language": "json"
-                                }
-                            }
-                        },
-                        "auth": null
-                    },
-                    "response": [
-                        {
-                            "id": "50c7c0fb-bb99-43fe-86ab-242604de837e",
-                            "name": "OK",
-                            "originalRequest": {
-                                "url": {
-                                    "path": [
-                                        "lancamentos",
-                                        "lote"
-                                    ],
-                                    "host": [
-                                        "{{baseUrl}}"
-                                    ],
-                                    "query": [],
-                                    "variable": []
-                                },
-                                "header": [
-                                    {
-                                        "key": "Content-Type",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    }
-                                ],
-                                "method": "POST",
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "[\n  {\n    \"idCliente\": \"<string>\",\n    \"idLancamentoOrigem\": \"<string>\",\n    \"instituicaoOrigem\": \"<string>\",\n    \"agencia\": \"<string>\",\n    \"conta\": \"<string>\",\n    \"tipo\": \"DEBITO\",\n    \"valor\": \"<number>\",\n    \"moeda\": \"<string>\",\n    \"dataHoraOcorrencia\": \"<dateTime>\",\n    \"idConsentimento\": \"<string>\",\n    \"descricao\": \"<string>\",\n    \"categoriaOrigem\": \"<string>\"\n  },\n  {\n    \"idCliente\": \"<string>\",\n    \"idLancamentoOrigem\": \"<string>\",\n    \"instituicaoOrigem\": \"<string>\",\n    \"agencia\": \"<string>\",\n    \"conta\": \"<string>\",\n    \"tipo\": \"DEBITO\",\n    \"valor\": \"<number>\",\n    \"moeda\": \"<string>\",\n    \"dataHoraOcorrencia\": \"<dateTime>\",\n    \"idConsentimento\": \"<string>\",\n    \"descricao\": \"<string>\",\n    \"categoriaOrigem\": \"<string>\"\n  }\n]",
-                                    "options": {
-                                        "raw": {
-                                            "headerFamily": "json",
-                                            "language": "json"
-                                        }
-                                    }
-                                }
-                            },
-                            "status": "OK",
-                            "code": 200,
-                            "header": [
-                                {
-                                    "key": "Content-Type",
-                                    "value": "application/json"
-                                }
-                            ],
-                            "body": "",
-                            "cookie": [],
-                            "_postman_previewlanguage": "json"
-                        },
-                        {
-                            "id": "bdbbcd4b-178e-402a-b21c-d6316c027da0",
-                            "name": "Bad Request",
-                            "originalRequest": {
-                                "url": {
-                                    "path": [
-                                        "lancamentos",
-                                        "lote"
-                                    ],
-                                    "host": [
-                                        "{{baseUrl}}"
-                                    ],
-                                    "query": [],
-                                    "variable": []
-                                },
-                                "header": [
-                                    {
-                                        "key": "Content-Type",
-                                        "value": "application/json"
-                                    }
-                                ],
-                                "method": "POST",
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "[\n  {\n    \"idCliente\": \"<string>\",\n    \"idLancamentoOrigem\": \"<string>\",\n    \"instituicaoOrigem\": \"<string>\",\n    \"agencia\": \"<string>\",\n    \"conta\": \"<string>\",\n    \"tipo\": \"DEBITO\",\n    \"valor\": \"<number>\",\n    \"moeda\": \"<string>\",\n    \"dataHoraOcorrencia\": \"<dateTime>\",\n    \"idConsentimento\": \"<string>\",\n    \"descricao\": \"<string>\",\n    \"categoriaOrigem\": \"<string>\"\n  },\n  {\n    \"idCliente\": \"<string>\",\n    \"idLancamentoOrigem\": \"<string>\",\n    \"instituicaoOrigem\": \"<string>\",\n    \"agencia\": \"<string>\",\n    \"conta\": \"<string>\",\n    \"tipo\": \"DEBITO\",\n    \"valor\": \"<number>\",\n    \"moeda\": \"<string>\",\n    \"dataHoraOcorrencia\": \"<dateTime>\",\n    \"idConsentimento\": \"<string>\",\n    \"descricao\": \"<string>\",\n    \"categoriaOrigem\": \"<string>\"\n  }\n]",
-                                    "options": {
-                                        "raw": {
-                                            "headerFamily": "json",
-                                            "language": "json"
-                                        }
-                                    }
-                                }
-                            },
-                            "status": "Bad Request",
-                            "code": 400,
-                            "header": [],
-                            "cookie": [],
-                            "_postman_previewlanguage": "text"
-                        }
-                    ],
-                    "event": [],
-                    "protocolProfileBehavior": {
-                        "disableBodyPruning": true
-                    }
+          "id": "60e8e257-19ed-41f3-b6c2-3efd06fd1c1d",
+          "name": "Receber Lote",
+          "request": {
+            "name": "Receber Lote",
+            "description": {},
+            "url": {
+              "path": [
+                "lancamentos",
+                "lote"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "[\n  {\n    \"idCliente\": \"<string>\",\n    \"idLancamentoOrigem\": \"<string>\",\n    \"instituicaoOrigem\": \"<string>\",\n    \"agencia\": \"<string>\",\n    \"conta\": \"<string>\",\n    \"tipo\": \"CREDITO\",\n    \"valor\": \"<number>\",\n    \"moeda\": \"<string>\",\n    \"dataHoraOcorrencia\": \"<dateTime>\",\n    \"idConsentimento\": \"<string>\",\n    \"descricao\": \"<string>\",\n    \"categoriaOrigem\": \"<string>\"\n  },\n  {\n    \"idCliente\": \"<string>\",\n    \"idLancamentoOrigem\": \"<string>\",\n    \"instituicaoOrigem\": \"<string>\",\n    \"agencia\": \"<string>\",\n    \"conta\": \"<string>\",\n    \"tipo\": \"DEBITO\",\n    \"valor\": \"<number>\",\n    \"moeda\": \"<string>\",\n    \"dataHoraOcorrencia\": \"<dateTime>\",\n    \"idConsentimento\": \"<string>\",\n    \"descricao\": \"<string>\",\n    \"categoriaOrigem\": \"<string>\"\n  }\n]",
+              "options": {
+                "raw": {
+                  "headerFamily": "json",
+                  "language": "json"
                 }
-            ]
+              }
+            },
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "398fc655-95f2-484f-a46f-f30ccf195c7d",
+              "name": "OK",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "lancamentos",
+                    "lote"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "[\n  {\n    \"idCliente\": \"<string>\",\n    \"idLancamentoOrigem\": \"<string>\",\n    \"instituicaoOrigem\": \"<string>\",\n    \"agencia\": \"<string>\",\n    \"conta\": \"<string>\",\n    \"tipo\": \"CREDITO\",\n    \"valor\": \"<number>\",\n    \"moeda\": \"<string>\",\n    \"dataHoraOcorrencia\": \"<dateTime>\",\n    \"idConsentimento\": \"<string>\",\n    \"descricao\": \"<string>\",\n    \"categoriaOrigem\": \"<string>\"\n  },\n  {\n    \"idCliente\": \"<string>\",\n    \"idLancamentoOrigem\": \"<string>\",\n    \"instituicaoOrigem\": \"<string>\",\n    \"agencia\": \"<string>\",\n    \"conta\": \"<string>\",\n    \"tipo\": \"DEBITO\",\n    \"valor\": \"<number>\",\n    \"moeda\": \"<string>\",\n    \"dataHoraOcorrencia\": \"<dateTime>\",\n    \"idConsentimento\": \"<string>\",\n    \"descricao\": \"<string>\",\n    \"categoriaOrigem\": \"<string>\"\n  }\n]",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "3ab91ed6-baee-4cdf-8948-bf97d367cbc1",
+              "name": "Bad Request",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "lancamentos",
+                    "lote"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "[\n  {\n    \"idCliente\": \"<string>\",\n    \"idLancamentoOrigem\": \"<string>\",\n    \"instituicaoOrigem\": \"<string>\",\n    \"agencia\": \"<string>\",\n    \"conta\": \"<string>\",\n    \"tipo\": \"CREDITO\",\n    \"valor\": \"<number>\",\n    \"moeda\": \"<string>\",\n    \"dataHoraOcorrencia\": \"<dateTime>\",\n    \"idConsentimento\": \"<string>\",\n    \"descricao\": \"<string>\",\n    \"categoriaOrigem\": \"<string>\"\n  },\n  {\n    \"idCliente\": \"<string>\",\n    \"idLancamentoOrigem\": \"<string>\",\n    \"instituicaoOrigem\": \"<string>\",\n    \"agencia\": \"<string>\",\n    \"conta\": \"<string>\",\n    \"tipo\": \"DEBITO\",\n    \"valor\": \"<number>\",\n    \"moeda\": \"<string>\",\n    \"dataHoraOcorrencia\": \"<dateTime>\",\n    \"idConsentimento\": \"<string>\",\n    \"descricao\": \"<string>\",\n    \"categoriaOrigem\": \"<string>\"\n  }\n]",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [],
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
         }
-    ],
-    "event": [],
-    "variable": [
-        {
-            "key": "baseUrl",
-            "value": "/"
-        }
-    ],
-    "info": {
-        "_postman_id": "59a40459-8b13-4f30-a4f5-48b3442a5ddc",
-        "name": "Extrato — Ingestão (US-01..US-04)",
-        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-        "description": {
-            "content": "",
-            "type": "text/plain"
-        }
+      ]
     }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "/"
+    }
+  ],
+  "info": {
+    "name": "Extrato — Ingestão (US-01..US-04)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "",
+      "type": "text/plain"
+    }
+  }
 }

@@ -13,7 +13,8 @@ foreach ($svc in $servicos.Keys) {
   Invoke-WebRequest "http://localhost:$porta/q/openapi?format=json" -OutFile $spec
   npx --yes -p openapi-to-postmanv2@6.3.0 openapi2postmanv2 `
     -s $spec -o "postman/api/$svc.postman_collection.json" -p `
-    -O "folderStrategy=Tags,requestParametersResolution=Example,includeAuthInfoInExample=false"
+    -O "folderStrategy=Tags,requestParametersResolution=Schema,includeAuthInfoInExample=false"
+  node -e "const f=process.argv[1],c=JSON.parse(require('fs').readFileSync(f,'utf8'));delete c.info._postman_id;require('fs').writeFileSync(f,JSON.stringify(c,null,2)+'\n')" "postman/api/$svc.postman_collection.json"
   Remove-Item $spec -Force
   Write-Host "gerada: postman/api/$svc.postman_collection.json"
 }

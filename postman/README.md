@@ -5,7 +5,7 @@ Duas coleções, dois papéis — cada uma com um mecanismo de sincronia própri
 | Coleção | Papel | Sincronia |
 |---|---|---|
 | `consolidador-extrato.postman_collection.json` | **Demo/banca**: roteiro ensaiado com 27 asserções | Manual disciplinada (editar → Newman validar → PR) |
-| `api/*.postman_collection.json` (1 por serviço) | **Referência de API**: toda a superfície HTTP | **Gerada do OpenAPI** (`gerar-api.ps1`/`.sh`) — nunca editar à mão; o CI falha o PR se defasarem |
+| `api/*.postman_collection.json` (1 por serviço) | **Referência de API**: toda a superfície HTTP | **Gerada do OpenAPI** (`gerar-api.ps1`/`.sh`) — nunca editar à mão; o guarda **semântico** do CI (`verificar-api.sh`: compara método+path do OpenAPI × coleção) falha o PR se defasarem. Byte-diff não serve: o conversor gera ids/exemplos aleatórios a cada execução |
 
 Mudou/adicionou endpoint? Suba a demo e rode `./postman/gerar-api.ps1`, commite o diff. O guarda no workflow `e2e` garante que ninguém esqueça.
 

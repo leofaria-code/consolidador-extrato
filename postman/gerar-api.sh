@@ -16,7 +16,8 @@ for svc in "${!SERVICOS[@]}"; do
     || { echo "ERRO: ${svc} (porta ${porta}) fora do ar — suba a demo antes"; exit 1; }
   npx --yes -p openapi-to-postmanv2@6.3.0 openapi2postmanv2 \
     -s "$spec" -o "postman/api/${svc}.postman_collection.json" -p \
-    -O folderStrategy=Tags,requestParametersResolution=Example,includeAuthInfoInExample=false
+    -O folderStrategy=Tags,requestParametersResolution=Schema,includeAuthInfoInExample=false
+  node -e "const f=process.argv[1],c=JSON.parse(require('fs').readFileSync(f,'utf8'));delete c.info._postman_id;require('fs').writeFileSync(f,JSON.stringify(c,null,2)+'\n')" "postman/api/${svc}.postman_collection.json"
   rm -f "$spec"
   echo "gerada: postman/api/${svc}.postman_collection.json"
 done
