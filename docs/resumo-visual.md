@@ -72,4 +72,18 @@ erDiagram
     POSICAO_CONSOLIDADA ||--o{ EVENTO_PENDENTE : "atualização gera"
 ```
 
-*(Diagramas 3 — régua de veneno — e 4 — cache/disjuntor — na próxima sessão.)*
+## 3 · Régua de veneno em 3 camadas (ADR-007 + nota)
+
+```mermaid
+flowchart TD
+    M[mensagem chega] --> D{deserializa?}
+    D -- "não (lixo)" --> H[handler: bytes crus p/ DLQ<br/>com a causa nos headers] --> S[fluxo SEGUE<br/>sem travar a partição]
+    D -- sim --> P{processa?}
+    P -- falha --> R[retry 3x backoff exponencial<br/>1s - 2s - 4s, jitter]
+    R -- curou --> OK[incorporado]
+    R -- "esgotou (permanente)" --> DLQ[DLQ: mensagem original + causa] --> S
+    P -- sucesso --> OK
+    DLQ -. "reprocessar-dlq.ps1<br/>(seguro: dedup ADR-004)" .-> M
+```
+
+*(Diagrama 4 — cache/disjuntor — e os links no README/roteiro na próxima sessão.)*
