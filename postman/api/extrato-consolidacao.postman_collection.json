@@ -1,0 +1,346 @@
+{
+    "item": [
+        {
+            "name": "Info Resource",
+            "description": "",
+            "item": [
+                {
+                    "id": "b287f65b-4939-4d10-a584-9be6e06bb5ba",
+                    "name": "Info",
+                    "request": {
+                        "name": "Info",
+                        "description": {},
+                        "url": {
+                            "path": [
+                                "info"
+                            ],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "query": [],
+                            "variable": []
+                        },
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "method": "GET",
+                        "body": {},
+                        "auth": null
+                    },
+                    "response": [
+                        {
+                            "id": "f440fd2a-37da-416a-9604-e095e826f70f",
+                            "name": "OK",
+                            "originalRequest": {
+                                "url": {
+                                    "path": [
+                                        "info"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": []
+                                },
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "method": "GET",
+                                "body": {}
+                            },
+                            "status": "OK",
+                            "code": 200,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                }
+                            ],
+                            "body": "{\n  \"key_0\": \"<string>\"\n}",
+                            "cookie": [],
+                            "_postman_previewlanguage": "json"
+                        }
+                    ],
+                    "event": [],
+                    "protocolProfileBehavior": {
+                        "disableBodyPruning": true
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Posicoes Interno Resource",
+            "description": "",
+            "item": [
+                {
+                    "id": "d2e09125-854a-4f6d-af59-d566cf124687",
+                    "name": "Por Cliente E Competencia",
+                    "request": {
+                        "name": "Por Cliente E Competencia",
+                        "description": {},
+                        "url": {
+                            "path": [
+                                "interno",
+                                "posicoes"
+                            ],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "query": [
+                                {
+                                    "disabled": false,
+                                    "description": {
+                                        "content": "",
+                                        "type": "text/plain"
+                                    },
+                                    "key": "competencia",
+                                    "value": "<string>"
+                                },
+                                {
+                                    "disabled": false,
+                                    "description": {
+                                        "content": "",
+                                        "type": "text/plain"
+                                    },
+                                    "key": "idCliente",
+                                    "value": "<string>"
+                                }
+                            ],
+                            "variable": []
+                        },
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "method": "GET",
+                        "body": {},
+                        "auth": null
+                    },
+                    "response": [
+                        {
+                            "id": "ef6edb39-7463-46f7-ba81-a29d4c1b0ec6",
+                            "name": "OK",
+                            "originalRequest": {
+                                "url": {
+                                    "path": [
+                                        "interno",
+                                        "posicoes"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [
+                                        {
+                                            "disabled": false,
+                                            "description": {
+                                                "content": "",
+                                                "type": "text/plain"
+                                            },
+                                            "key": "competencia",
+                                            "value": "<string>"
+                                        },
+                                        {
+                                            "disabled": false,
+                                            "description": {
+                                                "content": "",
+                                                "type": "text/plain"
+                                            },
+                                            "key": "idCliente",
+                                            "value": "<string>"
+                                        }
+                                    ],
+                                    "variable": []
+                                },
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "method": "GET",
+                                "body": {}
+                            },
+                            "status": "OK",
+                            "code": 200,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                }
+                            ],
+                            "body": "[\n  {\n    \"instituicaoOrigem\": \"<string>\",\n    \"agencia\": \"<string>\",\n    \"conta\": \"<string>\",\n    \"competencia\": {\n      \"year\": \"<integer>\",\n      \"month\": \"<integer>\",\n      \"prolepticMonth\": \"<long>\",\n      \"monthValue\": \"<integer>\",\n      \"leapYear\": \"<boolean>\"\n    },\n    \"entradas\": \"<number>\",\n    \"saidas\": \"<number>\",\n    \"saldo\": \"<number>\",\n    \"atualizadoEm\": \"<dateTime>\"\n  },\n  {\n    \"instituicaoOrigem\": \"<string>\",\n    \"agencia\": \"<string>\",\n    \"conta\": \"<string>\",\n    \"competencia\": {\n      \"year\": \"<integer>\",\n      \"month\": \"<integer>\",\n      \"prolepticMonth\": \"<long>\",\n      \"monthValue\": \"<integer>\",\n      \"leapYear\": \"<boolean>\"\n    },\n    \"entradas\": \"<number>\",\n    \"saidas\": \"<number>\",\n    \"saldo\": \"<number>\",\n    \"atualizadoEm\": \"<dateTime>\"\n  }\n]",
+                            "cookie": [],
+                            "_postman_previewlanguage": "json"
+                        }
+                    ],
+                    "event": [],
+                    "protocolProfileBehavior": {
+                        "disableBodyPruning": true
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Reconsolidacao Resource",
+            "description": "",
+            "item": [
+                {
+                    "id": "484c8fe0-7977-4f46-bf7f-ec93f1641006",
+                    "name": "Solicitar",
+                    "request": {
+                        "name": "Solicitar",
+                        "description": {},
+                        "url": {
+                            "path": [
+                                "reconsolidacoes"
+                            ],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "query": [],
+                            "variable": []
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "method": "POST",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"idCliente\": \"<string>\",\n  \"instituicaoOrigem\": \"<string>\",\n  \"agencia\": \"<string>\",\n  \"conta\": \"<string>\",\n  \"competencia\": \"<string>\",\n  \"motivo\": \"<string>\"\n}",
+                            "options": {
+                                "raw": {
+                                    "headerFamily": "json",
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "auth": null
+                    },
+                    "response": [
+                        {
+                            "id": "6ab585fd-aeaf-4c1f-a4b6-f206d750f38a",
+                            "name": "OK",
+                            "originalRequest": {
+                                "url": {
+                                    "path": [
+                                        "reconsolidacoes"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": []
+                                },
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "method": "POST",
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"idCliente\": \"<string>\",\n  \"instituicaoOrigem\": \"<string>\",\n  \"agencia\": \"<string>\",\n  \"conta\": \"<string>\",\n  \"competencia\": \"<string>\",\n  \"motivo\": \"<string>\"\n}",
+                                    "options": {
+                                        "raw": {
+                                            "headerFamily": "json",
+                                            "language": "json"
+                                        }
+                                    }
+                                }
+                            },
+                            "status": "OK",
+                            "code": 200,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                }
+                            ],
+                            "body": "",
+                            "cookie": [],
+                            "_postman_previewlanguage": "json"
+                        },
+                        {
+                            "id": "b3c6f041-5c28-4d7c-a794-c3fe96d2b51c",
+                            "name": "Bad Request",
+                            "originalRequest": {
+                                "url": {
+                                    "path": [
+                                        "reconsolidacoes"
+                                    ],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "query": [],
+                                    "variable": []
+                                },
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "method": "POST",
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"idCliente\": \"<string>\",\n  \"instituicaoOrigem\": \"<string>\",\n  \"agencia\": \"<string>\",\n  \"conta\": \"<string>\",\n  \"competencia\": \"<string>\",\n  \"motivo\": \"<string>\"\n}",
+                                    "options": {
+                                        "raw": {
+                                            "headerFamily": "json",
+                                            "language": "json"
+                                        }
+                                    }
+                                }
+                            },
+                            "status": "Bad Request",
+                            "code": 400,
+                            "header": [],
+                            "cookie": [],
+                            "_postman_previewlanguage": "text"
+                        }
+                    ],
+                    "event": [],
+                    "protocolProfileBehavior": {
+                        "disableBodyPruning": true
+                    }
+                }
+            ]
+        }
+    ],
+    "event": [],
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "/"
+        }
+    ],
+    "info": {
+        "_postman_id": "c00b716d-2942-4388-a65e-2eaccc7632ad",
+        "name": "Extrato — Consolidação (US-05, US-08..US-11)",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "description": {
+            "content": "",
+            "type": "text/plain"
+        }
+    }
+}
