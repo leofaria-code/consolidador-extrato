@@ -54,19 +54,9 @@ e já aparecem como assignee em todas as issues correspondentes (conferido via
 `gh api repos/.../collaborators` e `gh issue list --json assignees` em 10/07 — sem convites
 pendentes). Nada a fazer aqui.
 
-## Pendências
+## Pendências — todas resolvidas
 
-- **Fechar a issue #6 manualmente** — o PR #15 já entregou e mergeou o Incremento 5, mas a
-  keyword de auto-close ("Fecha a issue #6") não é reconhecida pelo GitHub em português.
-  Lição para os próximos PRs: usar `Closes #N`/`Fixes #N`/`Resolves #N` (inglês) se quiser o
-  auto-close, ou fechar manualmente:
-  ```bash
-  gh issue close 6 -R leofaria-code/consolidador-extrato -c "Entregue via PR #15 (merged 08/07) — fechando manualmente porque a keyword em PT não aciona o auto-close do GitHub."
-  ```
-- **Avaliar fechar a issue #8** — o critério de aceite (`mvn verify -Pplano-b-jvm` verde sem
-  Docker) está satisfeito desde o Inc-1 e foi reverificado em 10/07 (32 testes, 0 falhas). Não há
-  PR dedicado a essa issue porque o critério é transversal a todos os incrementos; fechar fica a
-  critério do Rodrigo/grupo:
-  ```bash
-  gh issue close 8 -R leofaria-code/consolidador-extrato -c "mvn verify -Pplano-b-jvm verde (32 testes, 0 falhas) desde o Inc-1, reverificado em 10/07 — critério 6 satisfeito de forma contínua."
-  ```
+- ~~Fechar a issue #6 manualmente~~ — feito em 10/07. A lição dupla das keywords ficou registrada na
+  própria tabela: "Fecha #N" (PT) não fecha; "Closes #9?" no meio de uma frase fecha sem querer.
+- ~~Avaliar fechar a issue #8~~ — fechada em 10/07 com OK do Rodrigo; hoje o critério é provado
+  continuamente pelo workflow `verify` a cada PR.
