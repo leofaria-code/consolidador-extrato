@@ -57,5 +57,6 @@ Cronograma comprimido (banca antecipada):
 - [x] 11/07 — Auditoria de aderência às aulas 5–8 + projeto-final.pdf (nenhum requisito descoberto): message pact do tópico implementado (34 testes; branch `feat/pact-mensagem`), nota pact-em-disco×Broker na ADR-003, nomenclatura conferida
 - [x] 11/07 (noite) — Rumo ao 100 (PR #23): disjuntor + última resposta boa no cache miss, reprocessar-dlq.ps1/.sh, broadcast de invalidação (2 réplicas ao vivo, --profile escala); AVALIACAO total proposto 100,0; 38 testes; CI verde
 - [x] 10/07 (noite) — Notas do AVALIACAO.md validadas pelo grupo (100,0 ratificado; registro no uso-de-ia — inclui erratum de datação: registros "11/07" = noite de 10/07)
+- [x] 11/07 — Demo enriquecida (PR #24): Swagger UI nos 3 serviços (modo prod), coleção com lote+US-03 (Newman 27/27), roteiro com atos bônus, workspace Postman pessoal no .gitignore (decisão em postman/README.md) e **workflow e2e no CI** (compose+Newman a cada PR — plano A com selo contínuo igual ao plano B)
 - [ ] até 14/07 — ensaio cronometrado (preencher pós-ensaio do roteiro-banca.md)
 - [ ] 15/07 — banca. Lembrete: rodar `./demo.ps1` ~10 min antes de entrar na sala
