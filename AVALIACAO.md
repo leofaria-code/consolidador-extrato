@@ -6,7 +6,7 @@ Perfil de execução: A (docker) · Fallbacks usados: perfil B (pura-JVM) para t
 
 > ⚠️ **Documento em construção** — pesos, notas e evidências são preenchidos a cada incremento.
 > Convenção: evidência = caminho de arquivo/classe/teste ou hash de commit.
-> **Notas abaixo são uma proposta gerada em sessão de IA (10/07)**, para o grupo ajustar antes do fechamento em 12/07. Escala 0–100 por critério (independente do peso) — **não há escala oficial da rubrica documentada no material do curso**, então não é possível confirmar se é a mesma que a banca usa; os pesos por critério (que somam 100) vêm do enunciado do projeto (`CLAUDE.md`).
+> **Notas abaixo são uma proposta gerada em sessão de IA (10/07, reavaliada em 11/07 após o hardening pré-banca)**, para o grupo ajustar antes do fechamento. Escala 0–100 por critério (independente do peso) — **não há escala oficial da rubrica documentada no material do curso**, então não é possível confirmar se é a mesma que a banca usa; os pesos por critério (que somam 100) vêm do enunciado do projeto (`CLAUDE.md`). Mudança da reavaliação: critério 5 de 85→95 (o gap que justificava o 85 foi fechado e superado; os gaps restantes estão nomeados na evidência); critério 4 mantido em 85 (a limitação que o justifica não mudou).
 
 ## Resumo (recalcule aqui se os pesos mudarem)
 
@@ -18,12 +18,12 @@ Nota final = Σ (peso × nota ÷ 100). Peso e nota são independentes — se um 
 | 2 | Comunicação assíncrona | 15 | 100 | 15,0 |
 | 3 | Idempotência e consistência | 12 | 100 | 12,0 |
 | 4 | Cache | 10 | 85 | 8,5 |
-| 5 | Resiliência | 12 | 85 | 10,2 |
+| 5 | Resiliência | 12 | 95 | 11,4 |
 | 6 | Testabilidade | 13 | 100 | 13,0 |
 | 7 | Decisões arquiteturais (ADRs) | 13 | 100 | 13,0 |
 | 8 | Uso crítico de IA | 5 | 100 | 5,0 |
 | 9 | Execução | 5 | 100 | 5,0 |
-| | **Total** | **100** | | **96,7** |
+| | **Total** | **100** | | **97,9** |
 
 ## Evidências por critério
 
@@ -49,33 +49,35 @@ Nota final = Σ (peso × nota ÷ 100). Peso e nota são independentes — se um 
    - Invalidação por evento: `ConsumidorPosicaoAtualizada` (idempotente por natureza — premissa Sessão 6).
    - Carimbo do **dado** (US-07): `ExtratoConsolidado.atualizadoEm` = mais recente entre as posições.
    - Atualizar sob demanda com limite por cliente (Sessão 6, decisão 5): `ControleAtualizacaoForcada` → 429.
-   - Hit/miss/invalidação **demonstráveis** por teste (`ExtratoConsultaTest`, contador do dublê da fonte). Verde em `mvn verify -Pplano-b-jvm` (07/07).
-   - Gap conhecido (não 100/100): cache Caffeine é local à instância — decisão consciente e justificada na ADR-006, mas é uma limitação real caso `extrato-consulta` escale horizontalmente (instâncias não compartilham cache/invalidação entre si).
+   - Hit/miss/invalidação **demonstráveis** por teste (`ExtratoConsultaTest`, contador do dublê da fonte) **e a invalidação por evento provada no plano A com Kafka real** (10/07, pós-fix do `@Blocking` — extrato cacheado vazio → evento → dado novo em segundos, com o `corr` no log; o TTL de 300s mascarava o bug até então).
+   - Gap conhecido (não 100/100; **inalterado na reavaliação de 11/07**): cache Caffeine é local à instância — decisão consciente e justificada na ADR-006, mas é uma limitação real caso `extrato-consulta` escale horizontalmente (instâncias não compartilham cache/invalidação entre si).
 
-5. **Resiliência** — peso 12 · nota proposta **85/100**
+5. **Resiliência** — peso 12 · nota proposta **95/100** *(reavaliada em 11/07; era 85)*
    Evidência:
    - Política em `docs/adr/ADR-007-resiliencia-retry-dlq.md`: 3 retentativas em processo com backoff exponencial (1s×2, jitter) + DLQ com causa nos headers; parâmetros da ata da Sessão 6 (decisão 8), ajustáveis por configuração.
    - Implementação: `@Retry`+`@ExponentialBackoff` nos consumidores (`ConsumidorLancamentos`, `ConsumidorReconsolidacao`); `failure-strategy=dead-letter-queue` (Kafka) e `reject`+`auto-bind-dlq` (Rabbit); `@Timeout` 2s sem retry na chamada interna do cache miss.
    - Fila de trabalho `reconsolidacao` (US-09): aceite imediato + guichê um a um (`max-outstanding-messages=1`); reapuração idempotente por recálculo absoluto.
    - **Teste da banca** (`RetentativaEDlqTest`): falha transitória supera em exatamente 3 tentativas; mensagem envenenada consome 1+3 e o fluxo continua. `ReconsolidacaoTest`: contestação corrigida pela reapuração. Verde no plano B (07/07).
-   - **DLQ física validada no plano A (10/07)**: veneno injetado direto no tópico → 1+3 tentativas → `lancamentos-recebidos-dlq` com **mensagem original + causa nos headers** (`dead-letter-reason` com a violação exata, classe da exceção, tópico/partição/offset — o contrato da Sessão 4) e o fluxo seguiu (lançamento válido atrás do veneno incorporado). DLQ do Rabbit (`reconsolidacao-dlq`) visível na management UI. Dois bugs reais de config/conversão encontrados e corrigidos nessa validação — registro em `docs/uso-de-ia.md` (10/07). *(Gap original desta nota fechado — grupo pode reavaliar o 85.)*
+   - **DLQ física validada no plano A (10/07)**: veneno injetado direto no tópico → 1+3 tentativas → `lancamentos-recebidos-dlq` com **mensagem original + causa nos headers** (`dead-letter-reason` com a violação exata, classe da exceção, tópico/partição/offset — o contrato da Sessão 4) e o fluxo seguiu (lançamento válido atrás do veneno incorporado). DLQ do Rabbit (`reconsolidacao-dlq`) visível na management UI.
+   - **Régua de veneno em 3 camadas (11/07)**: mensagem **ilegível** → `FalhaDeserializacaoLancamentos` encaminha os bytes crus à DLQ com a causa e libera o fluxo (sem o handler, o poll re-tenta para sempre e a **partição trava** — o 4º bug do plano A, demonstrado e corrigido ao vivo); falha **transitória** → 3× backoff; falha **permanente** → DLQ. Nota na ADR-007; `FalhaDeserializacaoTest` no plano B. Ao todo, **4 bugs reais de fronteira código↔infra** achados e corrigidos na validação com brokers reais — registro em `docs/uso-de-ia.md` (10–11/07).
+   - Gaps restantes nomeados (não 100/100): `@CircuitBreaker`/`@Fallback` da tabela de equivalências (ADR-001) não exercitados — o `@Timeout` simples bastou ao caso e a ADR-007 justifica, mas o padrão não está demonstrado; reprocesso da DLQ é procedimento documentado (republicar no tópico), não automatizado.
 
 6. **Testabilidade** — peso 13 · nota proposta **100/100**
    Evidência:
-   - `mvn verify -Pplano-b-jvm` verde sem Docker: 5 módulos, **32 testes, 0 falhas** (07/07, reverificado 10/07) — critério satisfeito por build real, não por leitura de código.
+   - `mvn verify -Pplano-b-jvm` verde sem Docker: 5 módulos, **35 testes, 0 falhas** (reverificado 11/07) — e **rodando em CI a cada PR** (`.github/workflows/verify.yml`, selo verde no repo): a mesma condição da correção, provada continuamente.
    - **PACT consulta↔consolidação** (Sessão 6, decisão 2): consumer `ContratoPosicoesConsumerPactTest` (deserializa no record real `PosicaoDaConta`; 2 interações — posições e extrato vazio), pact **em disco, versionado** (`pacts/`), provider `ContratoPosicoesProviderPactTest` verifica contra a aplicação real com estados semeados pelo caminho real. Roda no `mvn verify`, inclusive plano B.
    - **PACT de MENSAGEM do tópico `lancamentos-recebidos`** (o 2º par da Sessão 6, fechado pós-aula-08): consumidor declara o shape mínimo (identidade da ADR-004, tipo, valor, ocorrência — opcionais do erratum #1 fora, de propósito); provider verifica contra a serialização real. Os DOIS estilos de contrato da aula-08 (request/response e mensagem) presentes. Pact em disco × Broker: decisão documentada na ADR-003 (nota de 11/07).
    - Connector in-memory do SmallRye (`RecursosEmMemoria`) substitui Kafka/RabbitMQ nos testes; dublês contáveis provam cache; `@InjectSpy` prova retry.
    - Estratégia dos dois perfis (A alta fidelidade × B Docker-free como gate) documentada em `docs/adr/ADR-003-perfis-de-teste.md`.
 
 7. **Decisões arquiteturais** — peso 13 · nota proposta **100/100**
-   Evidência: `docs/adr/` — 7 ADRs, todas com alternativas rejeitadas e o porquê (ADR-001 stack; ADR-002 decomposição; ADR-003 perfis de teste A/B; ADR-004 idempotência na base; ADR-005 outbox transacional; ADR-006 cache miss; ADR-007 resiliência). **Os 5 candidatos da Sessão 6 estão fechados** (o candidato #1 já havia sido fechado como ADR-002 no bootstrap; os 4 pendentes da issue #7 — cache miss, idempotência, consistência, resiliência — fecharam como ADRs 004–007). Rastreabilidade decisão↔fala de stakeholder via `docs/requisitos/`.
+   Evidência: `docs/adr/` — 7 ADRs, todas com alternativas rejeitadas e o porquê, **com índice navegável** (`docs/adr/README.md`: decisão/US/rejeitadas em 1 linha). **Os 5 candidatos da Sessão 6 estão fechados** (o #1 como ADR-002 no bootstrap; os 4 da issue #7 como ADRs 004–007). As ADRs são vivas: notas de evolução datadas registram o que a prática ensinou (004: expurgo×dedup — US-11 exige US-04; 005: retenção da outbox; 007: a 3ª camada de veneno; 003: pact-em-disco × Broker). Rastreabilidade decisão↔fala de stakeholder via `docs/requisitos/`.
 
 8. **Uso crítico de IA** — peso 5 · nota proposta **100/100**
    Como usamos IA e o que validamos manualmente: ver `docs/uso-de-ia.md` (log contínuo, honesto: inclui o que a IA errou e o que o grupo rejeitou/validou) — inclusive a sessão de 10/07 (README + estas notas propostas), que registra o próprio processo de propor uma nota sem escala oficial disponível.
 
 9. **Execução** — peso 5 · nota proposta **100/100**
-   Como rodar: `README.md` §Arquitetura em 30 segundos (visão dos 3 serviços/portas), §Instalar dependências/§Compilar/§Testar/§Rodar em modo dev, e §Testando o fluxo ponta a ponta (roteiro de `curl` completo: health check → `POST /lancamentos` → `GET /extrato` → `atualizar=true` → `POST /reconsolidacoes`) — quem só lê o README consegue subir e exercitar os 3 serviços sem contexto adicional. **Demo do zero com um comando** (`./demo.ps1` → `docker-compose.yml` com Kafka/RabbitMQ/Postgres + os 3 serviços — aceite da issue #9), incluindo roteiro da DLQ ao vivo (§Demo da banca). Perfil A (Docker) para a demo, perfil B (pura-JVM) para os testes/CI (§Perfis de execução).
+   Como rodar: `README.md` §Arquitetura em 30 segundos (visão dos 3 serviços/portas), §Instalar dependências/§Compilar/§Testar/§Rodar em modo dev, e §Testando o fluxo ponta a ponta (roteiro de `curl` completo: health check → `POST /lancamentos` → `GET /extrato` → `atualizar=true` → `POST /reconsolidacoes`) — quem só lê o README consegue subir e exercitar os 3 serviços sem contexto adicional. **Demo do zero com um comando** (`./demo.ps1` → `docker-compose.yml` com Kafka/RabbitMQ/Postgres + os 3 serviços — aceite da issue #9), incluindo roteiro da DLQ ao vivo (§Demo da banca), **coleção Postman versionada** (`postman/` — 13 requests na ordem do roteiro, 22 asserções, validada com Newman) e **CI verde na `main`**. Perfil A (Docker) para a demo, perfil B (pura-JVM) para os testes/CI (§Perfis de execução).
 
 ## Opcionais entregues (grupo de 4 → mínimo 1)
 
