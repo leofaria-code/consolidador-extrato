@@ -33,7 +33,7 @@
 
 **Como executar os passos 0–5 (duas opções):**
 
-- **Visual (recomendada): Run Collection no Postman** — a coleção espelha exatamente esses passos em pastas (`0 · Saúde` … `5 · Validação`), com **22 asserções que ficam verdes na tela** enquanto quem está apresentando narra cada pasta. As asserções são relativas ao estado, então pode rodar de novo sem medo (inclusive no ensaio).
+- **Visual (recomendada): Run Collection no Postman** — a coleção espelha exatamente esses passos em pastas (`0 · Saúde` … `6 · Domínio: lote e fora de ordem`), com **27 asserções que ficam verdes na tela** enquanto quem está apresentando narra cada pasta. As asserções são relativas ao estado, então pode rodar de novo sem medo (inclusive no ensaio).
 - **Terminal (fallback):** os `curl` do README §Testando o fluxo ponta a ponta.
 
 Os passos **6–7 continuam no terminal + UI do Rabbit de propósito**: DLQ e correlação são onde a banca precisa ver o *broker* de verdade (headers de causa no tópico, `x-death` na fila, o mesmo `corr` nos logs JSON dos 3 serviços) — não uma abstração de client HTTP.
