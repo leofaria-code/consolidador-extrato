@@ -127,6 +127,14 @@ Ferramenta principal: Claude (Cowork/desktop), com delegação por complexidade 
 - **Surpresa técnica (a IA errou, o framework corrigiu):** o DSL clássico de message pact (`MessagePactBuilder`/`List<Message>`) não roda no default do pact-jvm 4.6 — o spec V4 exige outra assinatura (`V4Pact xxx(PactBuilder)`). O erro do runner diz exatamente isso; `pactVersion = V3` na anotação resolve. Registrado porque a aula usa o DSL clássico e o erro vai aparecer para qualquer colega que copiar o exemplo em versão nova.
 - **Validação:** `mvn verify -Pplano-b-jvm` — 34 testes, 0 falhas; "Verifying a pact between extrato-consolidacao and extrato-ingestao" no log do build da ingestão.
 
+## 11/07 (tarde) — Hardening pré-banca: e o 4º bug, o pior de todos
+
+- **Pedido:** executar o pacote de melhorias da revisão de ADRs (CI real, índice de ADRs, notas 004/005, resposta de escopo US-04/US-11) — e testar o caso que a revisão apontou como nunca exercitado: **lixo de deserialização**.
+- **O 4º bug (o único que TRAVAVA o sistema):** JSON inválido publicado direto no tópico → falha no deserializer do connector, ANTES do nosso retry/DLQ → o poll re-tenta para sempre → **partição travada**, health 503, lançamento válido atrás do lixo nunca processa. Os 3 bugs anteriores degradavam; este PARAVA a esteira — violação direta da US-08, invisível para os 34 testes verdes e para os 3 bugs já achados. O próprio erro do SmallRye aponta a solução ("configure a DeserializationFailureHandler").
+- **Fix com o espírito da US-08:** handler encaminha os bytes crus à MESMA DLQ com a causa nos headers (sem descarte silencioso) e devolve payload nulo; o consumidor confirma e segue. Demo ao vivo: a partição que estava travada drenou o lixo para a DLQ e o lançamento represado processou em segundos após o deploy do fix.
+- **Também nesta sessão:** CI GitHub Actions rodando `mvn verify -Pplano-b-jvm` a cada PR (a alegação "roda em CI" da ADR-003 virou selo verde); índice `docs/adr/README.md`; nota expurgo×dedup na ADR-004 (US-11 exige US-04 — a pergunta difícil da banca respondida por escrito); nota de retenção da outbox na ADR-005; pergunta 11 (escopo US-04/US-11) no roteiro.
+- **Placar do plano A: 4 bugs reais** — todos de fronteira código↔infra, nenhum visível no plano B. A régua de veneno agora tem três camadas documentadas na ADR-007: ilegível → handler → DLQ; transitória → backoff; permanente → DLQ.
+
 ## Backlog de registros (preencher a cada incremento)
 
 - [x] Resultado do mvn verify do Inc-1 + surpresas: `mvn verify -Pplano-b-jvm` — BUILD SUCCESS, 5 módulos, 7 testes, 0 falhas, ~2min12s, sem Docker. Sem surpresas nesta rodada (a pendência do plugin Quarkus/propriedades do tópico, deixada truncada numa sessão anterior, já tinha sido completada antes deste build).

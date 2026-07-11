@@ -34,3 +34,7 @@ O contrato `GuardaIdempotencia`/implementação em memória do Inc-1 é **removi
 - (+) Reprocessos legítimos (DLQ, reconsolidação, carga inicial) ficam seguros de graça — US-08 depende disso ("idempotência garante segurança do reprocesso").
 - (−) Um SELECT por mensagem no caminho quente. *Mitigação:* índice único cobre a busca; se medição futura apontar gargalo, uma janela em cache pode ser adicionada **na frente** da base (a base permanece como verdade — a janela viraria otimização, não mecanismo).
 - (−) A tabela cresce com o histórico. *Mitigação:* expurgo por consentimento (US-11) já remove dados; retenção/particionamento por competência é evolução documentável.
+
+## Nota (11/07): a interação expurgo × memória de dedup
+
+Como a memória de deduplicação **é** a base de lançamentos, o expurgo da US-11 apaga as duas coisas juntas: se uma origem reenviar um lançamento já expurgado, a dedup não o reconhece e ele seria **reincorporado** — recriando exatamente o dado que o expurgo eliminou. A guarda correta para esse caso não é a idempotência, e sim a **US-04**: consentimento revogado/vencido bloqueia a ingestão *antes* do tópico — o reenvio pós-expurgo nunca chega ao consumidor. Consequência de desenho: **US-11 sem US-04 é incompleta**; quando o expurgo for implementado, a verificação de consentimento vigente precisa vir junto (ou antes). Registrado para a evolução — e para a arguição, se perguntarem "o que acontece com um repetido do que foi expurgado?".

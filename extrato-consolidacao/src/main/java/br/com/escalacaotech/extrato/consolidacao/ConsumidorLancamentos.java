@@ -37,6 +37,11 @@ public class ConsumidorLancamentos {
     @Incoming("lancamentos-in")
     @Blocking
     public CompletionStage<Void> consumir(Message<LancamentoRecebido> mensagem) {
+        if (mensagem.getPayload() == null) {
+            // mensagem ilegível: o FalhaDeserializacaoLancamentos já a encaminhou
+            // à DLQ com a causa — aqui só confirmamos para o fluxo seguir (US-08)
+            return mensagem.ack();
+        }
         var correlacao = Correlacao.deMensagem(mensagem)
                 .orElseGet(() -> UUID.randomUUID().toString());
         try {

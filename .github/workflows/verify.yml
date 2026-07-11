@@ -1,0 +1,22 @@
+# CI do critério 6: o gate é o plano B — pura-JVM, sem Docker (ADR-003).
+# O runner do GitHub até tem Docker, mas rodamos SEM de propósito: é a prova
+# contínua de que a suíte não depende de daemon (a mesma condição da correção).
+name: verify
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  plano-b-jvm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+          cache: maven
+      - name: mvn verify (plano B — sem Docker, critério 6)
+        run: mvn --batch-mode verify -Pplano-b-jvm
