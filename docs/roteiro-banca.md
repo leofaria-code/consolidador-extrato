@@ -12,6 +12,7 @@
 - [ ] **Postman aberto com a coleção importada** (`postman/consolidador-extrato.postman_collection.json`) — é o caminho visual dos passos 0–5; fallback: `npx newman run postman/...json` no terminal.
 - [ ] Terminal com fonte grande + os comandos deste roteiro prontos para colar (fallback dos passos do Postman e caminho único dos passos 6–7).
 - [ ] UI do RabbitMQ logada (`localhost:15672`, guest/guest) numa aba.
+- [ ] **Swagger UI aberto** (`:8081|:8082|:8083/q/swagger-ui`) — superfície exploratória para a arguição: "e se mandar X?" se responde ao vivo, sem sair da tela.
 - [ ] **Plano B da demo** (se o Docker falhar na hora): `mvn verify -Pplano-b-jvm` ao vivo (32 testes, ~1 min, zero infra) + prints da validação de 10/07 no `uso-de-ia.md`. A rubrica pede o gate sem Docker de qualquer forma.
 
 ## Sequência da demo (com narrativa)
@@ -20,11 +21,13 @@
 |---|------|---------------|--------------|
 | 0 | Leo | Arquitetura em 30s: 3 contextos, bases segregadas, "ninguém lê a base do outro" | Diagrama do README |
 | 1 | Sandy | **Aceite assíncrono**: POST → 202 + eco do correlation id | POST `/lancamentos` com `X-Correlation-Id: banca-01` (README §fluxo) |
+| 1b | Sandy | **Lote + fora de ordem (US-03)**: item de JUNHO no lote reabre a competência antiga — extrato de junho e julho lado a lado | Pasta 6 da coleção Postman |
 | 2 | Marcos | **Cache miss → fonte → hit**: 1º GET busca na consolidação, 2º responde da memória; carimbo do DADO | `GET /extrato/cliente-001/2026-07` ×2 |
 | 3 | Sandy | **Idempotência**: repetir o MESMO POST → extrato inalterado (US-02: "extrato atrasado e certo > na hora e errado") | mesmo POST do passo 1; GET de novo |
 | 4 | Marcos | **Atualizar sob demanda com limite**: 1ª forçada 200, 2ª imediata 429 | `GET ...?atualizar=true` ×2 |
 | 5 | Sandy | **Guichê**: POST reconsolidação → 202 imediato → log do guichê com o mesmo corr | POST `/reconsolidacoes`; `docker compose logs consolidacao \| grep <corr>` |
 | 6 | Sandy | **Resiliência (o clímax)**: veneno direto no tópico → fluxo NÃO trava → DLQ com mensagem original + causa nos headers | README §Demo da banca (2 comandos); mostrar `reconsolidacao-dlq` na UI do Rabbit |
+| 6b | Sandy | **Final feliz do veneno**: reprocesso da DLQ em um comando — corrigidos entram pelo fluxo normal, seguro pela idempotência | `./reprocessar-dlq.ps1` |
 | 7 | Leo | **Correlação ponta a ponta**: o mesmo id do POST aparece no log da ingestão, consolidação e invalidação da consulta (JSON) | `docker compose logs \| grep banca-01` |
 | 8 | Rodrigo | **Testabilidade**: suíte inteira sem Docker + PACT verificando o contrato | `mvn verify -Pplano-b-jvm` (ou output salvo) + `pacts/*.json` no repo |
 
@@ -34,6 +37,11 @@
 - **Terminal (fallback):** os `curl` do README §Testando o fluxo ponta a ponta.
 
 Os passos **6–7 continuam no terminal + UI do Rabbit de propósito**: DLQ e correlação são onde a banca precisa ver o *broker* de verdade (headers de causa no tópico, `x-death` na fila, o mesmo `corr` nos logs JSON dos 3 serviços) — não uma abstração de client HTTP.
+
+## Atos bônus (só se perguntarem ou sobrar tempo — já validados ao vivo)
+
+- **Escala horizontal**: `docker compose --profile escala up -d consulta-replica` → réplica na 8084; um POST invalida as DUAS (broadcast — ADR-006 nota).
+- **Disjuntor + última resposta boa**: `docker compose stop consolidacao` → GET com `?atualizar=true` serve a última cópia (carimbo antigo = transparência); cliente sem cópia → 503 com Retry-After; `docker compose start consolidacao` normaliza.
 
 ## Arguição — perguntas prováveis × resposta curta (e onde está escrito)
 
