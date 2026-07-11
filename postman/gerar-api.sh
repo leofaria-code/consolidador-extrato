@@ -14,7 +14,7 @@ for svc in "${!SERVICOS[@]}"; do
   spec="$(mktemp)"
   curl -sf "http://localhost:${porta}/q/openapi?format=json" -o "$spec" \
     || { echo "ERRO: ${svc} (porta ${porta}) fora do ar — suba a demo antes"; exit 1; }
-  npx --yes -p openapi-to-postmanv2 openapi2postmanv2 \
+  npx --yes -p openapi-to-postmanv2@6.3.0 openapi2postmanv2 \
     -s "$spec" -o "postman/api/${svc}.postman_collection.json" -p \
     -O folderStrategy=Tags,requestParametersResolution=Example,includeAuthInfoInExample=false
   rm -f "$spec"

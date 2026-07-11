@@ -11,7 +11,7 @@ foreach ($svc in $servicos.Keys) {
   $porta = $servicos[$svc]
   $spec = New-TemporaryFile
   Invoke-WebRequest "http://localhost:$porta/q/openapi?format=json" -OutFile $spec
-  npx --yes -p openapi-to-postmanv2 openapi2postmanv2 `
+  npx --yes -p openapi-to-postmanv2@6.3.0 openapi2postmanv2 `
     -s $spec -o "postman/api/$svc.postman_collection.json" -p `
     -O "folderStrategy=Tags,requestParametersResolution=Example,includeAuthInfoInExample=false"
   Remove-Item $spec -Force
