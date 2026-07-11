@@ -31,7 +31,7 @@ sequenceDiagram
     K->>Q: evento (broadcast — group.id por instância)
     Q->>Q: invalida cache (idempotente por natureza)
     C->>Q: GET /extrato/{cliente}/{competencia}
-    Q->>Co: miss → GET /interno/posicoes (par do PACT; @Timeout+disjuntor)
+    Q->>Co: miss → GET /interno/posicoes (par do PACT, timeout e disjuntor)
     Q-->>C: 200 extrato + carimbo do DADO (US-07)
 ```
 
@@ -96,9 +96,9 @@ flowchart TD
     CB -- fechado --> F[GET /interno/posicoes<br/>par do PACT, Timeout 2s]
     F -- ok --> P[popula cache + guarda última-boa] --> R
     F -- falha --> FB{tem última<br/>resposta boa?}
-    CB -- aberto: para de<br/>martelar a fonte --> FB
-    FB -- sim --> UB[serve cópia — carimbo antigo<br/>expõe a idade US-05/07] --> R
+    CB -- aberto: pára de<br/>martelar a fonte --> FB
+    FB -- sim --> UB[serve cópia --> carimbo antigo<br/>expõe a idade US-05/07] --> R
     FB -- não --> E503[503 + Retry-After<br/>nunca 500 opaco]
-    EV[evento posicao-atualizada] -. broadcast: group.id<br/>por instância .-> INV[invalida entrada<br/>em TODAS as réplicas] -.-> C
+    EV[evento posicao-atualizada] -->|broadcast: group.id<br/>por instância| INV[invalida entrada<br/>em TODAS as réplicas]
+    INV --> C
 ```
-
