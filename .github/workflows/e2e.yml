@@ -36,6 +36,10 @@ jobs:
           echo "timeout aguardando saúde" && docker compose logs --tail 50 && exit 1
       - name: Newman — coleção da demo (27 asserções)
         run: npx --yes newman run postman/consolidador-extrato.postman_collection.json
+      - name: Coleções de API em dia com o código (guarda semântico)
+        run: |
+          bash postman/verificar-api.sh \
+            || { echo "::error::postman/api defasado — rode postman/gerar-api.sh (ou .ps1) com a demo de pé e commite"; exit 1; }
       - name: Logs em caso de falha
         if: failure()
         run: docker compose logs --tail 100
