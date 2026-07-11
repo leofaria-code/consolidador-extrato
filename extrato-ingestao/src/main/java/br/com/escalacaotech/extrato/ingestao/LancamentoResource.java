@@ -1,6 +1,7 @@
 package br.com.escalacaotech.extrato.ingestao;
 
 import br.com.escalacaotech.extrato.contratos.LancamentoRecebido;
+import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
@@ -29,12 +30,22 @@ public class LancamentoResource {
     @Inject
     PublicadorLancamentos publicador;
 
+    // Métricas de negócio da borda de entrada (US-12/ADR-008). Tag `resultado`
+    // só com valores enumerados — nunca conta/cliente (cardinalidade + LGPD).
+    @Inject
+    MeterRegistry registry;
+
+    private void contar(String resultado) {
+        registry.counter("extrato.ingestao.lancamentos", "resultado", resultado).increment();
+    }
+
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response receber(LancamentoRecebido lancamento) {
         var faltantes = validador.camposFaltantes(lancamento);
         if (!faltantes.isEmpty()) {
+            contar("rejeitado");
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(Map.of(
                             "erro", "ficha do lançamento inválida",
@@ -42,6 +53,7 @@ public class LancamentoResource {
                     .build();
         }
         publicador.publicar(lancamento);
+        contar("aceito");
         return Response.accepted(Map.of(
                         "status", "ACEITO",
                         "identidade", lancamento.identidade(),
@@ -59,8 +71,10 @@ public class LancamentoResource {
         for (var lancamento : lote) {
             if (validador.camposFaltantes(lancamento).isEmpty()) {
                 publicador.publicar(lancamento);
+                contar("aceito");
                 aceitos++;
             } else {
+                contar("rejeitado");
                 rejeitados++;
             }
         }

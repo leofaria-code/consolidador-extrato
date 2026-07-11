@@ -1,8 +1,10 @@
 package br.com.escalacaotech.extrato.ingestao;
 
 import br.com.escalacaotech.extrato.contratos.LancamentoRecebido;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.smallrye.reactive.messaging.kafka.api.OutgoingKafkaRecordMetadata;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
@@ -27,6 +29,9 @@ public class PublicadorLancamentos {
     @Channel("lancamentos-out")
     Emitter<LancamentoRecebido> emitter;
 
+    @Inject
+    MeterRegistry registry;
+
     public void publicar(LancamentoRecebido lancamento) {
         var chave = lancamento.instituicaoOrigem() + ":" + lancamento.agencia() + ":" + lancamento.conta();
         var correlacao = (String) MDC.get(Correlacao.MDC_CHAVE);
@@ -45,5 +50,6 @@ public class PublicadorLancamentos {
             mensagem = mensagem.addMetadata(new CorrelacaoMetadata(correlacao));
         }
         emitter.send(mensagem);
+        registry.counter("extrato.ingestao.lancamentos.publicados").increment();
     }
 }

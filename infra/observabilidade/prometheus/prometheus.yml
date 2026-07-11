@@ -1,0 +1,27 @@
+# Scrape dos 3 serviços (ADR-008) — pull: os serviços não sabem que o
+# Prometheus existe (plano B intocado). Intervalo curto = demo viva na banca.
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: ingestao
+    metrics_path: /q/metrics
+    static_configs:
+      - targets: ["ingestao:8081"]
+
+  - job_name: consolidacao
+    metrics_path: /q/metrics
+    static_configs:
+      - targets: ["consolidacao:8082"]
+
+  - job_name: consulta
+    metrics_path: /q/metrics
+    static_configs:
+      - targets: ["consulta:8083"]
+
+  # Réplica da demo de escala (ADR-006): alvo aparece DOWN se o profile
+  # `escala` não estiver de pé — esperado, e até didático na arguição.
+  - job_name: consulta-replica
+    metrics_path: /q/metrics
+    static_configs:
+      - targets: ["consulta-replica:8083"]

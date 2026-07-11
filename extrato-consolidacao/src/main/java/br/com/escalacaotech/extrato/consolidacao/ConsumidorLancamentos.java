@@ -1,6 +1,7 @@
 package br.com.escalacaotech.extrato.consolidacao;
 
 import br.com.escalacaotech.extrato.contratos.LancamentoRecebido;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.smallrye.reactive.messaging.annotations.Blocking;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -34,6 +35,9 @@ public class ConsumidorLancamentos {
     @Inject
     ProcessadorLancamentos processador;
 
+    @Inject
+    MeterRegistry registry;
+
     @Incoming("lancamentos-in")
     @Blocking
     public CompletionStage<Void> consumir(Message<LancamentoRecebido> mensagem) {
@@ -48,6 +52,9 @@ public class ConsumidorLancamentos {
             processador.processar(mensagem.getPayload(), correlacao);
             return mensagem.ack();
         } catch (Exception falha) {
+            // nack -> failure-strategy publica na DLQ (plano A); a métrica conta o
+            // desfecho aqui porque é o único ponto comum aos dois planos (ADR-008)
+            registry.counter("extrato.consolidacao.dlq.enviados", "motivo", "processamento").increment();
             return mensagem.nack(falha);
         }
     }

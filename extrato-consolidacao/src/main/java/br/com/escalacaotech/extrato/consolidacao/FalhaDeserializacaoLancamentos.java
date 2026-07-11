@@ -1,12 +1,14 @@
 package br.com.escalacaotech.extrato.consolidacao;
 
 import br.com.escalacaotech.extrato.contratos.LancamentoRecebido;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.smallrye.common.annotation.Identifier;
 import io.smallrye.reactive.messaging.kafka.api.OutgoingKafkaRecordMetadata;
 import io.smallrye.reactive.messaging.kafka.DeserializationFailureHandler;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.apache.kafka.common.header.Headers;
 import org.apache.kafka.common.header.internals.RecordHeaders;
+import jakarta.inject.Inject;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.eclipse.microprofile.reactive.messaging.Message;
@@ -37,6 +39,9 @@ public class FalhaDeserializacaoLancamentos
     @Channel("lancamentos-dlq-out")
     Emitter<byte[]> dlq;
 
+    @Inject
+    MeterRegistry registry;
+
     @Override
     public LancamentoRecebido handleDeserializationFailure(String topic, boolean isKey,
                                                            String deserializer, byte[] data,
@@ -51,6 +56,7 @@ public class FalhaDeserializacaoLancamentos
                         .getBytes(StandardCharsets.UTF_8));
         causa.add("dead-letter-topic", topic.getBytes(StandardCharsets.UTF_8));
 
+        registry.counter("extrato.consolidacao.dlq.enviados", "motivo", "deserializacao").increment();
         dlq.send(Message.of(data == null ? new byte[0] : data)
                 .addMetadata(OutgoingKafkaRecordMetadata.<String>builder()
                         .withHeaders(causa).build()));

@@ -127,3 +127,32 @@ services:
         condition: service_healthy
       consolidacao:
         condition: service_started
+
+  # Observabilidade (ADR-008): Prometheus raspa /q/metrics dos 3 serviços e o
+  # Grafana abre o dashboard da banca sem login (viewer anônimo).
+  # Sobe só com: docker compose --profile observabilidade up -d
+  prometheus:
+    profiles: ["observabilidade"]
+    image: prom/prometheus:v3.5.0
+    ports:
+      # http://localhost:9090/targets — os 4 alvos do scrape. Se a 9090 já
+      # estiver ocupada na sua máquina: PROMETHEUS_PORT=9091 docker compose ...
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ./infra/observabilidade/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+
+  grafana:
+    profiles: ["observabilidade"]
+    image: grafana/grafana:12.1.0
+    ports:
+      # http://localhost:3000 — dashboard "visão da banca". Porta ocupada?
+      # GRAFANA_PORT=3001 docker compose ...
+      - "${GRAFANA_PORT:-3000}:3000"
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: "Viewer"
+    volumes:
+      - ./infra/observabilidade/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./infra/observabilidade/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
