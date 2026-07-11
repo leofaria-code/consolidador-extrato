@@ -65,7 +65,10 @@ Os passos **6–7 continuam no terminal + UI do Rabbit de propósito**: DLQ e co
    O provider reproduz o pact versionado (`pacts/`) contra a aplicação real no `mvn verify` — mudança incompatível quebra o build da consolidação antes de quebrar a consulta em produção; a mudança de contrato aparece como diff em PR. → Inc-5, ADR-006.
 
 10. **"Os testes passam sem Docker — então para que os brokers?"**
-    Plano B prova domínio e fiação (o gate, critério 6); plano A prova o que só broker real prova: partição, DLQ física, binds. E pagou o aluguel: 2 bugs reais achados em 10/07 (DLX não declarado; conversão de payload do Rabbit). → ADR-003 + uso-de-ia 10/07.
+    Plano B prova domínio e fiação (o gate, critério 6); plano A prova o que só broker real prova: partição, DLQ física, binds. E pagou o aluguel: 3 bugs reais achados em 10/07 (DLX não declarado; conversão de payload do Rabbit; @Blocking no consumidor de eventos). → ADR-003 + uso-de-ia 10/07. O CI roda o plano B a cada PR — mesma condição da correção.
+
+11. **"Cadê a US-04 (consentimento) e a US-11 (expurgo)?"**
+    Corte de escopo consciente, não esquecimento: a Sessão 6 (decisão 6) fixou que consentimento é **externo** — o sistema *reage* a eventos de uma plataforma simulada, não gere ciclo de vida. Priorizamos os padrões que a rubrica avalia; US-04/US-11 estão rastreadas como próximos incrementos nos properties de cada serviço, e a parte **difícil** delas já está pensada e escrita: a interação expurgo × memória de dedup (nota de 11/07 na ADR-004 — expurgo apaga a dedup junto, então US-11 exige US-04 antes; reenvio pós-expurgo é bloqueado na ingestão, não na idempotência).
 
 ## Distribuição sugerida da arguição
 
