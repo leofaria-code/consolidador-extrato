@@ -1,6 +1,7 @@
 package br.com.escalacaotech.extrato.consolidacao;
 
 import br.com.escalacaotech.extrato.contratos.PedidoReconsolidacao;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.smallrye.faulttolerance.api.ExponentialBackoff;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -23,10 +24,15 @@ public class ProcessadorReconsolidacao {
     @Inject
     ServicoConsolidacao servico;
 
+    @Inject
+    MeterRegistry registry;
+
     @Retry(maxRetries = 3, delay = 1, delayUnit = ChronoUnit.SECONDS)
     @ExponentialBackoff(factor = 2, maxDelay = 10, maxDelayUnit = ChronoUnit.SECONDS)
     public void processar(PedidoReconsolidacao pedido, String correlacao) {
         LOG.infof("Guichê: processando pedido %s [corr=%s]", pedido.idPedido(), correlacao);
         servico.reconsolidar(pedido, correlacao);
+        // só o desfecho conta — tentativa falha do @Retry não incrementa (ADR-008)
+        registry.counter("extrato.consolidacao.reconsolidacoes").increment();
     }
 }

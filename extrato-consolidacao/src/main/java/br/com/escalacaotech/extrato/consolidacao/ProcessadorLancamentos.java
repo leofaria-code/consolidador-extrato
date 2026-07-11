@@ -1,6 +1,7 @@
 package br.com.escalacaotech.extrato.consolidacao;
 
 import br.com.escalacaotech.extrato.contratos.LancamentoRecebido;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.smallrye.faulttolerance.api.ExponentialBackoff;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -27,17 +28,28 @@ public class ProcessadorLancamentos {
     @Inject
     ServicoConsolidacao servico;
 
+    // Idempotência MEDIDA (ADR-004/ADR-008): repetido x incorporado viram série no
+    // Prometheus. Incrementa só no desfecho — tentativa falha do @Retry não conta.
+    @Inject
+    MeterRegistry registry;
+
     @Retry(maxRetries = 3, delay = 1, delayUnit = ChronoUnit.SECONDS)
     @ExponentialBackoff(factor = 2, maxDelay = 10, maxDelayUnit = ChronoUnit.SECONDS)
     public void processar(LancamentoRecebido lancamento, String correlacao) {
         var identidade = lancamento.identidade();
 
         switch (servico.incorporar(lancamento, correlacao)) {
-            case REPETIDO -> LOG.debugf(
-                    "Lançamento repetido ignorado (idempotência, ADR-004): %s [corr=%s]",
-                    identidade, correlacao);
-            case INCORPORADO -> LOG.infof("Lançamento incorporado: %s [corr=%s]",
-                    identidade, correlacao);
+            case REPETIDO -> {
+                registry.counter("extrato.consolidacao.lancamentos", "resultado", "repetido").increment();
+                LOG.debugf(
+                        "Lançamento repetido ignorado (idempotência, ADR-004): %s [corr=%s]",
+                        identidade, correlacao);
+            }
+            case INCORPORADO -> {
+                registry.counter("extrato.consolidacao.lancamentos", "resultado", "incorporado").increment();
+                LOG.infof("Lançamento incorporado: %s [corr=%s]",
+                        identidade, correlacao);
+            }
         }
     }
 }

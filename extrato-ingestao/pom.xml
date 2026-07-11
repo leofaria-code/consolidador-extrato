@@ -40,6 +40,11 @@
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-logging-json</artifactId>
     </dependency>
+    <!-- Métricas em /q/metrics (US-12 / ADR-008) — registry Prometheus do BOM -->
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-micrometer-registry-prometheus</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>io.quarkus</groupId>
