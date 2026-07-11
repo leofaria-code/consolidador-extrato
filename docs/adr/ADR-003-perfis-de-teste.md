@@ -38,7 +38,11 @@ Dois perfis Maven, mais o perfil conceitual (contrato de entrega §3):
 - (+) **Banca/correção roda verde sem montar infra.**
 - (−) **O plano B não cobre** ordenação por partição real, serialização de rede, offset/rebalance de consumer group nem DLQ no nível do broker. *Mitigação:* o plano A existe exatamente para isso; padrões que só o broker prova (ex.: DLQ do Incremento 4) exigem teste também no plano A — não podem depender só de B.
 - (−) **Custo de manter dois caminhos**: config duplicada e disciplina — toda feature de mensageria nova precisa do switch in-memory correspondente no teste. *Mitigação:* `RecursosEmMemoria` centraliza o switch por módulo.
-- (−) **Risco de divergência A↔B**: um teste passar em B e quebrar em A (ou vice-versa). *Mitigação:* rodar o plano A pelo menos antes de fechar cada incremento, não só o B do dia a dia.
+- (−) **Risco de divergência A↔B**: um teste passar em B e quebrar em A (ou vice-versa). *Mitigação:* rodar o plano A pelo menos antes de fechar cada incremento, não só o B do dia a dia. (Confirmado na prática em 10/07: a validação do plano A achou 3 bugs de fronteira código↔infra — ver uso-de-ia.md.)
+
+## Nota (11/07): pact em disco × Pact Broker
+
+A aula-08 apresenta o **Pact Broker** (publicação de pacts, matriz de compatibilidade, `can-i-deploy`) como a peça de colaboração do CDC em times com deploys independentes. Nós escolhemos **pact em disco, versionado no repo** (`pacts/`): (a) é Docker-free — coerente com o gate do plano B (esta ADR); (b) num monorepo com build de reator único, o "broker" é o próprio git — a mudança de contrato aparece como diff em PR e o provider verifica o arquivo commitado no mesmo build; (c) uma peça a menos na demo. O broker vira a evolução natural se os serviços ganharem repositórios/ciclos de deploy separados — aí `can-i-deploy` responde o que o reator responde hoje de graça.
 
 ## Nota de rastreabilidade
 
