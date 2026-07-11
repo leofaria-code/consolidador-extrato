@@ -8,13 +8,19 @@ services:
 
   kafka:
     image: apache/kafka:3.9.1
+    ports:
+      - "29092:29092"   # inspeção do HOST (Offset Explorer, kafka-ui, IntelliJ): localhost:29092
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
-      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      # Dois listeners de dados: PLAINTEXT (interno, anunciado como kafka:9092 p/
+      # os serviços) e EXTERNAL (anunciado como localhost:29092 p/ o host) —
+      # mapear só a porta NÃO basta: o broker devolve o advertised.listener no
+      # metadata, e "kafka:9092" não resolve fora da rede do compose.
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:29092
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
@@ -38,6 +44,8 @@ services:
 
   postgres:
     image: postgres:17-alpine
+    ports:
+      - "15432:5432"   # inspeção do HOST (psql/IntelliJ): localhost:15432, extrato/extrato
     environment:
       POSTGRES_DB: consolidacao
       POSTGRES_USER: extrato
