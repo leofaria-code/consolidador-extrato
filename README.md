@@ -231,10 +231,21 @@ Guia completo da observabilidade (logs + correlação + métricas + dashboard, c
 A via acima (`demo.ps1` / `docker compose up`) **builda do código-fonte** e exige JDK 25 + Maven. Para quem só quer **executar** o projeto pronto, há uma segunda via que puxa as imagens já empacotadas do Docker Hub — o único pré-requisito é ter **Docker**:
 
 ```bash
-HUB_NS=<usuario-do-dockerhub> docker compose -f docker-compose.hub.yml up -d
+docker compose -f docker-compose.hub.yml up -d
 ```
 
-Sobe a stack completa e idêntica (3 serviços + réplica na 8084 + brokers + Prometheus + Grafana), nas mesmas portas. A imagem JVM carrega o runtime Java 25 e o `.jar` já compilado dentro dela; a config de observabilidade também vai assada nas imagens — nada é montado do disco, então **não precisa do repositório**. Fixe uma versão com `TAG=1.0.0` (default: `latest`).
+Funciona igual em Windows, Linux e macOS — puxa do namespace publicado (`leofariacode`) por padrão, sem precisar de variável de ambiente. Sobe a stack completa e idêntica (3 serviços + réplica na 8084 + brokers + Prometheus + Grafana), nas mesmas portas. A imagem JVM carrega o runtime Java 25 e o `.jar` já compilado dentro dela; a config de observabilidade também vai assada nas imagens — nada é montado do disco, então **não precisa do repositório**.
+
+Fixe uma versão com `TAG` (default: `latest`) ou aponte para o seu namespace se forkou e republicou — aí a variável é necessária, e a sintaxe muda por shell:
+
+```bash
+# Linux/macOS (bash):
+HUB_NS=seu-usuario TAG=1.0.0 docker compose -f docker-compose.hub.yml up -d
+```
+```powershell
+# Windows (PowerShell):
+$env:HUB_NS="seu-usuario"; $env:TAG="1.0.0"; docker compose -f docker-compose.hub.yml up -d
+```
 
 > Esta via **não substitui** a de build-from-source (usada na demo e no CI) — é uma opção adicional. Ver a decisão em [ADR-009](docs/adr/ADR-009-distribuicao-por-imagem-docker-hub.md).
 
