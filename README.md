@@ -172,7 +172,7 @@ Sobe brokers reais (Kafka, RabbitMQ, Postgres) **e** os três serviços com um c
 ./demo.ps1        # Windows (ou ./demo.sh no Linux/macOS)
 ```
 
-Portas: `8081` ingestão · `8082` consolidação · `8083` consulta · `15672` RabbitMQ Management (`guest`/`guest`).
+Portas: `8081` ingestão · `8082` consolidação · `8083` consulta · `8084` réplica da consulta (broadcast de invalidação) · `15672` RabbitMQ Management (`guest`/`guest`) · `9090` Prometheus · `3000` Grafana (sem login). A stack sobe **completa por padrão** — nenhum `--profile` necessário (ADR-008, revisão 11/07).
 O roteiro `curl` da seção anterior funciona igual. A base é **descartável** (`drop-and-create` a cada subida do container da consolidação).
 
 **Demonstrando a DLQ ao vivo** (US-08 — falha permanente não trava o fluxo):
@@ -198,19 +198,19 @@ A DLQ da fila de reconsolidação (`reconsolidacao-dlq`) é visível na UI do Ra
 
 > Kafka do host exige o listener dedicado: mapear só a 9092 não funciona — o broker anuncia `kafka:9092` no metadata, nome que não resolve fora do compose (por isso o `EXTERNAL://localhost:29092`).
 
-**Prefere Postman?** Importe `postman/consolidador-extrato.postman_collection.json` — são os requests da demo na ordem do roteiro, com testes automáticos (Run Collection → 27 asserções verdes; as asserções são relativas ao estado, então pode rodar quantas vezes quiser). Via CLI: `npx newman run postman/consolidador-extrato.postman_collection.json`.
+**Prefere Postman?** Importe `postman/consolidador-extrato.postman_collection.json` — são os requests da demo na ordem do roteiro, com testes automáticos (Run Collection → 35 asserções verdes, incluindo a prova do broadcast entre as 2 instâncias da consulta e a saúde de Prometheus/Grafana; as asserções são relativas ao estado, então pode rodar quantas vezes quiser). Via CLI: `npx newman run postman/consolidador-extrato.postman_collection.json`.
 
 > No Git Bash do Windows, o `sh -c "exec /opt/..."` evita a conversão automática de caminhos (MSYS) que quebraria o `/opt/kafka/...`.
 
-### Rodando com observabilidade (Prometheus + Grafana, ADR-008)
+### Observabilidade (Prometheus + Grafana, ADR-008) — já incluída no padrão
 
 ```bash
-docker compose --profile observabilidade up -d --build
+docker compose up -d --build
 ```
 
-Sobe tudo da demo **mais** Prometheus (`http://localhost:9090` — em `/targets`, os alvos do scrape) e Grafana (`http://localhost:3000`, sem login) com o dashboard **"Consolidador de Extrato — visão da banca"** provisionado: fluxo de lançamentos (aceito × incorporado × **repetido** — a idempotência como série temporal), cache hit ratio, DLQ por motivo (fica vermelho quando o veneno entra) e disjuntor/fallback. Rode o roteiro `curl`/Postman acima e veja os painéis mexerem.
+Junto com a demo sobem Prometheus (`http://localhost:9090` — em `/targets`, os alvos do scrape) e Grafana (`http://localhost:3000`, sem login) com o dashboard **"Consolidador de Extrato — visão da banca"** provisionado: fluxo de lançamentos (aceito × incorporado × **repetido** — a idempotência como série temporal), cache hit ratio, DLQ por motivo (fica vermelho quando o veneno entra) e disjuntor/fallback. Rode o roteiro `curl`/Postman acima e veja os painéis mexerem.
 
-Cada serviço expõe as métricas cruas em `/q/metrics` (formato Prometheus): contadores de negócio `extrato_*`, cache do Caffeine (`cache_gets_total`) e SmallRye FT (`ft_*`), além de JVM/HTTP. Portas 9090/3000 ocupadas na sua máquina? `PROMETHEUS_PORT=9091 GRAFANA_PORT=3001 docker compose --profile observabilidade up -d`.
+Cada serviço expõe as métricas cruas em `/q/metrics` (formato Prometheus): contadores de negócio `extrato_*`, cache do Caffeine (`cache_gets_total`) e SmallRye FT (`ft_*`), além de JVM/HTTP. Portas 9090/3000 ocupadas na sua máquina? `PROMETHEUS_PORT=9091 GRAFANA_PORT=3001 docker compose up -d`.
 
 Guia completo da observabilidade (logs + correlação + métricas + dashboard, com a tabela de todas as métricas): [`docs/observabilidade.md`](docs/observabilidade.md).
 

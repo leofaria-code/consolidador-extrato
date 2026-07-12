@@ -8,7 +8,7 @@
 ## Antes de entrar na sala (checklist)
 
 - [ ] `./demo.ps1` rodado **antes** — a stack leva ~2 min para ficar saudável; conferir `curl http://localhost:808{1,2,3}/q/health`.
-- [ ] Portas 8081–8083 e 15672 livres (nenhum `quarkus:dev` esquecido).
+- [ ] Portas 8081–8084, 15672, 9090 e 3000 livres (nenhum `quarkus:dev` esquecido; a stack completa sobe por padrão).
 - [ ] **Postman aberto com a coleção importada** (`postman/consolidador-extrato.postman_collection.json`) — é o caminho visual dos passos 0–5; fallback: `npx newman run postman/...json` no terminal.
 - [ ] Terminal com fonte grande + os comandos deste roteiro prontos para colar (fallback dos passos do Postman e caminho único dos passos 6–7).
 - [ ] UI do RabbitMQ logada (`localhost:15672`, guest/guest) numa aba.
@@ -33,11 +33,11 @@
 | 7 | Leo | **Correlação ponta a ponta**: o mesmo id do POST aparece no log da ingestão, consolidação e invalidação da consulta (JSON) | `docker compose logs \| grep banca-01` |
 | 7b | Marcos | **Disjuntor + última resposta boa (promovido a ato principal)**: derrubar a consolidação AO VIVO → miss forçado serve a última cópia com carimbo antigo (transparência); cliente sem cópia → 503 com Retry-After; religar → normaliza | `docker compose stop consolidacao` → GET `?atualizar=true` → GET cliente novo → `docker compose start consolidacao` |
 | 8 | Rodrigo | **Testabilidade**: suíte inteira sem Docker + os DOIS contratos PACT (HTTP e mensagem) verificados no build + CI duplo (verify + e2e com Newman e guarda semântico) | `mvn verify -Pplano-b-jvm` (ou output salvo) + `pacts/*.json` + aba Actions com os selos verdes |
-| 9 | Leo | **Fechamento — a jornada de engenharia (critério 8 no palco)**: 4 bugs reais que só os brokers de verdade revelaram (DLX, payload do Rabbit, @Blocking, deserialização que TRAVAVA a partição) + o guarda de CI que reprovou o próprio criador na estreia. Mensagem final: "o repositório se auto-fiscaliza — 38 testes, 27 asserções e2e e 2 contratos a cada PR" | 1 min de fala, aba do `uso-de-ia.md` aberta |
+| 9 | Leo | **Fechamento — a jornada de engenharia (critério 8 no palco)**: 4 bugs reais que só os brokers de verdade revelaram (DLX, payload do Rabbit, @Blocking, deserialização que TRAVAVA a partição) + o guarda de CI que reprovou o próprio criador na estreia. Mensagem final: "o repositório se auto-fiscaliza — 41 testes, 35 asserções e2e e 3 contratos a cada PR" | 1 min de fala, aba do `uso-de-ia.md` aberta |
 
 **Como executar os passos 0–5 (duas opções):**
 
-- **Visual (recomendada): Run Collection no Postman** — a coleção espelha exatamente esses passos em pastas (`0 · Saúde` … `6 · Domínio: lote e fora de ordem`), com **27 asserções que ficam verdes na tela** enquanto quem está apresentando narra cada pasta. As asserções são relativas ao estado, então pode rodar de novo sem medo (inclusive no ensaio).
+- **Visual (recomendada): Run Collection no Postman** — a coleção espelha exatamente esses passos em pastas (`0 · Saúde` … `7 · Broadcast + observabilidade`), com **35 asserções que ficam verdes na tela** enquanto quem está apresentando narra cada pasta. As asserções são relativas ao estado, então pode rodar de novo sem medo (inclusive no ensaio).
 - **Terminal (fallback):** os `curl` do README §Testando o fluxo ponta a ponta.
 
 Os passos **6–7 continuam no terminal + UI do Rabbit de propósito**: DLQ e correlação são onde a banca precisa ver o *broker* de verdade (headers de causa no tópico, `x-death` na fila, o mesmo `corr` nos logs JSON dos 3 serviços) — não uma abstração de client HTTP.
@@ -63,8 +63,8 @@ Os passos **6–7 continuam no terminal + UI do Rabbit de propósito**: DLQ e co
 
 ## Ato bônus (só se perguntarem — já validado ao vivo)
 
-- **Escala horizontal**: `docker compose --profile escala up -d consulta-replica` → réplica na 8084; um POST invalida as DUAS (broadcast — ADR-006 nota). *Se pretenderem usar, subir a réplica ANTES da sala (leva ~40s).*
-- **Dashboard ao vivo (ADR-008)**: subir com `docker compose --profile observabilidade up -d` ANTES da sala → Grafana em `localhost:3000` (sem login), dashboard "visão da banca". Roteiro de 1 min: lote da coleção Postman → o gráfico de **fluxo** mexe (aceito × incorporado) e a série **repetidos ignorados** sobe ao repetir o POST (idempotência SEM olhar log); veneno do ato 6 → painel **DLQ fica vermelho na hora**; derrubar a consolidação (ato 7b) → painel do **disjuntor/fallback** mexe. Prometheus cru em `localhost:9090/targets` (a réplica aparece DOWN se o profile `escala` não subiu — esperado). Frase de efeito: "a idempotência não é uma linha de log — é uma série temporal".
+- **Escala horizontal**: a réplica da consulta **já sobe por padrão** com o compose (8084; revisão da ADR-008 em 11/07) — um POST invalida as DUAS (broadcast — ADR-006 nota). Nada a subir na hora.
+- **Dashboard ao vivo (ADR-008)**: Prometheus + Grafana **já sobem por padrão** com o compose → Grafana em `localhost:3000` (sem login), dashboard "visão da banca". Roteiro de 1 min: lote da coleção Postman → o gráfico de **fluxo** mexe (aceito × incorporado) e a série **repetidos ignorados** sobe ao repetir o POST (idempotência SEM olhar log); veneno do ato 6 → painel **DLQ fica vermelho na hora**; derrubar a consolidação (ato 7b) → painel do **disjuntor/fallback** mexe. Prometheus cru em `localhost:9090/targets` (os 4 alvos UP — a réplica sobe por padrão desde 11/07). Frase de efeito: "a idempotência não é uma linha de log — é uma série temporal".
 
 ## Arguição — perguntas prováveis × resposta curta (e onde está escrito)
 
@@ -84,7 +84,7 @@ Os passos **6–7 continuam no terminal + UI do Rabbit de propósito**: DLQ e co
    3× backoff exponencial é a ata da Sessão 6 (decisão 8), ajustável por config — "e se não bastar?" é deploy de config. Em processo preserva a ordem por conta e dá intervalos crescentes reais; broker fica como camada de entrega. Régua única: toda falha ganha 3 chances; a que persiste vai à DLQ com a causa nos headers — **demonstrado ao vivo no passo 6**. → ADR-007.
 
 6. **"Cache: por que não uma réplica própria na consulta? Por que não Redis? E se escalar?"** (cache, peso 10)
-   O evento carrega só referência (minimização/LGPD) — a réplica exigiria chamar a consolidação a cada evento de qualquer forma: mais complexa sem eliminar o acoplamento. A dependência do miss fica governada pelo PACT. Em escala horizontal, a invalidação é **broadcast** (consumer group por instância — demonstrável com `--profile escala`: 2 réplicas, um POST, as duas invalidam); o que fica local é o hit — eficiência, não correção; Redis é upgrade por medição. TTL 5min = meta de frescor da US-05. E se a consolidação cair no miss? Disjuntor + **última resposta boa** com o carimbo expondo a idade; sem cópia, 503 com Retry-After. → ADR-006 (+notas) e ADR-007.
+   O evento carrega só referência (minimização/LGPD) — a réplica exigiria chamar a consolidação a cada evento de qualquer forma: mais complexa sem eliminar o acoplamento. A dependência do miss fica governada pelo PACT. Em escala horizontal, a invalidação é **broadcast** (consumer group por instância — demonstrável ao vivo: a réplica da 8084 já está no ar por padrão; um POST, as duas invalidam); o que fica local é o hit — eficiência, não correção; Redis é upgrade por medição. TTL 5min = meta de frescor da US-05. E se a consolidação cair no miss? Disjuntor + **última resposta boa** com o carimbo expondo a idade; sem cópia, 503 com Retry-After. → ADR-006 (+notas) e ADR-007.
 
 7. **"Por que Quarkus se o curso é em Spring? Cadê o @RetryableTopic?"**
    Decisão estratégica (adoção na Caixa + próximo módulo); os PADRÕES são os mesmos e a tradução foi parte do aprendizado. `@RetryableTopic` vira DUAS camadas no Quarkus: `@Retry` (política de tentativa) + `failure-strategy` (destino da falha) — separação que até ajuda: são decisões independentes. → ADR-001 (tabela de equivalências).

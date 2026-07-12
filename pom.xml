@@ -96,8 +96,9 @@
     <!--
       Perfis de execução (contrato de entrega §3 do projeto final):
 
-      * plano-a-docker (padrão): brokers e cache reais via Docker (Quarkus Dev Services
-        sobe Kafka/RabbitMQ/Redis automaticamente em dev/test quando houver Docker).
+      * plano-a-docker (padrão): brokers reais via Docker (Quarkus Dev Services
+        sobe Kafka/RabbitMQ automaticamente em dev/test quando houver Docker;
+        o cache é Caffeine, in-process — sem Redis, ADR-006).
       * plano-b-jvm: pura-JVM, sem Docker — Dev Services desligados; mensageria usa o
         connector in-memory nos testes e o cache usa Caffeine local. É o perfil em que
         `mvn verify` DEVE passar (critério 6: testes rodam sem Docker).
