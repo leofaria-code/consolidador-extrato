@@ -1,5 +1,5 @@
 # E2E do plano A no CI: sobe a stack REAL (Kafka/RabbitMQ/Postgres + 3 serviços)
-# no runner e roda a coleção Postman (27 asserções) com Newman. A demo deixa de
+# no runner e roda a coleção Postman (35 asserções) com Newman. A demo deixa de
 # ser "validada naquele dia" e passa a ser provada a cada PR — o mesmo selo
 # contínuo que o plano B já tem (verify.yml), agora para a integração.
 name: e2e
@@ -23,18 +23,18 @@ jobs:
         run: mvn --batch-mode -DskipTests package
       - name: Subir a stack da demo
         run: docker compose up -d --build
-      - name: Aguardar saúde dos 3 serviços
+      - name: Aguardar saúde dos serviços (3 + réplica — stack completa é o padrão)
         run: |
           for i in $(seq 1 60); do
             ok=0
-            for p in 8081 8082 8083; do
+            for p in 8081 8082 8083 8084; do
               curl -sf "http://localhost:$p/q/health" >/dev/null && ok=$((ok+1))
             done
-            [ "$ok" -eq 3 ] && echo "3 serviços saudáveis" && exit 0
+            [ "$ok" -eq 4 ] && echo "4 serviços saudáveis" && exit 0
             sleep 5
           done
           echo "timeout aguardando saúde" && docker compose logs --tail 50 && exit 1
-      - name: Newman — coleção da demo (27 asserções)
+      - name: Newman — coleção da demo (35 asserções)
         run: npx --yes newman run postman/consolidador-extrato.postman_collection.json
       - name: Coleções de API em dia com o código (guarda semântico)
         run: |
