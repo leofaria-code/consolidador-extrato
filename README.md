@@ -172,6 +172,7 @@ Sobe brokers reais (Kafka, RabbitMQ, Postgres) **e** os três serviços com um c
 ./demo.ps1        # Windows (ou ./demo.sh no Linux/macOS)
 ```
 
+
 A stack sobe **completa por padrão** — nenhum `--profile` necessário (ADR-008, revisão 11/07). O roteiro `curl` da seção anterior funciona igual. A base é **descartável** (`drop-and-create` a cada subida do container da consolidação).
 
 **Links rápidos** (um clique, com a stack de pé):
@@ -185,6 +186,7 @@ A stack sobe **completa por padrão** — nenhum `--profile` necessário (ADR-00
 | Grafana — dashboard "visão da banca" | <http://localhost:3000> | sem login (viewer anônimo) |
 | Prometheus — alvos do scrape | <http://localhost:9090/targets> | os 4 serviços `up` |
 | RabbitMQ Management | <http://localhost:15672> | `guest`/`guest` — fila `reconsolidacao` e a DLQ ao vivo |
+| Kafka UI | <http://localhost:8080> | - |
 
 Cada serviço também responde `http://localhost:808{1-4}/q/health` (saúde) e `/q/metrics` (métricas cruas, formato Prometheus).
 
@@ -205,12 +207,15 @@ A DLQ da fila de reconsolidação (`reconsolidacao-dlq`) é visível na UI do Ra
 
 | Recurso | Endereço no host | Ferramentas |
 |---|---|---|
-| Kafka (listener `EXTERNAL`) | `localhost:29092` | Offset Explorer, kafka-ui, plugin Kafka do IntelliJ |
+| Kafka UI | `http://localhost:8080` | browser |
+| Kafka (listener `EXTERNAL`) | `localhost:29092` | Offset Explorer, plugin Kafka do IntelliJ |
 | Postgres (`consolidacao`) | `localhost:15432` · `extrato`/`extrato` | psql, IntelliJ Database |
 
 > Kafka do host exige o listener dedicado: mapear só a 9092 não funciona — o broker anuncia `kafka:9092` no metadata, nome que não resolve fora do compose (por isso o `EXTERNAL://localhost:29092`).
 
-**Prefere Postman?** Importe `postman/consolidador-extrato.postman_collection.json` — são os requests da demo na ordem do roteiro, com testes automáticos (Run Collection → 35 asserções verdes, incluindo a prova do broadcast entre as 2 instâncias da consulta e a saúde de Prometheus/Grafana; as asserções são relativas ao estado, então pode rodar quantas vezes quiser). Via CLI: `npx newman run postman/consolidador-extrato.postman_collection.json`.
+> Porta `8080` ocupada? `KAFKA_UI_PORT=8085 docker compose up -d kafka-ui`.
+
+**Prefere Postman?** Importe `postman/consolidador-extrato.postman_collection.json` — são os requests da demo na ordem do roteiro, com testes automáticos (Run Collection → 27 asserções verdes; as asserções são relativas ao estado, então pode rodar quantas vezes quiser). Via CLI: `npx newman run postman/consolidador-extrato.postman_collection.json`.
 
 > No Git Bash do Windows, o `sh -c "exec /opt/..."` evita a conversão automática de caminhos (MSYS) que quebraria o `/opt/kafka/...`.
 
@@ -226,6 +231,30 @@ Cada serviço expõe as métricas cruas em `/q/metrics` (formato Prometheus): co
 
 Guia completo da observabilidade (logs + correlação + métricas + dashboard, com a tabela de todas as métricas): [`docs/observabilidade.md`](docs/observabilidade.md).
 
+### Simulando 1 minuto de uso "real"
+
+Para gerar um minuto de trafego misto contra a stack local, use o script:
+
+```bash
+./simular-cenario-real.sh
+```
+
+Ele mistura os comportamentos mais importantes do dominio sem cair em falso negativo por regra de negocio:
+
+- `POST /lancamentos` com clientes/contas diferentes
+- reenvio do mesmo lancamento (prova de idempotencia)
+- `GET /extrato`
+- `GET /extrato?atualizar=true` controlado (sem disparar `429` no mesmo cliente)
+- `POST /reconsolidacoes`
+
+Quer rodar por mais tempo ou apontar para outra stack?
+
+```bash
+SIMULATION_DURATION_SECONDS=120 ./simular-cenario-real.sh
+SIMULATION_PROMETHEUS_URL=http://localhost:9091 ./simular-cenario-real.sh
+```
+
+No fim, o script imprime um resumo com contagem de lancamentos, consultas, reenvios idempotentes, reconsolidacoes e erros inesperados. Se `SIMULATION_PROMETHEUS_URL` estiver definido, ele tambem consulta algumas metricas no Prometheus para facilitar a leitura da observabilidade logo apos a simulacao.
 ## Rodar direto do Docker Hub — sem clonar, sem Maven, sem JDK (ADR-009)
 
 A via acima (`demo.ps1` / `docker compose up`) **builda do código-fonte** e exige JDK 25 + Maven. Para quem só quer **executar** o projeto pronto, há uma segunda via que puxa as imagens já empacotadas do Docker Hub — o único pré-requisito é ter **Docker**:
@@ -272,3 +301,6 @@ Java 25 (LTS) · Quarkus 3.33.2 (LTS, BOM `io.quarkus.platform`) · Maven multi-
 ## Como começar
 
 Leia `docs/requisitos/README.md` — o pacote de requisitos é a entrada de todo o desenvolvimento. As user stories são a primeira fonte de verdade; em divergência, as transcrições prevalecem (a Sessão 6 corrige e precisa as anteriores).
+
+echo 'isto-nao-e-json' | \
+docker compose exec -T kafka sh -c "exec /opt/kafka/bin/kafka-console-producer.sh --bootstrap-server localhost:9092 --topic lancamentos-recebidos"
