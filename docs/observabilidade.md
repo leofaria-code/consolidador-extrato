@@ -89,18 +89,18 @@ Tags só com valores **enumerados** (`resultado`, `motivo`). Identificador de cl
 
 `MetricasIngestaoTest` · `MetricasConsolidacaoTest` (o mesmo lançamento 2× produz `incorporado` E `repetido`) · `MetricasConsultaTest` (hit/miss built-in). Asserções de **presença**, nunca de valor exato — counters acumulam entre testes da mesma JVM.
 
-## Stack visual — Prometheus + Grafana (profile `observabilidade`)
+## Stack visual — Prometheus + Grafana (padrão no compose desde 11/07)
 
 ```bash
-docker compose --profile observabilidade up -d --build
+docker compose up -d --build
 ```
 
 | Serviço | Endereço | O que tem |
 |---|---|---|
-| Prometheus | `http://localhost:9090` | `/targets`: 4 alvos (ingestao/consolidacao/consulta UP; `consulta-replica` DOWN sem `--profile escala` — esperado) |
+| Prometheus | `http://localhost:9090` | `/targets`: 4 alvos UP (ingestao/consolidacao/consulta/consulta-replica — todos sobem por padrão; ADR-008, revisão 11/07) |
 | Grafana | `http://localhost:3000` (sem login — viewer anônimo) | dashboard **"Consolidador de Extrato — visão da banca"** |
 
-Portas ocupadas na sua máquina? `PROMETHEUS_PORT=9091 GRAFANA_PORT=3001 docker compose --profile observabilidade up -d`.
+Portas ocupadas na sua máquina? `PROMETHEUS_PORT=9091 GRAFANA_PORT=3001 docker compose up -d`.
 
 Tudo provisionado por arquivo em [`infra/observabilidade/`](../infra/observabilidade/) (scrape 5s, datasource, dashboard JSON) — **nada clicado à mão**: a stack sobe pronta do zero, e edição pela UI do Grafana não sobrevive ao restart (proposital: o JSON versionado é a fonte de verdade).
 

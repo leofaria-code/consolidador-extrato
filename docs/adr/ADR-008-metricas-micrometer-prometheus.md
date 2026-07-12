@@ -1,6 +1,6 @@
 # ADR-008 — Métricas: Micrometer + endpoint Prometheus, com Grafana opcional na demo
 
-- **Status:** aceita · 11/07/2026
+- **Status:** aceita · 11/07/2026 · **revisada 11/07/2026** (Prometheus/Grafana saem do profile opt-in e passam a subir por padrão no compose — ver "Demo")
 - **Decisores:** Leo, Sandy, Marcos, Rodrigo
 - **Origem:** extensão do Inc-6 (US-12 — opcional de observabilidade): logs + correlação respondem "o que aconteceu com ESTE pedido"; faltava responder "quanto, com que taxa, e está piorando?" sem grep em log
 - **Relaciona-se com:** ADR-004 (a idempotência vira métrica: `repetido` × `incorporado`), ADR-006 (hit/miss do Caffeine built-in), ADR-007 (DLQ e disjuntor medidos, não só logados), ADR-002 (`shared-contracts` continua só com tipos de fronteira — nenhuma dependência de observabilidade lá), ADR-003 (métricas não podem exigir broker: o gate do plano B cobre o endpoint)
@@ -38,7 +38,7 @@ Contadores incrementam **só no desfecho** — tentativa falha de `@Retry` não 
 
 **Regra 3 — cardinalidade baixa é lei.** Tags só com valores enumerados (`resultado`, `motivo`). Identificador de cliente/conta/correlação **nunca** vira label: explode séries no Prometheus e vaza dado pessoal em superfície não protegida (LGPD). Quem responde "qual cliente?" é o log correlacionado do Inc-6 — cada ferramenta na sua pergunta.
 
-**Demo (opcional por profile):** `docker compose --profile observabilidade up` sobe Prometheus (scrape 5s em `/q/metrics`) + Grafana anônimo-viewer com datasource e dashboard provisionados por arquivo — reproduzível do zero, nada clicado à mão. O profile é opt-in: `demo.ps1` e o workflow e2e do CI não mudam.
+**Demo (padrão no compose — revisão 11/07):** `docker compose up` sobe Prometheus (scrape 5s em `/q/metrics`) + Grafana anônimo-viewer com datasource e dashboard provisionados por arquivo — reproduzível do zero, nada clicado à mão. *Histórico:* a decisão original confinava a dupla ao profile `observabilidade` (opt-in) para não pesar o e2e do CI nem o `demo.ps1`; foi revisada no mesmo dia, junto com a réplica da consulta (ex-profile `escala`), quando o objetivo passou a ser **stack completa para qualquer um que rodar o compose** — a demo da banca e uma eventual distribuição pública mostram o projeto inteiro sem comando extra. O custo aceito: 2 pulls de imagem e 1 build a mais no e2e.
 
 ## Consequências
 
@@ -47,4 +47,4 @@ Contadores incrementam **só no desfecho** — tentativa falha de `@Retry` não 
 - (+) Caminho de evolução documentado: OTel = troca de registry, instrumentação preservada.
 - (−) Nomes das métricas built-in (`cache_gets_total`, `ft_*`) são do SmallRye/Micrometer e podem mudar entre versões — mitigação: teste de presença no plano B (`MetricasConsultaTest`) pega divergência do cache; os `ft_*` do dashboard foram conferidos contra o `/q/metrics` real do plano A em 11/07 (achado: fallback é `ft_invocations_total{fallback="applied"}`, não `ft_fallback_calls_total` — ver uso-de-ia.md).
 - (−) Sem tracing distribuído: a timeline visual de um pedido continua sendo lida por correlation id nos logs. Aceito — é exatamente o trade-off da alternativa 1.
-- (−) Duas imagens a mais na demo (Prometheus/Grafana) — confinadas ao profile; quem roda `docker compose up` puro não paga nada.
+- (−) Duas imagens a mais na demo (Prometheus/Grafana) — desde a revisão de 11/07 elas sobem por padrão; quem quiser a stack mínima usa `docker compose up ingestao consolidacao consulta` (as dependências sobem junto).
