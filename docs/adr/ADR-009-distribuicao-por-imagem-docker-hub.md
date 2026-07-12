@@ -29,7 +29,7 @@ Para a via do Hub ser "um arquivo e roda", o `docker-compose.hub.yml` não pode 
 
 ## Consequências
 
-- (+) Terceiro roda a stack completa com só Docker: `HUB_NS=<usuario> docker compose -f docker-compose.hub.yml up -d`. Sem clone, sem JDK, sem Maven.
+- (+) Terceiro roda a stack completa com só Docker: `docker compose -f docker-compose.hub.yml up -d` (namespace padrão `leofariacode` embutido — sem variável de ambiente, idêntico em Windows/Linux/macOS). Sem clone, sem JDK, sem Maven.
 - (+) A via principal (build-from-source) fica **intocada**: demo da banca, CI (`verify`/`e2e`) e o desenvolvimento diário seguem idênticos.
 - (+) Coerência: a observabilidade passa a ser tão auto-suficiente quanto os serviços (config na imagem, como o `.jar`).
 - (−) **As imagens do Hub são um retrato, não um espelho.** Mudança em dashboard/scrape só chega ao consumidor do Hub após republicar (`publicar-hub` com tag nova). Mitigação: o desenvolvimento acontece contra a via principal (arquivo em disco, ao vivo); a republicação é deliberada, ao cortar uma release — não a cada ajuste. Mudança de código de serviço exigiria republicar de qualquer forma (o `.jar` é assado).

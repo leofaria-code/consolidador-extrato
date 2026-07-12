@@ -8,7 +8,8 @@
 #   ./publicar-hub.ps1 -Namespace localtest -Tag dev -SkipPush   # só builda/taggeia (validação)
 #
 # Depois de publicar, qualquer um sobe a stack completa sem clonar/Maven/JDK:
-#   HUB_NS=seu-usuario docker compose -f docker-compose.hub.yml up -d
+#   docker compose -f docker-compose.hub.yml up -d              (namespace leofariacode)
+#   $env:HUB_NS="seu-usuario"; docker compose -f docker-compose.hub.yml up -d   (outro namespace)
 param(
   [Parameter(Mandatory = $true)][string]$Namespace,
   [string]$Tag = "1.0.0",
@@ -57,4 +58,4 @@ foreach ($nome in $imagens.Keys) {
 }
 
 Write-Host "OK — 5 imagens publicadas em https://hub.docker.com/u/$Namespace" -ForegroundColor Green
-Write-Host "Testar: HUB_NS=$Namespace TAG=$Tag docker compose -f docker-compose.hub.yml up -d"
+Write-Host "Testar: `$env:HUB_NS=`"$Namespace`"; `$env:TAG=`"$Tag`"; docker compose -f docker-compose.hub.yml up -d"

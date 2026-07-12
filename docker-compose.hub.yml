@@ -5,7 +5,12 @@
 # Isto NÃO substitui o docker-compose.yml (build-from-source, usado na demo/CI):
 # é uma opção adicional para quem só quer executar o projeto já empacotado.
 #
-#   HUB_NS=seu-usuario-dockerhub docker compose -f docker-compose.hub.yml up -d
+#   docker compose -f docker-compose.hub.yml up -d
+#
+# Puxa do namespace publicado (leofariacode) por padrão — sem variável, funciona
+# igual em Windows/Linux/macOS. Se você forkou e publicou no SEU namespace:
+#   Linux/macOS:  HUB_NS=seu-usuario docker compose -f docker-compose.hub.yml up -d
+#   Windows (PS): $env:HUB_NS="seu-usuario"; docker compose -f docker-compose.hub.yml up -d
 #
 # Publicar/atualizar as imagens: ./publicar-hub.ps1 (ou .sh) — ver README.
 # Fixe uma versão com TAG=1.0.0 (default: latest).
@@ -64,7 +69,7 @@ services:
   # Os 3 serviços + réplica: imagens publicadas (jar + JRE 25 já assados dentro).
   # HUB_NS é obrigatório; falha com mensagem clara se não for definido.
   ingestao:
-    image: ${HUB_NS:?defina HUB_NS com seu usuario do Docker Hub}/extrato-ingestao:${TAG:-latest}
+    image: ${HUB_NS:-leofariacode}/extrato-ingestao:${TAG:-latest}
     ports:
       - "8081:8081"
     environment:
@@ -74,7 +79,7 @@ services:
         condition: service_healthy
 
   consolidacao:
-    image: ${HUB_NS:?defina HUB_NS com seu usuario do Docker Hub}/extrato-consolidacao:${TAG:-latest}
+    image: ${HUB_NS:-leofariacode}/extrato-consolidacao:${TAG:-latest}
     ports:
       - "8082:8082"
     environment:
@@ -96,7 +101,7 @@ services:
         condition: service_healthy
 
   consulta:
-    image: ${HUB_NS:?defina HUB_NS com seu usuario do Docker Hub}/extrato-consulta:${TAG:-latest}
+    image: ${HUB_NS:-leofariacode}/extrato-consulta:${TAG:-latest}
     ports:
       - "8083:8083"
     environment:
@@ -110,7 +115,7 @@ services:
 
   # Réplica: REUSA a imagem da consulta (broadcast de invalidação — ADR-006 nota).
   consulta-replica:
-    image: ${HUB_NS:?defina HUB_NS com seu usuario do Docker Hub}/extrato-consulta:${TAG:-latest}
+    image: ${HUB_NS:-leofariacode}/extrato-consulta:${TAG:-latest}
     ports:
       - "8084:8083"
     environment:
@@ -126,12 +131,12 @@ services:
   # Observabilidade com config assada na imagem (ADR-009) — sem volumes, sem
   # depender de arquivos do repo. Fonte de verdade segue em infra/observabilidade/.
   prometheus:
-    image: ${HUB_NS:?defina HUB_NS com seu usuario do Docker Hub}/extrato-prometheus:${TAG:-latest}
+    image: ${HUB_NS:-leofariacode}/extrato-prometheus:${TAG:-latest}
     ports:
       - "${PROMETHEUS_PORT:-9090}:9090"
 
   grafana:
-    image: ${HUB_NS:?defina HUB_NS com seu usuario do Docker Hub}/extrato-grafana:${TAG:-latest}
+    image: ${HUB_NS:-leofariacode}/extrato-grafana:${TAG:-latest}
     ports:
       - "${GRAFANA_PORT:-3000}:3000"
     depends_on:
