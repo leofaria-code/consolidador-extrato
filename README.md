@@ -215,7 +215,7 @@ A DLQ da fila de reconsolidação (`reconsolidacao-dlq`) é visível na UI do Ra
 
 > Porta `8080` ocupada? `KAFKA_UI_PORT=8085 docker compose up -d kafka-ui`.
 
-**Prefere Postman?** Importe `postman/consolidador-extrato.postman_collection.json` — são os requests da demo na ordem do roteiro, com testes automáticos (Run Collection → 27 asserções verdes; as asserções são relativas ao estado, então pode rodar quantas vezes quiser). Via CLI: `npx newman run postman/consolidador-extrato.postman_collection.json`.
+**Prefere Postman?** Importe `postman/consolidador-extrato.postman_collection.json` — são os requests da demo na ordem do roteiro, com testes automáticos (Run Collection → 35 asserções verdes, incluindo a prova do broadcast entre as 2 instâncias da consulta e a saúde de Prometheus/Grafana; as asserções são relativas ao estado, então pode rodar quantas vezes quiser). Via CLI: `npx newman run postman/consolidador-extrato.postman_collection.json`.
 
 > No Git Bash do Windows, o `sh -c "exec /opt/..."` evita a conversão automática de caminhos (MSYS) que quebraria o `/opt/kafka/...`.
 
@@ -255,6 +255,7 @@ SIMULATION_PROMETHEUS_URL=http://localhost:9091 ./simular-cenario-real.sh
 ```
 
 No fim, o script imprime um resumo com contagem de lancamentos, consultas, reenvios idempotentes, reconsolidacoes e erros inesperados. Se `SIMULATION_PROMETHEUS_URL` estiver definido, ele tambem consulta algumas metricas no Prometheus para facilitar a leitura da observabilidade logo apos a simulacao.
+
 ## Rodar direto do Docker Hub — sem clonar, sem Maven, sem JDK (ADR-009)
 
 A via acima (`demo.ps1` / `docker compose up`) **builda do código-fonte** e exige JDK 25 + Maven. Para quem só quer **executar** o projeto pronto, há uma segunda via que puxa as imagens já empacotadas do Docker Hub — o único pré-requisito é ter **Docker**:
@@ -301,6 +302,3 @@ Java 25 (LTS) · Quarkus 3.33.2 (LTS, BOM `io.quarkus.platform`) · Maven multi-
 ## Como começar
 
 Leia `docs/requisitos/README.md` — o pacote de requisitos é a entrada de todo o desenvolvimento. As user stories são a primeira fonte de verdade; em divergência, as transcrições prevalecem (a Sessão 6 corrige e precisa as anteriores).
-
-echo 'isto-nao-e-json' | \
-docker compose exec -T kafka sh -c "exec /opt/kafka/bin/kafka-console-producer.sh --bootstrap-server localhost:9092 --topic lancamentos-recebidos"
