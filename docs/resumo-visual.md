@@ -2,7 +2,7 @@
 
 > 1 página, 4 diagramas, os números do projeto. GitHub renderiza os Mermaid nativamente.
 
-**Números:** 3 serviços · 8 ADRs (+índice) · 41 testes plano B + 35 asserções e2e no CI · 3 contratos PACT (2 HTTP + 1 mensagem) · 4 bugs reais achados no plano A · demo de 1 comando (`./demo.ps1`).
+**Números:** 3 serviços · 9 ADRs (+índice) · 41 testes plano B + 35 asserções e2e no CI · 3 contratos PACT (2 HTTP + 1 mensagem) · 4 bugs reais achados no plano A · demo de 1 comando (`./demo.ps1`).
 
 ## 1 · Fluxo feliz — os três efeitos e o outbox (ADRs 004/005)
 

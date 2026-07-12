@@ -10,7 +10,7 @@ Projeto final em grupo do módulo **BE-JV-010 — Arquitetura de Software Ágil 
 
 ## Estado atual
 
-✅ **Projeto entregue** — 6 incrementos, 7 ADRs, CI duplo (plano B + e2e) verde. Resta o ensaio cronometrado; **banca em 15/07/2026**.
+✅ **Projeto entregue** — 7 incrementos, 9 ADRs, CI duplo (plano B + e2e) verde. Resta o ensaio cronometrado; **banca em 15/07/2026**.
 
 | Entregável | Status |
 |---|---|
