@@ -19,8 +19,8 @@ scrape_configs:
     static_configs:
       - targets: ["consulta:8083"]
 
-  # Réplica da demo de escala (ADR-006): alvo aparece DOWN se o profile
-  # `escala` não estiver de pé — esperado, e até didático na arguição.
+  # Réplica da demo de escala (ADR-006): sobe por padrão desde 11/07 — o alvo
+  # aparece UP junto com os outros três (broadcast de invalidação demonstrável).
   - job_name: consulta-replica
     metrics_path: /q/metrics
     static_configs:
