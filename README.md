@@ -172,8 +172,21 @@ Sobe brokers reais (Kafka, RabbitMQ, Postgres) **e** os três serviços com um c
 ./demo.ps1        # Windows (ou ./demo.sh no Linux/macOS)
 ```
 
-Portas: `8081` ingestão · `8082` consolidação · `8083` consulta · `8084` réplica da consulta (broadcast de invalidação) · `15672` RabbitMQ Management (`guest`/`guest`) · `9090` Prometheus · `3000` Grafana (sem login). A stack sobe **completa por padrão** — nenhum `--profile` necessário (ADR-008, revisão 11/07).
-O roteiro `curl` da seção anterior funciona igual. A base é **descartável** (`drop-and-create` a cada subida do container da consolidação).
+A stack sobe **completa por padrão** — nenhum `--profile` necessário (ADR-008, revisão 11/07). O roteiro `curl` da seção anterior funciona igual. A base é **descartável** (`drop-and-create` a cada subida do container da consolidação).
+
+**Links rápidos** (um clique, com a stack de pé):
+
+| O quê | Link | Nota |
+|---|---|---|
+| Ingestão — Swagger UI | <http://localhost:8081/q/swagger-ui> | `POST /lancamentos` ao vivo |
+| Consolidação — Swagger UI | <http://localhost:8082/q/swagger-ui> | `/reconsolidacoes` (o guichê) e `/interno/posicoes` (par do PACT) |
+| Consulta — Swagger UI | <http://localhost:8083/q/swagger-ui> | `GET /extrato/{cliente}/{competencia}` |
+| Réplica da consulta | <http://localhost:8084/q/health> | mesma imagem da consulta, 2ª instância — prova do broadcast de invalidação |
+| Grafana — dashboard "visão da banca" | <http://localhost:3000> | sem login (viewer anônimo) |
+| Prometheus — alvos do scrape | <http://localhost:9090/targets> | os 4 serviços `up` |
+| RabbitMQ Management | <http://localhost:15672> | `guest`/`guest` — fila `reconsolidacao` e a DLQ ao vivo |
+
+Cada serviço também responde `http://localhost:808{1-4}/q/health` (saúde) e `/q/metrics` (métricas cruas, formato Prometheus).
 
 **Demonstrando a DLQ ao vivo** (US-08 — falha permanente não trava o fluxo):
 
@@ -188,13 +201,12 @@ docker compose exec -T kafka sh -c "exec /opt/kafka/bin/kafka-console-consumer.s
 
 A DLQ da fila de reconsolidação (`reconsolidacao-dlq`) é visível na UI do RabbitMQ em `http://localhost:15672`.
 
-**Inspecionando os brokers e o banco do host** (os serviços conversam pela rede interna do compose; estas portas existem só para tooling):
+**Inspecionando Kafka e o banco do host** (não são HTTP — precisam de ferramenta, não de browser; os serviços conversam pela rede interna do compose e estas portas existem só para tooling):
 
 | Recurso | Endereço no host | Ferramentas |
 |---|---|---|
 | Kafka (listener `EXTERNAL`) | `localhost:29092` | Offset Explorer, kafka-ui, plugin Kafka do IntelliJ |
 | Postgres (`consolidacao`) | `localhost:15432` · `extrato`/`extrato` | psql, IntelliJ Database |
-| RabbitMQ Management | `http://localhost:15672` · `guest`/`guest` | browser |
 
 > Kafka do host exige o listener dedicado: mapear só a 9092 não funciona — o broker anuncia `kafka:9092` no metadata, nome que não resolve fora do compose (por isso o `EXTERNAL://localhost:29092`).
 
