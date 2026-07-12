@@ -10,7 +10,7 @@
     {
       "id": 1,
       "title": "Fluxo de lançamentos (por segundo)",
-      "description": "Aceitos na borda (ingestão) x incorporados e repetidos na consolidação — a distância entre aceito e incorporado é o assíncrono; a série 'repetido' é a idempotência (ADR-004) trabalhando.",
+      "description": "Aceitos e rejeitados na borda (ingestão) x incorporados e repetidos na consolidação — a distância entre aceito e incorporado é o assíncrono; a série 'repetido' é a idempotência (ADR-004) trabalhando.",
       "type": "timeseries",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "gridPos": { "h": 9, "w": 14, "x": 0, "y": 0 },
@@ -36,6 +36,11 @@
           "refId": "C",
           "expr": "sum(rate(extrato_consolidacao_lancamentos_total{resultado=\"repetido\"}[1m]))",
           "legendFormat": "repetidos ignorados (idempotência)"
+        },
+        {
+          "refId": "D",
+          "expr": "sum(increase(extrato_ingestao_lancamentos_total{resultado=\"rejeitado\"}[1m]))",
+          "legendFormat": "rejeitados no ultimo minuto (ingestão 400)"
         }
       ]
     },

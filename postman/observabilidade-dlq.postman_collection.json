@@ -1,0 +1,145 @@
+{
+  "info": {
+    "name": "Consolidador de Extrato - Observabilidade - DLQ",
+    "description": "Colecao para acompanhar o contador de DLQ antes e depois da injecao manual de um veneno no topico Kafka. O passo de injecao continua manual porque a DLQ desta demo nasce no broker, fora da superficie HTTP do Postman. Ajuste `urlPrometheus` se a stack estiver em porta customizada.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "urlConsolidacao",
+      "value": "http://localhost:8082"
+    },
+    {
+      "key": "urlPrometheus",
+      "value": "http://localhost:9090"
+    },
+    {
+      "key": "dlqAntes",
+      "value": "0"
+    }
+  ],
+  "item": [
+    {
+      "name": "0 - Baseline do contador de DLQ",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('consulta do contador de DLQ respondeu com sucesso', function () {",
+              "  pm.response.to.have.status(200);",
+              "  pm.expect(pm.response.json().status).to.eql('success');",
+              "});",
+              "var resultados = pm.response.json().data.result;",
+              "var total = 0;",
+              "resultados.forEach(function (item) { total += Number(item.value[1]); });",
+              "pm.collectionVariables.set('dlqAntes', String(total));",
+              "pm.test('baseline de DLQ foi armazenado', function () {",
+              "  pm.expect(Number(pm.collectionVariables.get('dlqAntes'))).to.be.at.least(0);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{urlPrometheus}}/api/v1/query?query=extrato_consolidacao_dlq_enviados_total"
+      }
+    },
+    {
+      "name": "1 - Consolidacao segue UP antes do veneno",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('consolidacao esta UP antes da injecao', function () {",
+              "  pm.response.to.have.status(200);",
+              "  pm.expect(pm.response.json().status).to.eql('UP');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{urlConsolidacao}}/q/health"
+      }
+    },
+    {
+      "name": "2 - Passo manual - injete o veneno no Kafka",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('request auxiliar executado; agora injete o veneno e siga para o proximo passo', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "description": "Execute no terminal antes do proximo request:\\n\\n```bash\\necho 'isto-nao-e-json' | docker compose exec -T kafka sh -c \"exec /opt/kafka/bin/kafka-console-producer.sh --bootstrap-server localhost:9092 --topic lancamentos-recebidos\"\\n```\\n\\nAguarde ~8 segundos para as tentativas e o envio para a DLQ. Se quiser inspecionar a mensagem diretamente no topico de DLQ, use o comando do README depois de rodar esta colecao.",
+        "method": "GET",
+        "url": "{{urlConsolidacao}}/q/health"
+      }
+    },
+    {
+      "name": "3 - Contador de DLQ apos o veneno",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('consulta do contador de DLQ respondeu com sucesso', function () {",
+              "  pm.response.to.have.status(200);",
+              "  pm.expect(pm.response.json().status).to.eql('success');",
+              "});",
+              "var resultados = pm.response.json().data.result;",
+              "var total = 0;",
+              "resultados.forEach(function (item) { total += Number(item.value[1]); });",
+              "var anterior = Number(pm.collectionVariables.get('dlqAntes'));",
+              "pm.test('contador de DLQ nao diminuiu', function () {",
+              "  pm.expect(total).to.be.at.least(anterior);",
+              "});",
+              "pm.test('contador de DLQ aumentou apos a injecao manual', function () {",
+              "  pm.expect(total).to.be.above(anterior);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{urlPrometheus}}/api/v1/query?query=extrato_consolidacao_dlq_enviados_total"
+      }
+    },
+    {
+      "name": "4 - Consolidacao continua saudavel apos o veneno",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('consolidacao continua UP apos o veneno', function () {",
+              "  pm.response.to.have.status(200);",
+              "  pm.expect(pm.response.json().status).to.eql('UP');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{urlConsolidacao}}/q/health"
+      }
+    }
+  ]
+}

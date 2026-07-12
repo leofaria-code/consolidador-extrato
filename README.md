@@ -172,7 +172,7 @@ Sobe brokers reais (Kafka, RabbitMQ, Postgres) **e** os três serviços com um c
 ./demo.ps1        # Windows (ou ./demo.sh no Linux/macOS)
 ```
 
-Portas: `8081` ingestão · `8082` consolidação · `8083` consulta · `15672` RabbitMQ Management (`guest`/`guest`).
+Portas: `8080` Kafka UI · `8081` ingestão · `8082` consolidação · `8083` consulta · `15672` RabbitMQ Management (`guest`/`guest`).
 O roteiro `curl` da seção anterior funciona igual. A base é **descartável** (`drop-and-create` a cada subida do container da consolidação).
 
 **Demonstrando a DLQ ao vivo** (US-08 — falha permanente não trava o fluxo):
@@ -192,11 +192,14 @@ A DLQ da fila de reconsolidação (`reconsolidacao-dlq`) é visível na UI do Ra
 
 | Recurso | Endereço no host | Ferramentas |
 |---|---|---|
-| Kafka (listener `EXTERNAL`) | `localhost:29092` | Offset Explorer, kafka-ui, plugin Kafka do IntelliJ |
+| Kafka UI | `http://localhost:8080` | browser |
+| Kafka (listener `EXTERNAL`) | `localhost:29092` | Offset Explorer, plugin Kafka do IntelliJ |
 | Postgres (`consolidacao`) | `localhost:15432` · `extrato`/`extrato` | psql, IntelliJ Database |
 | RabbitMQ Management | `http://localhost:15672` · `guest`/`guest` | browser |
 
 > Kafka do host exige o listener dedicado: mapear só a 9092 não funciona — o broker anuncia `kafka:9092` no metadata, nome que não resolve fora do compose (por isso o `EXTERNAL://localhost:29092`).
+
+> Porta `8080` ocupada? `KAFKA_UI_PORT=8085 docker compose up -d kafka-ui`.
 
 **Prefere Postman?** Importe `postman/consolidador-extrato.postman_collection.json` — são os requests da demo na ordem do roteiro, com testes automáticos (Run Collection → 27 asserções verdes; as asserções são relativas ao estado, então pode rodar quantas vezes quiser). Via CLI: `npx newman run postman/consolidador-extrato.postman_collection.json`.
 
@@ -214,6 +217,31 @@ Cada serviço expõe as métricas cruas em `/q/metrics` (formato Prometheus): co
 
 Guia completo da observabilidade (logs + correlação + métricas + dashboard, com a tabela de todas as métricas): [`docs/observabilidade.md`](docs/observabilidade.md).
 
+### Simulando 1 minuto de uso "real"
+
+Para gerar um minuto de trafego misto contra a stack local, use o script:
+
+```bash
+./simular-cenario-real.sh
+```
+
+Ele mistura os comportamentos mais importantes do dominio sem cair em falso negativo por regra de negocio:
+
+- `POST /lancamentos` com clientes/contas diferentes
+- reenvio do mesmo lancamento (prova de idempotencia)
+- `GET /extrato`
+- `GET /extrato?atualizar=true` controlado (sem disparar `429` no mesmo cliente)
+- `POST /reconsolidacoes`
+
+Quer rodar por mais tempo ou apontar para outra stack?
+
+```bash
+SIMULATION_DURATION_SECONDS=120 ./simular-cenario-real.sh
+SIMULATION_PROMETHEUS_URL=http://localhost:9091 ./simular-cenario-real.sh
+```
+
+No fim, o script imprime um resumo com contagem de lancamentos, consultas, reenvios idempotentes, reconsolidacoes e erros inesperados. Se `SIMULATION_PROMETHEUS_URL` estiver definido, ele tambem consulta algumas metricas no Prometheus para facilitar a leitura da observabilidade logo apos a simulacao.
+
 ## Perfis de execução
 
 | Perfil | Quando usar | Comportamento |
@@ -228,3 +256,6 @@ Java 25 (LTS) · Quarkus 3.33.2 (LTS, BOM `io.quarkus.platform`) · Maven multi-
 ## Como começar
 
 Leia `docs/requisitos/README.md` — o pacote de requisitos é a entrada de todo o desenvolvimento. As user stories são a primeira fonte de verdade; em divergência, as transcrições prevalecem (a Sessão 6 corrige e precisa as anteriores).
+
+echo 'isto-nao-e-json' | \
+docker compose exec -T kafka sh -c "exec /opt/kafka/bin/kafka-console-producer.sh --bootstrap-server localhost:9092 --topic lancamentos-recebidos"

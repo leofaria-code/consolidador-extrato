@@ -106,7 +106,7 @@ Tudo provisionado por arquivo em [`infra/observabilidade/`](../infra/observabili
 
 ### Os 4 painéis do dashboard
 
-1. **Fluxo de lançamentos (por segundo)** — `aceitos` (ingestão) × `incorporados` × `repetidos ignorados` (consolidação). A distância entre aceito e incorporado é o assíncrono; a série de repetidos é a idempotência trabalhando.
+1. **Fluxo de lançamentos** — `aceitos` (ingestão, por segundo) × `rejeitados no último minuto` (ingestão) × `incorporados` × `repetidos ignorados` (consolidação). A distância entre aceito e incorporado é o assíncrono; a série de repetidos é a idempotência trabalhando; a de rejeitados usa `increase(...[1m])` para deixar um `400` isolado visível em tempo real.
 2. **Cache hit ratio** — gauge do Caffeine (consulta).
 3. **DLQ (acumulado)** — por `motivo`; **vermelho** quando ≥ 1 (tem mensagem aguardando `reprocessar-dlq`).
 4. **Disjuntor e fallback do cache miss** — fallbacks aplicados, retentativas e estado do disjuntor.

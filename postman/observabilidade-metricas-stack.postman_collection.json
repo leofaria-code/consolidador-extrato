@@ -1,0 +1,251 @@
+{
+  "info": {
+    "name": "Consolidador de Extrato - Observabilidade - Metricas e stack",
+    "description": "Colecao para inspecionar a stack de observabilidade da demo: health dos servicos, endpoint de metricas, Prometheus e Grafana. Ajuste `urlPrometheus` e `urlGrafana` se tiver subido a stack com portas customizadas.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "urlIngestao",
+      "value": "http://localhost:8081"
+    },
+    {
+      "key": "urlConsolidacao",
+      "value": "http://localhost:8082"
+    },
+    {
+      "key": "urlConsulta",
+      "value": "http://localhost:8083"
+    },
+    {
+      "key": "urlPrometheus",
+      "value": "http://localhost:9090"
+    },
+    {
+      "key": "urlGrafana",
+      "value": "http://localhost:3000"
+    }
+  ],
+  "item": [
+    {
+      "name": "0 - Health - ingestao",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('ingestao esta UP', function () {",
+              "  pm.response.to.have.status(200);",
+              "  pm.expect(pm.response.json().status).to.eql('UP');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{urlIngestao}}/q/health"
+      }
+    },
+    {
+      "name": "1 - Health - consolidacao",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('consolidacao esta UP', function () {",
+              "  pm.response.to.have.status(200);",
+              "  pm.expect(pm.response.json().status).to.eql('UP');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{urlConsolidacao}}/q/health"
+      }
+    },
+    {
+      "name": "2 - Health - consulta",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('consulta esta UP', function () {",
+              "  pm.response.to.have.status(200);",
+              "  pm.expect(pm.response.json().status).to.eql('UP');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{urlConsulta}}/q/health"
+      }
+    },
+    {
+      "name": "3 - /q/metrics - ingestao",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('endpoint de metricas da ingestao esta disponivel', function () {",
+              "  pm.response.to.have.status(200);",
+              "  pm.expect(pm.response.text()).to.include('extrato_ingestao_lancamentos_total');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{urlIngestao}}/q/metrics"
+      }
+    },
+    {
+      "name": "4 - /q/metrics - consolidacao",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('endpoint de metricas da consolidacao esta disponivel', function () {",
+              "  pm.response.to.have.status(200);",
+              "  pm.expect(pm.response.text()).to.include('extrato_consolidacao_lancamentos_total');",
+              "  pm.expect(pm.response.text()).to.include('extrato_consolidacao_dlq_enviados_total');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{urlConsolidacao}}/q/metrics"
+      }
+    },
+    {
+      "name": "5 - /q/metrics - consulta",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('endpoint de metricas da consulta esta disponivel', function () {",
+              "  pm.response.to.have.status(200);",
+              "  pm.expect(pm.response.text()).to.include('cache_gets_total');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{urlConsulta}}/q/metrics"
+      }
+    },
+    {
+      "name": "6 - Prometheus - targets",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Prometheus respondeu com sucesso', function () {",
+              "  pm.response.to.have.status(200);",
+              "  pm.expect(pm.response.json().status).to.eql('success');",
+              "});",
+              "pm.test('ingestao, consolidacao e consulta estao UP', function () {",
+              "  var resultados = pm.response.json().data.result;",
+              "  var porJob = {};",
+              "  resultados.forEach(function (item) { porJob[item.metric.job] = item.value[1]; });",
+              "  pm.expect(porJob.ingestao).to.eql('1');",
+              "  pm.expect(porJob.consolidacao).to.eql('1');",
+              "  pm.expect(porJob.consulta).to.eql('1');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{urlPrometheus}}/api/v1/query?query=up"
+      }
+    },
+    {
+      "name": "7 - Prometheus - cache hit ratio (base para painel)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Prometheus devolveu hit e/ou miss do cache', function () {",
+              "  pm.response.to.have.status(200);",
+              "  var resultados = pm.response.json().data.result;",
+              "  pm.expect(resultados.length).to.be.above(0);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{urlPrometheus}}/api/v1/query?query=cache_gets_total{cache=\"extrato-consolidado\"}"
+      }
+    },
+    {
+      "name": "8 - Prometheus - fallback e disjuntor",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('consulta de FT respondeu com sucesso', function () {",
+              "  pm.response.to.have.status(200);",
+              "  pm.expect(pm.response.json().status).to.eql('success');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{urlPrometheus}}/api/v1/query?query=ft_invocations_total"
+      }
+    },
+    {
+      "name": "9 - Grafana - API health",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Grafana respondeu com database ok', function () {",
+              "  pm.response.to.have.status(200);",
+              "  pm.expect(pm.response.json().database).to.eql('ok');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{urlGrafana}}/api/health"
+      }
+    }
+  ]
+}
