@@ -32,6 +32,18 @@
     {
       "key": "idLancamento",
       "value": "lanc-postman-0001"
+    },
+    {
+      "key": "urlConsultaReplica",
+      "value": "http://localhost:8084"
+    },
+    {
+      "key": "urlPrometheus",
+      "value": "http://localhost:9090"
+    },
+    {
+      "key": "urlGrafana",
+      "value": "http://localhost:3000"
     }
   ],
   "item": [
@@ -113,8 +125,9 @@
                   "    pm.expect(corpo.status).to.eql('ACEITO');",
                   "    pm.expect(corpo.identidade.idLancamentoOrigem).to.eql(pm.variables.get('idLancamento'));",
                   "});",
-                  "// dá tempo do fluxo assíncrono (tópico → posição → evento → invalidação)",
-                  "setTimeout(() => {}, 3000);"
+                  "// dá tempo do fluxo assíncrono (tópico → posição → evento → invalidação);",
+                  "// 5s: o PRIMEIRO lançamento de uma stack fria paga JIT + primeira transação (visto em 11/07)",
+                  "setTimeout(() => {}, 5000);"
                 ]
               }
             }
@@ -242,7 +255,8 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('200 — releitura forçada do dado', () => pm.response.to.have.status(200));"
+                  "pm.test('releitura forçada aceita (200) — ou 429 se o intervalo mínimo de uma rodada anterior ainda vale (rerun-estável)', () =>",
+                  "    pm.expect([200, 429]).to.include(pm.response.code));"
                 ]
               }
             }
@@ -527,6 +541,185 @@
           "request": {
             "method": "GET",
             "url": "{{urlConsulta}}/extrato/cliente-postman-lote/2026-07"
+          }
+        }
+      ]
+    },
+    {
+      "name": "7 · Stack completa por padrão: broadcast entre réplicas + observabilidade (ADR-006 nota / ADR-008 rev. 11-07)",
+      "item": [
+        {
+          "name": "Health — réplica da consulta (8084)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('réplica UP — sobe por padrão desde 11/07', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{urlConsultaReplica}}/q/health"
+          }
+        },
+        {
+          "name": "Aquecer o cache da INSTÂNCIA PRINCIPAL (8083)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200 — cache da principal aquecido', () => pm.response.to.have.status(200));",
+                  "// linha de base do broadcast: o valor que AMBOS os caches guardam agora",
+                  "pm.collectionVariables.set('entradasAntesBroadcast', Number(pm.response.json().totais.entradas));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{urlConsulta}}/extrato/{{idCliente}}/{{competencia}}"
+          }
+        },
+        {
+          "name": "Aquecer o cache da RÉPLICA (8084)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('réplica serve o MESMO dado (mesma fonte, cache próprio)', () => {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(Number(pm.response.json().totais.entradas))",
+                  "        .to.eql(pm.collectionVariables.get('entradasAntesBroadcast'));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{urlConsultaReplica}}/extrato/{{idCliente}}/{{competencia}}"
+          }
+        },
+        {
+          "name": "POST lançamento novo → o evento que TODAS as réplicas devem receber",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('202 — novo lançamento na esteira', () => pm.response.to.have.status(202));",
+                  "// tópico → transação (3 efeitos) → outbox → evento → invalidação nas 2 réplicas",
+                  "setTimeout(() => {}, 4000);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Correlation-Id",
+                "value": "{{correlacao}}-broadcast"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idCliente\": \"{{idCliente}}\",\n  \"idLancamentoOrigem\": \"lanc-postman-broadcast-{{$timestamp}}\",\n  \"instituicaoOrigem\": \"banco-a\",\n  \"agencia\": \"0001\",\n  \"conta\": \"77777-0\",\n  \"tipo\": \"CREDITO\",\n  \"valor\": 50.00,\n  \"moeda\": \"BRL\",\n  \"dataHoraOcorrencia\": \"{{competencia}}-11T09:00:00-03:00\",\n  \"idConsentimento\": \"consent-001\",\n  \"descricao\": \"prova do broadcast (demo Postman)\"\n}"
+            },
+            "url": "{{urlIngestao}}/lancamentos"
+          }
+        },
+        {
+          "name": "GET na PRINCIPAL → dado novo (cache invalidado)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('principal invalidou: entradas subiram 50 (dedup estabiliza reruns)', () =>",
+                  "    pm.expect(Number(pm.response.json().totais.entradas))",
+                  "        .to.eql(pm.collectionVariables.get('entradasAntesBroadcast') + 50));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{urlConsulta}}/extrato/{{idCliente}}/{{competencia}}"
+          }
+        },
+        {
+          "name": "GET na RÉPLICA → dado novo (o BROADCAST invalidou as duas)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('réplica TAMBÉM invalidou — broadcast provado (sem ele, serviria o dado velho do cache por até 5 min)', () =>",
+                  "    pm.expect(Number(pm.response.json().totais.entradas))",
+                  "        .to.eql(pm.collectionVariables.get('entradasAntesBroadcast') + 50));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{urlConsultaReplica}}/extrato/{{idCliente}}/{{competencia}}"
+          }
+        },
+        {
+          "name": "Prometheus — os 4 serviços no radar do scrape",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('4+ alvos UP (ingestão, consolidação, consulta, réplica)', () => {",
+                  "    pm.response.to.have.status(200);",
+                  "    const up = pm.response.json().data.activeTargets.filter(t => t.health === 'up');",
+                  "    pm.expect(up.length).to.be.at.least(4);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{urlPrometheus}}/api/v1/targets"
+          }
+        },
+        {
+          "name": "Grafana — dashboard da banca no ar (sem login)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Grafana saudável — viewer anônimo, dashboard provisionado por arquivo', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{urlGrafana}}/api/health"
           }
         }
       ]

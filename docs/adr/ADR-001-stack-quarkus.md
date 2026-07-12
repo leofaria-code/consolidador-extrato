@@ -10,7 +10,7 @@ O módulo BE-JV-010 é ministrado sobre Spring Boot (o projeto-guia de referênc
 ## Alternativas consideradas
 
 1. **Spring Boot 3.5.x** — alinhamento máximo com o material do curso e o gabarito; reaproveitamento direto do código das aulas; `@RetryableTopic` pronto. Custo: zero ganho estratégico para o grupo; conhecimento repetido do que as aulas já cobrem.
-2. **Quarkus 3.33 LTS** — alinhamento com a direção tecnológica da Caixa e com o próximo módulo; Dev Services simplifica o perfil A (sobe Kafka/RabbitMQ/Redis sem docker-compose manual); mesma família Jakarta/MicroProfile. Custo: os padrões precisam ser **traduzidos** (não copiados) do gabarito; risco de arguição "por que não Spring?".
+2. **Quarkus 3.33 LTS** — alinhamento com a direção tecnológica da Caixa e com o próximo módulo; Dev Services simplifica o perfil A (sobe Kafka/RabbitMQ sem docker-compose manual); mesma família Jakarta/MicroProfile. Custo: os padrões precisam ser **traduzidos** (não copiados) do gabarito; risco de arguição "por que não Spring?".
 3. **Híbrido (Spring + 1 serviço Quarkus)** — demonstraria poliglotismo, mas duplicaria toolchain, complexidade de build e superfície de defesa na banca, sem aprofundar nenhum dos dois.
 
 ## Decisão

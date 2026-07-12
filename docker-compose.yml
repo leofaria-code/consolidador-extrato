@@ -2,8 +2,11 @@
 # Do zero com um comando: ./demo.ps1 (Windows) ou ./demo.sh (Linux/macOS).
 # Ele roda `mvn -DskipTests package` e depois `docker compose up --build`.
 #
-# Portas no host: 8081 ingestão · 8082 consolidação · 8083 consulta
+# Portas no host: 8081 ingestão · 8082 consolidação · 8083 consulta · 8084 réplica da consulta
 #                 15672 RabbitMQ Management (guest/guest) — ver a DLQ ao vivo
+#                 9090 Prometheus · 3000 Grafana (dashboard da banca, sem login)
+# Stack COMPLETA por padrão (decisão 11/07, revisão da ADR-008): quem roda
+# `docker compose up` leva tudo — réplica e observabilidade deixaram de ser profiles.
 services:
 
   kafka:
@@ -123,9 +126,8 @@ services:
 
   # Réplica da consulta para a demo de escala horizontal (ADR-006, nota 11/07):
   # broadcast de invalidação — as DUAS instâncias invalidam no mesmo evento.
-  # Sobe só com: docker compose --profile escala up -d consulta-replica
+  # Sobe por padrão desde 11/07 (antes: profile "escala").
   consulta-replica:
-    profiles: ["escala"]
     build:
       context: ./extrato-consulta
       dockerfile: src/main/docker/Dockerfile.jvm
@@ -141,11 +143,10 @@ services:
       consolidacao:
         condition: service_started
 
-  # Observabilidade (ADR-008): Prometheus raspa /q/metrics dos 3 serviços e o
-  # Grafana abre o dashboard da banca sem login (viewer anônimo).
-  # Sobe só com: docker compose --profile observabilidade up -d
+  # Observabilidade (ADR-008, revisada 11/07): Prometheus raspa /q/metrics dos
+  # serviços e o Grafana abre o dashboard da banca sem login (viewer anônimo).
+  # Sobe por padrão (antes: profile "observabilidade").
   prometheus:
-    profiles: ["observabilidade"]
     image: prom/prometheus:v3.5.0
     ports:
       # http://localhost:9090/targets — os 4 alvos do scrape. Se a 9090 já
@@ -155,7 +156,6 @@ services:
       - ./infra/observabilidade/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
 
   grafana:
-    profiles: ["observabilidade"]
     image: grafana/grafana:12.1.0
     ports:
       # http://localhost:3000 — dashboard "visão da banca". Porta ocupada?

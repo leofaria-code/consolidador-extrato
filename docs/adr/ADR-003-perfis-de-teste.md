@@ -6,7 +6,7 @@
 
 ## Contexto
 
-A stack é assíncrona por natureza: Kafka (ingestão), RabbitMQ (reconsolidação) e Redis (cache). Toda dependência dessas puxa, por padrão, um broker de verdade — e o Quarkus Dev Services sobe esses containers automaticamente em dev/test quando há Docker.
+A stack é assíncrona por natureza: Kafka (ingestão) e RabbitMQ (reconsolidação) — o cache é Caffeine, in-process (ADR-006), e não entra nessa conta. Toda dependência de broker puxa, por padrão, um broker de verdade — e o Quarkus Dev Services sobe esses containers automaticamente em dev/test quando há Docker.
 
 Dois fatos empurram em direções opostas:
 
@@ -25,7 +25,7 @@ Desenvolvemos em máquinas pessoais com Docker disponível (perfil A viável loc
 
 Dois perfis Maven, mais o perfil conceitual (contrato de entrega §3):
 
-- **`plano-a-docker`** (padrão, `activeByDefault`): brokers e cache reais via Quarkus Dev Services (Kafka/RabbitMQ/Redis sobem sozinhos quando há Docker). Perfil de integração de alta fidelidade.
+- **`plano-a-docker`** (padrão, `activeByDefault`): brokers reais via Quarkus Dev Services (Kafka/RabbitMQ sobem sozinhos quando há Docker; o cache Caffeine é in-process nos dois planos). Perfil de integração de alta fidelidade.
 - **`plano-b-jvm`** (**o gate**): `mvn verify -Pplano-b-jvm` **tem de passar** — é o que roda em CI e na correção. Desliga Dev Services (`quarkus.devservices.enabled=false`); a mensageria usa o connector in-memory do SmallRye, o cache usa Caffeine local e a persistência usa H2.
 - **`plano-c`** (conceitual): não requer build — coberto por `docs/adr/` e `docs/arquitetura.md`.
 
