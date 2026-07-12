@@ -226,6 +226,27 @@ Cada serviço expõe as métricas cruas em `/q/metrics` (formato Prometheus): co
 
 Guia completo da observabilidade (logs + correlação + métricas + dashboard, com a tabela de todas as métricas): [`docs/observabilidade.md`](docs/observabilidade.md).
 
+## Rodar direto do Docker Hub — sem clonar, sem Maven, sem JDK (ADR-009)
+
+A via acima (`demo.ps1` / `docker compose up`) **builda do código-fonte** e exige JDK 25 + Maven. Para quem só quer **executar** o projeto pronto, há uma segunda via que puxa as imagens já empacotadas do Docker Hub — o único pré-requisito é ter **Docker**:
+
+```bash
+HUB_NS=<usuario-do-dockerhub> docker compose -f docker-compose.hub.yml up -d
+```
+
+Sobe a stack completa e idêntica (3 serviços + réplica na 8084 + brokers + Prometheus + Grafana), nas mesmas portas. A imagem JVM carrega o runtime Java 25 e o `.jar` já compilado dentro dela; a config de observabilidade também vai assada nas imagens — nada é montado do disco, então **não precisa do repositório**. Fixe uma versão com `TAG=1.0.0` (default: `latest`).
+
+> Esta via **não substitui** a de build-from-source (usada na demo e no CI) — é uma opção adicional. Ver a decisão em [ADR-009](docs/adr/ADR-009-distribuicao-por-imagem-docker-hub.md).
+
+### Publicar/atualizar as imagens (mantenedor)
+
+```bash
+docker login                              # a credencial é sua — o script nunca a manuseia
+./publicar-hub.ps1 -Namespace <usuario>   # Windows (ou ./publicar-hub.sh -n <usuario>); tag 1.0.0 + latest
+```
+
+Empacota, builda e faz `push` das 5 imagens próprias (`extrato-ingestao`, `-consolidacao`, `-consulta` — a réplica reusa esta —, `-prometheus`, `-grafana`). Mudou um dashboard ou o scrape? Os arquivos em `infra/observabilidade/` seguem sendo a fonte de verdade (a via principal os monta ao vivo); para refletir no Hub, re-rode o script com uma tag nova (`-Tag 1.0.1`).
+
 ## Perfis de execução
 
 | Perfil | Quando usar | Comportamento |
