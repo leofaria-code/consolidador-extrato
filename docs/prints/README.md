@@ -13,3 +13,5 @@ Capturas dos momentos que mais importam, para embutir nos slides caso a demo ao 
 | [`07-github-repo-publico.png`](07-github-repo-publico.png) | 9 | O repo **público**, 130+ commits, 5 contributors, Java 85,6% — projeto de verdade, entregue ao longo das semanas. |
 
 > Gerados em 13/07 pela sessão de IA (ver `uso-de-ia.md`): a stack foi subida, exercitada com tráfego real (`simular-cenario-real.sh` + veneno + parada da consolidação) e capturada headless. Regravar é reproduzir os atos e recapturar.
+>
+> **Fonte editável:** o print 04 é o único desenhado à mão — sua fonte é [`terminal-evidencias.html`](terminal-evidencias.html) (abre sozinho no navegador; edite e re-renderize para atualizar o PNG). Os demais 6 são capturas de sistemas ao vivo, sem fonte.
