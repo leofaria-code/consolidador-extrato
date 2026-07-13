@@ -1,6 +1,17 @@
 # Consolidador de Extrato — Open Finance
 
-[![verify (plano B — sem Docker)](https://github.com/leofaria-code/consolidador-extrato/actions/workflows/verify.yml/badge.svg)](https://github.com/leofaria-code/consolidador-extrato/actions/workflows/verify.yml)
+[![verify — plano B sem Docker](https://github.com/leofaria-code/consolidador-extrato/actions/workflows/verify.yml/badge.svg)](https://github.com/leofaria-code/consolidador-extrato/actions/workflows/verify.yml)
+[![e2e — plano A (compose + Newman)](https://github.com/leofaria-code/consolidador-extrato/actions/workflows/e2e.yml/badge.svg)](https://github.com/leofaria-code/consolidador-extrato/actions/workflows/e2e.yml)
+[![Docker Hub](https://img.shields.io/docker/v/leofariacode/extrato-consulta?sort=semver&label=Docker%20Hub&logo=docker&logoColor=white&color=2496ED)](https://hub.docker.com/u/leofariacode)
+
+![Java](https://img.shields.io/badge/Java-25%20LTS-ED8B00?logo=openjdk&logoColor=white)
+![Quarkus](https://img.shields.io/badge/Quarkus-3.33.2%20LTS-4695EB?logo=quarkus&logoColor=white)
+![Apache Kafka](https://img.shields.io/badge/Apache%20Kafka-3.9-231F20?logo=apachekafka&logoColor=white)
+![RabbitMQ](https://img.shields.io/badge/RabbitMQ-4-FF6600?logo=rabbitmq&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-4169E1?logo=postgresql&logoColor=white)
+![Prometheus](https://img.shields.io/badge/Prometheus-3.5-E6522C?logo=prometheus&logoColor=white)
+![Grafana](https://img.shields.io/badge/Grafana-12.1-F46800?logo=grafana&logoColor=white)
+![Maven](https://img.shields.io/badge/Maven-multi--m%C3%B3dulo-C71A36?logo=apachemaven&logoColor=white)
 
 Projeto final em grupo do módulo **BE-JV-010 — Arquitetura de Software Ágil II** (Escalação Tech · Dev. Back-End Java Especialista · turma Caixa).
 
@@ -295,9 +306,27 @@ Empacota, builda e faz `push` das 5 imagens próprias (`extrato-ingestao`, `-con
 | `plano-a-docker` (padrão, `-Pplano-a-docker` implícito) | Demo completa, dev local com Docker disponível | Dev Services sobe Kafka/RabbitMQ reais |
 | `plano-b-jvm` (`-Pplano-b-jvm`) | CI, ambientes sem Docker, banca | Dev Services desligado; conectores in-memory + Caffeine local — `mvn verify -Pplano-b-jvm` **tem que passar** (critério 6) |
 
-## Stack (ADR-001)
+## Stack completa
 
-Java 25 (LTS) · Quarkus 3.33.2 (LTS, BOM `io.quarkus.platform`) · Maven multi-módulo · SmallRye Reactive Messaging (Kafka/RabbitMQ) · SmallRye Fault Tolerance · quarkus-cache (Caffeine) · Panache · PACT (Quarkiverse).
+Cada escolha rastreável a um ADR — a decisão está documentada, não improvisada.
+
+| Camada | Tecnologia | Versão | Papel no projeto | Decisão |
+|---|---|---|---|---|
+| Linguagem · runtime | Java (Temurin) | **25 LTS** | base dos 3 serviços (runtime assado nas imagens) | [ADR-001](docs/adr/ADR-001-stack-quarkus.md) |
+| Framework | Quarkus (BOM `io.quarkus.platform`) | **3.33.2 LTS** | REST, CDI, mensageria, health, OpenAPI | [ADR-001](docs/adr/ADR-001-stack-quarkus.md) |
+| Build | Maven multi-módulo | — | 3 serviços + `shared-contracts` | [ADR-002](docs/adr/ADR-002-decomposicao-de-dominio.md) |
+| Mensageria — **tópico** | Apache Kafka + SmallRye Reactive Messaging | **3.9.1** | esteira de ingestão e evento `posicao-atualizada` (pub-sub, ordem por conta) | [ADR-002](docs/adr/ADR-002-decomposicao-de-dominio.md) |
+| Mensageria — **fila** | RabbitMQ + SmallRye Reactive Messaging | **4** | reconsolidação (work queue, um a um — o "guichê") | [ADR-002](docs/adr/ADR-002-decomposicao-de-dominio.md) |
+| Persistência | PostgreSQL + Hibernate ORM / Panache | **17** | bases segregadas (uma por serviço) | [ADR-002](docs/adr/ADR-002-decomposicao-de-dominio.md) |
+| Cache | quarkus-cache (Caffeine) | in-process | consulta com TTL 5 min + invalidação por evento | [ADR-006](docs/adr/ADR-006-consulta-em-cache-miss.md) |
+| Resiliência | SmallRye Fault Tolerance | — | retry/backoff, DLQ, `@Timeout`, disjuntor | [ADR-007](docs/adr/ADR-007-resiliencia-retry-dlq.md) |
+| Contratos | PACT (Quarkiverse `quarkus-pact`) | **1.5.0** | 3 contratos (2 HTTP + 1 mensagem), versionados em disco | [ADR-003](docs/adr/ADR-003-perfis-de-teste.md) |
+| Observabilidade | Micrometer + Prometheus + Grafana | **3.5.0 / 12.1.0** | `/q/metrics` + dashboard "visão da banca" + correlação ponta a ponta | [ADR-008](docs/adr/ADR-008-metricas-micrometer-prometheus.md) |
+| Inspeção (tooling) | Kafka UI (provectuslabs) | **0.7.2** | tópicos, mensagens, consumers e offsets | — |
+| Testes | JUnit 5 · REST Assured · Newman | — | **41** plano B (sem Docker) + **35** asserções e2e | [ADR-003](docs/adr/ADR-003-perfis-de-teste.md) |
+| Distribuição | Docker · Docker Compose · Docker Hub | — | 2 vias: build-from-source **e** imagens publicadas (`leofariacode/*`) | [ADR-009](docs/adr/ADR-009-distribuicao-por-imagem-docker-hub.md) |
+
+**Perfis:** `plano-a-docker` (brokers reais via Docker) · `plano-b-jvm` (pura-JVM, sem Docker — o gate obrigatório do CI). Índice completo das decisões: [`docs/adr/`](docs/adr/README.md) (9 ADRs).
 
 ## Como começar
 
