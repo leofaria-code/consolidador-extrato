@@ -55,7 +55,7 @@ flowchart LR
 - **`extrato-consolidacao`** (8082) consome o tópico, incorpora o lançamento de forma idempotente, atualiza a posição da conta×competência e publica `posicao-atualizada`; também atende pedidos de reconsolidação via fila.
 - **`extrato-consulta`** (8083) expõe o extrato consolidado com cache (Caffeine, TTL 5 min) e invalida a entrada quando recebe `posicao-atualizada`.
 
-Detalhes e garantias de cada fluxo: `docs/arquitetura.md` · **diagramas de sequência/ER/resiliência/cache: [`docs/resumo-visual.md`](docs/resumo-visual.md)**.
+Detalhes e garantias de cada fluxo: `docs/arquitetura.md` · **diagramas (mapa de mecanismos, sequência, ER, resiliência, cache): [`docs/resumo-visual.md`](docs/resumo-visual.md)**.
 
 ## Pré-requisitos
 
@@ -186,7 +186,7 @@ A stack sobe **completa por padrão** — nenhum `--profile` necessário (ADR-00
 | Grafana — dashboard "visão da banca" | <http://localhost:3000> | sem login (viewer anônimo) |
 | Prometheus — alvos do scrape | <http://localhost:9090/targets> | os 4 serviços `up` |
 | RabbitMQ Management | <http://localhost:15672> | `guest`/`guest` — fila `reconsolidacao` e a DLQ ao vivo |
-| Kafka UI | <http://localhost:8080> | - |
+| Kafka UI | <http://localhost:8080> | tópicos, mensagens, consumers e offsets — ver a esteira `lancamentos-recebidos` e as DLQ ao vivo |
 
 Cada serviço também responde `http://localhost:808{1-4}/q/health` (saúde) e `/q/metrics` (métricas cruas, formato Prometheus).
 
