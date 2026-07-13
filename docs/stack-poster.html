@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Consolidador de Extrato — arquitetura e stack (blueprint de uma pagina).">
+<title>Consolidador de Extrato — Arquitetura & Stack</title>
+<style>
+  :root {
+    --ground: #0a1017;
+    --ground-2: #0e1622;
+    --panel: #121d2c;
+    --panel-2: #16233420;
+    --line: #223347;
+    --line-soft: #1a2838;
+    --ink: #e9f0f9;
+    --ink-2: #9fb0c6;
+    --ink-3: #64768e;
+    --kafka: #4b9bff;
+    --kafka-dim: #4b9bff26;
+    --rabbit: #ff8a3d;
+    --rabbit-dim: #ff8a3d24;
+    --http: #8b9cb3;
+    --http-dim: #8b9cb31f;
+    --ok: #37d68a;
+    --sql: #b98cff;
+
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    --maxw: 1080px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background:
+      radial-gradient(1200px 600px at 20% -10%, #14243a 0%, transparent 60%),
+      linear-gradient(var(--ground-2), var(--ground));
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .sheet {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: clamp(20px, 4vw, 56px) clamp(16px, 4vw, 40px) 64px;
+    position: relative;
+  }
+  /* blueprint grid overlay */
+  .sheet::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--line-soft) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line-soft) 1px, transparent 1px);
+    background-size: 34px 34px;
+    opacity: 0.35;
+    mask-image: radial-gradient(120% 90% at 50% 0%, #000 30%, transparent 90%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .sheet > * { position: relative; z-index: 1; }
+
+  /* ---- title block ---- */
+  header {
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: linear-gradient(180deg, #16243608, #0d1621);
+    padding: clamp(20px, 3vw, 32px);
+    display: grid;
+    gap: 18px;
+  }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--kafka);
+    margin: 0;
+  }
+  h1 {
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: clamp(28px, 5vw, 46px);
+    letter-spacing: -0.01em;
+    line-height: 1.05;
+    text-wrap: balance;
+    margin: 0;
+  }
+  h1 .dim { color: var(--ink-3); }
+  .lede {
+    max-width: 62ch;
+    color: var(--ink-2);
+    font-size: clamp(15px, 1.6vw, 17px);
+    margin: 0;
+  }
+  .badges { display: flex; flex-wrap: wrap; gap: 8px; }
+  .badge {
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 5px 11px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--ink-2);
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .badge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 8px var(--ok); }
+
+  /* ---- section scaffolding ---- */
+  section { margin-top: clamp(36px, 5vw, 56px); }
+  .sec-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--line-soft);
+    padding-bottom: 12px;
+  }
+  .sec-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--kafka);
+    letter-spacing: 0.1em;
+  }
+  .sec-head h2 {
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: clamp(16px, 2.2vw, 20px);
+    margin: 0;
+    letter-spacing: 0.01em;
+  }
+  .sec-head .aside { margin-left: auto; color: var(--ink-3); font-size: 13px; font-family: var(--mono); }
+
+  /* ---- stat grid ---- */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+  }
+  .stat {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--panel);
+    padding: 16px 18px;
+    display: grid;
+    gap: 4px;
+  }
+  .stat .n {
+    font-family: var(--mono);
+    font-size: clamp(24px, 3.4vw, 32px);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+  .stat .l { font-size: 12.5px; color: var(--ink-2); }
+  .stat.ok .n { color: var(--ok); }
+
+  /* ---- transport legend ---- */
+  .legend {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 12px;
+  }
+  .leg {
+    border: 1px solid var(--line);
+    border-left-width: 3px;
+    border-radius: 10px;
+    background: var(--panel);
+    padding: 14px 16px;
+  }
+  .leg.kafka { border-left-color: var(--kafka); }
+  .leg.rabbit { border-left-color: var(--rabbit); }
+  .leg.http { border-left-color: var(--http); }
+  .leg h3 {
+    font-family: var(--mono);
+    font-size: 13px;
+    margin: 0 0 4px;
+    letter-spacing: 0.04em;
+  }
+  .leg.kafka h3 { color: var(--kafka); }
+  .leg.rabbit h3 { color: var(--rabbit); }
+  .leg.http h3 { color: var(--http); }
+  .leg p { margin: 0; font-size: 13px; color: var(--ink-2); }
+
+  /* ---- architecture flow ---- */
+  .flow-wrap { overflow-x: auto; padding-bottom: 6px; }
+  .flow {
+    display: grid;
+    grid-template-columns: 1.2fr 0.9fr 1.2fr 0.9fr 1.5fr 0.9fr 1.2fr;
+    align-items: stretch;
+    gap: 0;
+    min-width: 900px;
+  }
+  .node {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: linear-gradient(180deg, #16233680, var(--panel));
+    padding: 16px 14px;
+    text-align: center;
+    display: grid;
+    gap: 6px;
+    align-content: center;
+  }
+  .node .svc { font-family: var(--mono); font-weight: 600; font-size: 15px; }
+  .node .port { font-family: var(--mono); font-size: 12px; color: var(--kafka); }
+  .node .role { font-size: 12px; color: var(--ink-2); line-height: 1.4; }
+  .node.entry { background: none; border-style: dashed; border-color: var(--http); }
+  .node.entry .svc { color: var(--http); }
+
+  .edge {
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: 8px;
+    padding: 0 6px;
+    text-align: center;
+  }
+  .edge .rail {
+    width: 100%;
+    height: 2px;
+    border-radius: 2px;
+    position: relative;
+  }
+  .edge .rail::after {
+    content: "";
+    position: absolute;
+    right: -1px; top: 50%;
+    transform: translateY(-50%);
+    border: 5px solid transparent;
+  }
+  .edge.kafka .rail { background: var(--kafka); }
+  .edge.kafka .rail::after { border-left-color: var(--kafka); }
+  .edge.http .rail { background: repeating-linear-gradient(90deg, var(--http) 0 6px, transparent 6px 12px); }
+  .edge.http .rail::after { border-left-color: var(--http); }
+  .edge .tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    line-height: 1.35;
+    color: var(--ink-2);
+  }
+  .edge.kafka .tag b { color: var(--kafka); font-weight: 600; }
+  .edge.http .tag b { color: var(--http); font-weight: 600; }
+
+  /* satellites row (stores / queue) */
+  .satellites {
+    display: grid;
+    grid-template-columns: 1.2fr 0.9fr 1.2fr 0.9fr 1.5fr 0.9fr 1.2fr;
+    gap: 0;
+    min-width: 900px;
+    margin-top: 10px;
+  }
+  .sat-cell { padding: 0 6px; display: grid; gap: 8px; align-content: start; }
+  .sat {
+    border: 1px dashed var(--line);
+    border-radius: 10px;
+    padding: 9px 11px;
+    font-size: 11.5px;
+    font-family: var(--mono);
+    color: var(--ink-2);
+    text-align: center;
+    position: relative;
+  }
+  .sat::before {
+    content: "";
+    position: absolute;
+    top: -11px; left: 50%;
+    width: 1px; height: 10px;
+    background: var(--line);
+  }
+  .sat.store { border-left: 3px solid var(--sql); }
+  .sat.queue { border-left: 3px solid var(--rabbit); border-style: solid; }
+  .sat.cache { border-left: 3px solid var(--ok); }
+  .sat b { color: var(--ink); font-weight: 600; }
+
+  .flow-foot {
+    margin-top: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 20px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--ink-3);
+  }
+  .flow-foot span b { color: var(--http); }
+
+  /* ---- stack table ---- */
+  .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; }
+  table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 13.5px; }
+  thead th {
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    padding: 12px 16px;
+    background: var(--ground-2);
+    border-bottom: 1px solid var(--line);
+  }
+  tbody td { padding: 12px 16px; border-bottom: 1px solid var(--line-soft); vertical-align: top; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: #16233633; }
+  td .layer { display: inline-flex; align-items: center; gap: 8px; }
+  td .swatch { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+  td .tech { font-weight: 600; color: var(--ink); }
+  td .ver { font-family: var(--mono); font-variant-numeric: tabular-nums; color: var(--kafka); white-space: nowrap; }
+  td .role { color: var(--ink-2); }
+  td a { color: var(--ink-2); text-decoration: none; border-bottom: 1px dotted var(--ink-3); font-family: var(--mono); font-size: 12px; white-space: nowrap; }
+  td a:hover { color: var(--kafka); border-bottom-color: var(--kafka); }
+  td a:focus-visible { outline: 2px solid var(--kafka); outline-offset: 2px; border-radius: 3px; }
+
+  /* ---- run strip ---- */
+  .runs { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+  .run {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--panel);
+    padding: 18px;
+    display: grid;
+    gap: 10px;
+  }
+  .run h3 { margin: 0; font-family: var(--mono); font-size: 13px; letter-spacing: 0.03em; }
+  .run .req { font-size: 12px; color: var(--ink-3); }
+  .run pre {
+    margin: 0;
+    background: var(--ground);
+    border: 1px solid var(--line-soft);
+    border-radius: 8px;
+    padding: 12px 14px;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--ink);
+  }
+  .run pre .tok { color: var(--kafka); }
+
+  footer {
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line-soft);
+    color: var(--ink-3);
+    font-size: 12.5px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+    align-items: center;
+    justify-content: space-between;
+  }
+  footer .tag { font-family: var(--mono); }
+  footer b { color: var(--ink-2); font-weight: 600; }
+
+</style>
+
+</head>
+<body>
+<div class="sheet">
+  <header>
+    <p class="eyebrow">Arquitetura de Software Ágil II · BE-JV-010 · turma Caixa</p>
+    <h1>Consolidador de Extrato <span class="dim">/ Open Finance</span></h1>
+    <p class="lede">Três microsserviços Quarkus orientados a eventos: ingestão por tópico, agregação idempotente com outbox transacional, e consulta com cache invalidado por evento. Cada mecanismo de transporte escolhido de propósito — e documentado em ADR.</p>
+    <div class="badges">
+      <span class="badge"><span class="dot"></span> CI duplo verde</span>
+      <span class="badge">plano B · sem Docker</span>
+      <span class="badge">plano A · compose + Newman</span>
+      <span class="badge">imagens públicas no Docker Hub</span>
+    </div>
+  </header>
+
+  <section aria-labelledby="s-num">
+    <div class="sec-head">
+      <span class="sec-num">01</span>
+      <h2 id="s-num">O projeto em números</h2>
+      <span class="aside">estado final · banca 15/07/2026</span>
+    </div>
+    <div class="stats">
+      <div class="stat"><span class="n">3</span><span class="l">serviços independentes, bases segregadas</span></div>
+      <div class="stat"><span class="n">9</span><span class="l">ADRs — cada escolha justificada</span></div>
+      <div class="stat ok"><span class="n">41</span><span class="l">testes plano B (sem Docker)</span></div>
+      <div class="stat ok"><span class="n">35</span><span class="l">asserções e2e (compose + Newman)</span></div>
+      <div class="stat"><span class="n">3</span><span class="l">contratos PACT (2 HTTP + 1 mensagem)</span></div>
+      <div class="stat"><span class="n">4</span><span class="l">bugs reais achados no plano A</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">02</span>
+      <h2>Mecanismos de transporte</h2>
+      <span class="aside">a mesma linguagem dos diagramas do repo</span>
+    </div>
+    <div class="legend">
+      <div class="leg kafka">
+        <h3>▬ TÓPICO KAFKA</h3>
+        <p>Pub-sub, ordem por chave = conta. Quem publica não conhece quem consome. Esteira de ingestão e evento <code>posicao-atualizada</code>.</p>
+      </div>
+      <div class="leg rabbit">
+        <h3>▬ FILA RABBITMQ</h3>
+        <p>Work queue, um a um — o "guichê". Aceite imediato e processamento sequencial da reconsolidação (<code>reconsolidacao</code>).</p>
+      </div>
+      <div class="leg http">
+        <h3>▬ HTTP / REST</h3>
+        <p>Síncrono, request-response. Comando (<code>POST</code>) e leitura (<code>GET /extrato</code>); o miss do cache é governado por contrato PACT.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">03</span>
+      <h2>Como corre o dado</h2>
+      <span class="aside">esteira assíncrona · aceite em 202</span>
+    </div>
+    <div class="flow-wrap">
+      <div class="flow">
+        <div class="node entry">
+          <span class="svc">Canal / App</span>
+          <span class="role">origem dos lançamentos</span>
+        </div>
+        <div class="edge http">
+          <span class="tag"><b>HTTP</b><br>POST /lancamentos → 202</span>
+          <div class="rail"></div>
+        </div>
+        <div class="node">
+          <span class="svc">Ingestão</span>
+          <span class="port">:8081</span>
+          <span class="role">valida e publica</span>
+        </div>
+        <div class="edge kafka">
+          <span class="tag"><b>TÓPICO KAFKA</b><br>lancamentos-recebidos</span>
+          <div class="rail"></div>
+        </div>
+        <div class="node">
+          <span class="svc">Consolidação</span>
+          <span class="port">:8082</span>
+          <span class="role">incorpora idempotente + outbox</span>
+        </div>
+        <div class="edge kafka">
+          <span class="tag"><b>TÓPICO KAFKA</b><br>posicao-atualizada</span>
+          <div class="rail"></div>
+        </div>
+        <div class="node">
+          <span class="svc">Consulta</span>
+          <span class="port">:8083</span>
+          <span class="role">extrato + cache</span>
+        </div>
+      </div>
+
+      <div class="satellites">
+        <div class="sat-cell"></div>
+        <div class="sat-cell"></div>
+        <div class="sat-cell"></div>
+        <div class="sat-cell"></div>
+        <div class="sat-cell">
+          <div class="sat store"><b>PostgreSQL 17</b><br>3 efeitos · 1 transação</div>
+          <div class="sat queue"><b>Fila RabbitMQ</b><br>reconsolidacao · guichê</div>
+        </div>
+        <div class="sat-cell"></div>
+        <div class="sat-cell">
+          <div class="sat cache"><b>Cache Caffeine</b><br>TTL 5 min · invalida por evento</div>
+        </div>
+      </div>
+    </div>
+    <div class="flow-foot">
+      <span><b>◄ HTTP</b> · cache miss: Consulta → Consolidação <code>GET /interno/posicoes</code> (par do PACT, timeout + disjuntor)</span>
+      <span><b>◄ HTTP</b> · Canal → Consulta <code>GET /extrato/{cliente}/{competência}</code> (com carimbo do dado)</span>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">04</span>
+      <h2>Stack completa</h2>
+      <span class="aside">cada linha rastreável a um ADR</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Camada</th><th>Tecnologia</th><th>Versão</th><th>Papel</th><th>ADR</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="layer"><span class="swatch" style="background:var(--ink)"></span>Runtime</span></td><td class="tech">Java (Temurin)</td><td class="ver">25 LTS</td><td class="role">base dos 3 serviços</td><td><a href="#">ADR-001</a></td></tr>
+          <tr><td><span class="layer"><span class="swatch" style="background:var(--kafka)"></span>Framework</span></td><td class="tech">Quarkus</td><td class="ver">3.33.2 LTS</td><td class="role">REST · CDI · mensageria · health · OpenAPI</td><td><a href="#">ADR-001</a></td></tr>
+          <tr><td><span class="layer"><span class="swatch" style="background:var(--kafka)"></span>Mensageria · tópico</span></td><td class="tech">Apache Kafka + SmallRye</td><td class="ver">3.9.1</td><td class="role">ingestão + evento (pub-sub, ordem por conta)</td><td><a href="#">ADR-002</a></td></tr>
+          <tr><td><span class="layer"><span class="swatch" style="background:var(--rabbit)"></span>Mensageria · fila</span></td><td class="tech">RabbitMQ + SmallRye</td><td class="ver">4</td><td class="role">reconsolidação (work queue, o guichê)</td><td><a href="#">ADR-002</a></td></tr>
+          <tr><td><span class="layer"><span class="swatch" style="background:var(--sql)"></span>Persistência</span></td><td class="tech">PostgreSQL + Panache</td><td class="ver">17</td><td class="role">bases segregadas (uma por serviço)</td><td><a href="#">ADR-002</a></td></tr>
+          <tr><td><span class="layer"><span class="swatch" style="background:var(--ok)"></span>Cache</span></td><td class="tech">quarkus-cache (Caffeine)</td><td class="ver">in-process</td><td class="role">consulta · TTL 5 min · invalida por evento</td><td><a href="#">ADR-006</a></td></tr>
+          <tr><td><span class="layer"><span class="swatch" style="background:var(--http)"></span>Resiliência</span></td><td class="tech">SmallRye Fault Tolerance</td><td class="ver">—</td><td class="role">retry/backoff · DLQ · timeout · disjuntor</td><td><a href="#">ADR-007</a></td></tr>
+          <tr><td><span class="layer"><span class="swatch" style="background:var(--http)"></span>Contratos</span></td><td class="tech">PACT (Quarkiverse)</td><td class="ver">1.5.0</td><td class="role">3 contratos versionados em disco</td><td><a href="#">ADR-003</a></td></tr>
+          <tr><td><span class="layer"><span class="swatch" style="background:var(--rabbit)"></span>Observabilidade</span></td><td class="tech">Micrometer + Prometheus + Grafana</td><td class="ver">3.5.0 / 12.1.0</td><td class="role">/q/metrics · dashboard · correlação ponta a ponta</td><td><a href="#">ADR-008</a></td></tr>
+          <tr><td><span class="layer"><span class="swatch" style="background:var(--kafka)"></span>Inspeção</span></td><td class="tech">Kafka UI</td><td class="ver">0.7.2</td><td class="role">tópicos · mensagens · consumers · offsets</td><td class="role">—</td></tr>
+          <tr><td><span class="layer"><span class="swatch" style="background:var(--ok)"></span>Testes</span></td><td class="tech">JUnit 5 · REST Assured · Newman</td><td class="ver">41 + 35</td><td class="role">plano B (sem Docker) + e2e</td><td><a href="#">ADR-003</a></td></tr>
+          <tr><td><span class="layer"><span class="swatch" style="background:var(--ink)"></span>Distribuição</span></td><td class="tech">Docker · Compose · Docker Hub</td><td class="ver">2 vias</td><td class="role">build-from-source e imagens publicadas</td><td><a href="#">ADR-009</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">05</span>
+      <h2>Como rodar — duas vias</h2>
+      <span class="aside">só Docker, ou o build completo</span>
+    </div>
+    <div class="runs">
+      <div class="run">
+        <h3 style="color:var(--kafka)">Via Docker Hub — só Docker</h3>
+        <p class="req">Sem clonar · sem JDK · sem Maven. Puxa as imagens públicas.</p>
+        <pre>docker compose <span class="tok">-f</span> docker-compose.hub.yml up <span class="tok">-d</span></pre>
+      </div>
+      <div class="run">
+        <h3 style="color:var(--rabbit)">Build-from-source — a demo da banca</h3>
+        <p class="req">Java 25 + Maven + Docker. Compila e sobe do zero.</p>
+        <pre>./demo.ps1   <span class="tok">#</span> Windows  ·  ./demo.sh no Linux/macOS</pre>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span class="tag">Leo · Sandy · Marcos · Rodrigo</span>
+    <span class="tag"><b>plano-a-docker</b> brokers reais · <b>plano-b-jvm</b> o gate sem Docker</span>
+    <span class="tag">10 serviços · 5 imagens próprias · 1 comando</span>
+  </footer>
+</div>
+
+</body>
+</html>
