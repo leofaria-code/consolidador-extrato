@@ -16,6 +16,7 @@
 - [ ] **Swagger UI aberto** (`:8081|:8082|:8083/q/swagger-ui`) — superfície exploratória para a arguição: "e se mandar X?" se responde ao vivo, sem sair da tela.
 - [ ] **Cronometrista definido** (sugestão: Rodrigo até o passo 7b, Marcos depois) — sinais no minuto 10 e no 18.
 - [ ] **Plano B da demo** (se o Docker falhar na hora): `mvn verify -Pplano-b-jvm` ao vivo (41 testes, ~1 min, zero infra) + prints da validação de 10/07 no `uso-de-ia.md`. A rubrica pede o gate sem Docker de qualquer forma.
+- [ ] **Plano C — vídeo gravado** da demo ([`docs/roteiro-video.md`](roteiro-video.md)): fallback se a máquina corporativa travar Docker/portas. Ter em **3 vetores** (notebook próprio, Drive/YouTube não listado, MP4 local). **Plano D:** prints-chave nos slides.
 
 ## Sequência da demo (com narrativa)
 
