@@ -13,13 +13,70 @@
 #   SIMULATION_CONSOLIDACAO_URL=http://localhost:8082 \
 #   SIMULATION_CONSULTA_URL=http://localhost:8083 \
 #   ./simular-cenario-real.sh
+#   ./simular-cenario-real.sh --remote 134.122.116.117
+#   SIMULATION_REMOTE_HOST=134.122.116.117 ./simular-cenario-real.sh
 
 set -euo pipefail
 
-readonly URL_INGESTAO="${SIMULATION_INGESTAO_URL:-http://localhost:8081}"
-readonly URL_CONSOLIDACAO="${SIMULATION_CONSOLIDACAO_URL:-http://localhost:8082}"
-readonly URL_CONSULTA="${SIMULATION_CONSULTA_URL:-http://localhost:8083}"
-readonly URL_PROMETHEUS="${SIMULATION_PROMETHEUS_URL:-}"
+TARGET_MODE="${SIMULATION_TARGET:-}"
+REMOTE_HOST="${SIMULATION_REMOTE_HOST:-}"
+REMOTE_SCHEME="${SIMULATION_REMOTE_SCHEME:-http}"
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --local)
+      TARGET_MODE="local"
+      shift
+      ;;
+    --remote)
+      if [ "$#" -lt 2 ]; then
+        printf 'Uso incorreto: informe o host apos --remote\n' >&2
+        exit 1
+      fi
+      TARGET_MODE="remote"
+      REMOTE_HOST="$2"
+      shift 2
+      ;;
+    *)
+      printf 'Argumento desconhecido: %s\n' "$1" >&2
+      exit 1
+      ;;
+  esac
+done
+
+if [ -z "$TARGET_MODE" ] && [ -n "$REMOTE_HOST" ]; then
+  TARGET_MODE="remote"
+fi
+
+if [ -z "$TARGET_MODE" ]; then
+  TARGET_MODE="local"
+fi
+
+if [ "$TARGET_MODE" = "remote" ] && [ -z "$REMOTE_HOST" ]; then
+  printf 'Modo remoto exige SIMULATION_REMOTE_HOST ou --remote <host>\n' >&2
+  exit 1
+fi
+
+if [ "$TARGET_MODE" = "remote" ]; then
+  URL_INGESTAO_DEFAULT="${REMOTE_SCHEME}://${REMOTE_HOST}:8081"
+  URL_CONSOLIDACAO_DEFAULT="${REMOTE_SCHEME}://${REMOTE_HOST}:8082"
+  URL_CONSULTA_DEFAULT="${REMOTE_SCHEME}://${REMOTE_HOST}:8083"
+  URL_PROMETHEUS_DEFAULT="${REMOTE_SCHEME}://${REMOTE_HOST}:9090"
+fi
+
+if [ "$TARGET_MODE" = "local" ]; then
+  URL_INGESTAO_DEFAULT="http://localhost:8081"
+  URL_CONSOLIDACAO_DEFAULT="http://localhost:8082"
+  URL_CONSULTA_DEFAULT="http://localhost:8083"
+  URL_PROMETHEUS_DEFAULT=""
+fi
+
+readonly TARGET_MODE
+readonly REMOTE_HOST
+readonly URL_INGESTAO="${SIMULATION_INGESTAO_URL:-$URL_INGESTAO_DEFAULT}"
+readonly URL_CONSOLIDACAO="${SIMULATION_CONSOLIDACAO_URL:-$URL_CONSOLIDACAO_DEFAULT}"
+readonly URL_CONSULTA="${SIMULATION_CONSULTA_URL:-$URL_CONSULTA_DEFAULT}"
+readonly URL_PROMETHEUS="${SIMULATION_PROMETHEUS_URL:-$URL_PROMETHEUS_DEFAULT}"
 
 DURATION_SECONDS="${SIMULATION_DURATION_SECONDS:-60}"
 PAUSE_SECONDS="${SIMULATION_PAUSE_SECONDS:-2}"
@@ -67,6 +124,15 @@ agora() {
 
 log() {
   printf '[%s] %s\n' "$(agora)" "$*"
+}
+
+descrever_destino() {
+  if [ "$TARGET_MODE" = "remote" ]; then
+    printf 'remoto (%s)' "$REMOTE_HOST"
+    return 0
+  fi
+
+  printf 'local'
 }
 
 escolher_item() {
@@ -362,6 +428,7 @@ main() {
   local acao=0
 
   log "Iniciando simulacao por ${DURATION_SECONDS}s"
+  log "Destino: $(descrever_destino)"
   log "Servicos: ingestao=${URL_INGESTAO} consolidacao=${URL_CONSOLIDACAO} consulta=${URL_CONSULTA}"
 
   if ! verificar_saude; then
