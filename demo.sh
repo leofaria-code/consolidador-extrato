@@ -6,5 +6,5 @@ set -euo pipefail
 echo "== 1/2 Empacotando os serviços (sem testes — o gate é o plano B) =="
 mvn -DskipTests package
 
-echo "== 2/2 Subindo brokers + serviços (docker compose up --build) =="
-docker compose up --build
+echo "== 2/2 Subindo brokers + serviços + observabilidade (docker compose --profile observabilidade up --build) =="
+docker compose --profile observabilidade up --build

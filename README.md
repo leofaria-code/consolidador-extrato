@@ -257,13 +257,19 @@ Ele mistura os comportamentos mais importantes do dominio sem cair em falso nega
 - `GET /extrato`
 - `GET /extrato?atualizar=true` controlado (sem disparar `429` no mesmo cliente)
 - `POST /reconsolidacoes`
+- `POST /lancamentos` invalido para gerar `400` na borda
+- mensagem envenenada direto no Kafka para exercitar retry + DLQ
 
 Quer rodar por mais tempo ou apontar para outra stack?
 
 ```bash
 SIMULATION_DURATION_SECONDS=120 ./simular-cenario-real.sh
 SIMULATION_PROMETHEUS_URL=http://localhost:9091 ./simular-cenario-real.sh
+./simular-cenario-real.sh --remote 134.122.116.117
+SIMULATION_REMOTE_HOST=134.122.116.117 ./simular-cenario-real.sh
 ```
+
+No modo remoto, o script usa por padrao as portas publicadas da stack (`8081`, `8082`, `8083`) e assume o Prometheus em `9090`, a menos que voce sobrescreva com `SIMULATION_*_URL`.
 
 No fim, o script imprime um resumo com contagem de lancamentos, consultas, reenvios idempotentes, reconsolidacoes e erros inesperados. Se `SIMULATION_PROMETHEUS_URL` estiver definido, ele tambem consulta algumas metricas no Prometheus para facilitar a leitura da observabilidade logo apos a simulacao.
 

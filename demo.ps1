@@ -6,5 +6,5 @@ Write-Host "== 1/2 Empacotando os serviços (sem testes — o gate é o plano B)
 mvn -DskipTests package
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-Write-Host "== 2/2 Subindo brokers + serviços (docker compose up --build) =="
-docker compose up --build
+Write-Host "== 2/2 Subindo brokers + serviços + observabilidade (docker compose --profile observabilidade up --build) =="
+docker compose --profile observabilidade up --build
