@@ -338,5 +338,6 @@ Cada escolha rastreável a um ADR — a decisão está documentada, não improvi
 
 Leia `docs/requisitos/README.md` — o pacote de requisitos é a entrada de todo o desenvolvimento. As user stories são a primeira fonte de verdade; em divergência, as transcrições prevalecem (a Sessão 6 corrige e precisa as anteriores).
 
-Video da aula
-https://youtu.be/8wEFGofAq0c
+## Vídeo Auxiliar da apresentação de banca avaliadora
+Está disponível no YouTube:
+[![Assistir à apresentação](https://img.shields.io/badge/YouTube-Assistir%20à%20apresentação-FF0000?logo=youtube&logoColor=white)](https://youtu.be/8wEFGofAq0c)
