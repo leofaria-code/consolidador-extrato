@@ -53,4 +53,10 @@ A coleção `observabilidade-dlq.postman_collection.json` **não tenta publicar 
 echo 'isto-nao-e-json' | docker compose exec -T kafka sh -c "exec /opt/kafka/bin/kafka-console-producer.sh --bootstrap-server localhost:9092 --topic lancamentos-recebidos"
 ```
 
+Se a stack estiver rodando no servidor remoto `134.122.116.117`, use este comando:
+
+```bash
+ssh root@134.122.116.117 "cd /opt/consolidador-extrato && printf '%s\n' 'isto-nao-e-json' | docker compose exec -T kafka sh -c 'exec /opt/kafka/bin/kafka-console-producer.sh --bootstrap-server localhost:9092 --topic lancamentos-recebidos'"
+```
+
 Depois disso, a coleção valida pelo Prometheus que `extrato_consolidacao_dlq_enviados_total` aumentou e que a consolidação permaneceu `UP`.
